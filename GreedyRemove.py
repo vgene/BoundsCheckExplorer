@@ -99,7 +99,7 @@ def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
             print("  shows significant worse performance difference, speedup = (", time_og / time_exp, ")")
 
     print("Testing with the final list: ", final_list)
-    test_final = testList(final_list)
+    time_final = testList(final_list)
     # 0.95 * time_og < time_all_remove < 1.05 * time_og
     if time_final < time_all_remove * 1.2:
         # good speedup
