@@ -4,16 +4,18 @@ import subprocess
 import re
 import os
 
+ROOT_PATH = "/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
 def runOneTest(bc_fname):
-    out = subprocess.check_output(['./exp.sh', 'bc_fname'])
-
+    out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    out, _ = out.communicate()
     out = out.decode("utf-8")  # convert to string from bytes
 
     try:
-        m = re.search(r'([\d,]) ns/iter', out)
-        s = m.group(0)
-        s.replace(',', '')
+        m = re.search(r'([0-9,]+) ns/iter', out)
+        s = m.group(1)
+        s = s.replace(',', '')
         result = int(s)
     except Exception:
         print("Run experiment failed")
@@ -23,14 +25,14 @@ def runOneTest(bc_fname):
 
 
 def genFunctionRemoveFile(fn_list):
-    fn_list_lines = map(lambda x: x + '\n', fn_list)
+    fn_list_lines = list(map(lambda x: x + '\n', fn_list))
     with open("fn_rm.txt", 'w') as fd:
         fd.writelines(fn_list_lines)
 
 
 def transform(ori_bc_fname, bc_fname):
     try:
-        subprocess.check_call(['./transform.sh', ori_bc_fname, bc_fname])
+        subprocess.check_call([ROOT_PATH + '/transform.sh', ori_bc_fname, bc_fname], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
         print("Transform remove-bc failed")
         return False
@@ -48,44 +50,67 @@ def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
             return None
 
         time_exp = runOneTest(rm_bc_fname)
+        if time_exp is None:
+            return None
         return time_exp
 
     # try ground truth
     time_og = testList([])
+    if time_og is None:
+        print("Abort")
+        return None
     print("original time = ", time_og, " ns/iter")
 
     time_all_remove = testList(fn_list)
-    if time_all_remove is not None:
-        print("all removed time = ", time_all_remove, " ns/iter")
-    else:
+    if time_all_remove is None:
         print("Abort")
         return None
+
+    print("all removed time = ", time_all_remove, " ns/iter")
 
     # 0.95 * time_og < time_all_remove < 1.05 * time_og
     if time_all_remove < time_og * (1 - threshold):
         # good speedup
-        print("all removed shows good speedup (", time_all_remove / time_og, "), bigger than threshold (", threshold, ")")
+        print("all removed shows good speedup (", time_og / time_all_remove, "), bigger than threshold (", 1 + threshold, ")")
 
     elif time_all_remove > time_og * (1 + threshold):
-        print("all removed shows worse performance, (", time_all_remove / time_og, "),  please check")
+        print("all removed shows worse performance, (", time_og / time_all_remove , "),  please check")
         return
     else:
-        print("all removed shows insignificant performance difference, speedup = (", time_all_remove / time_og, "),  stop here")
+        print("all removed shows insignificant performance difference, speedup = (", time_og / time_all_remove, "),  stop here")
         return
 
+    print("testing on ", len(fn_list), " functions")
     final_list = []
     for fn in fn_list:
-        test_fn_list = fn_list
+        test_fn_list = fn_list.copy()
         test_fn_list.remove(fn)
 
+        print("testing with function " + fn + " removed")
         time_exp = testList(test_fn_list)
 
         # 0.95 * time_og < time_all_remove < 1.05 * time_og
-        if time_exp < time_og * (1 - threshold):
+        if time_exp < time_all_remove * 1.2:
             # good speedup
+            print("  still shows good speedup (", time_og / time_exp, ")")
+            print("  relative speedup (", time_all_remove / time_exp, ")")
+        else:
             final_list.append(fn)
+            print("  shows significant worse performance difference, speedup = (", time_og / time_exp, ")")
 
-    return final_list
+    print("Testing with the final list: ", final_list)
+    test_final = testList(final_list)
+    # 0.95 * time_og < time_all_remove < 1.05 * time_og
+    if time_final < time_all_remove * 1.2:
+        # good speedup
+        print("  still shows good speedup (", time_og / time_final, ")")
+        print("  relative speedup (", time_all_remove / time_final, ")")
+        return final_list
+    else:
+        print("  shows significant worse performance difference, speedup = (", time_og / time_final, ")")
+        print("  this greedy experiment failed")
+        return None
+
 
 
 def getFuncList(filename):
@@ -99,7 +124,7 @@ def getFuncList(filename):
         lines = fd.readlines()
 
     if lines:
-        fn_list = lines
+        fn_list = list(map(lambda x: x.strip(), lines))
     else:
         return None
 

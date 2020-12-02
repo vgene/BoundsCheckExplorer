@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # make sure it's the remove-bc toolchain
 # make sure it's the release version of LLVM 9.0.1
 
