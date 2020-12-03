@@ -24,7 +24,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 
+#include "GlobalCtors.h"
+
 #include <iostream>
+#include <fstream>
 #include <set>
 #include <vector>
 #include <map>
@@ -46,6 +49,21 @@ namespace {
 
     OuterLoopProfInstr() : ModulePass(ID) {}
 
+    bool hasBoundsCheck(Loop* l) {
+      for (BasicBlock *bb: l->getBlocks()) {
+        for (Instruction &I: *bb) {
+          if (CallBase* cs = dyn_cast<CallBase>(&I)) {
+            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")) {
+              return true;
+
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
     void visitAndRemoveFnRec(Function* f, std::set<Function*> &visited_fns, std::set<Function*> &keep_fns) {
       // visited
       if (visited_fns.find(f) != visited_fns.end())
@@ -53,7 +71,6 @@ namespace {
 
       // mark visited
       visited_fns.insert(f);
-      errs() << "examing " << f->getName() << '\n';
 
       // remove this from keep functions
       keep_fns.erase(f);
@@ -148,6 +165,9 @@ namespace {
         for (auto i = LI.begin(); i != LI.end(); i++) {
           Loop *l = *i;
           if (l->getLoopDepth() == 1) {// outermost loop depth == 1
+            // // this check is not sound, could be a function call
+            // if (!hasBoundsCheck(l))
+            //   continue;
             auto header = l->getHeader();
             map_fn_loops[&F].push_back(header);
           }
@@ -195,6 +215,8 @@ namespace {
 
       errs() << numLoops << " outermost loops left in " << keep_fns.size() << " functions" << "\n";
 
+      std::ofstream file("loops.txt");
+      file << "#LoopID #Function #Loop" << std::endl;
       numLoops = 0;
       for (Function* f: keep_fns){
         auto &bbs = map_fn_loops[f];
@@ -202,12 +224,47 @@ namespace {
 
         for (auto &bb : bbs) {
           auto l = LI.getLoopFor(bb);
+          file << numLoops <<  " "  << f->getName().str() << " " << l->getName().str() << std::endl;
+          assert(l->getLoopDepth() == 1 && "loop depth has to be 1");
           instrumentProf(l, numLoops, &M);
           ++numLoops;
         }
       }
+      file.close();
 
-      return true;
+      // The initializer will register the file and dump profiled result
+      FunctionCallee wrapper_InitFn =  M.getOrInsertFunction("outer_prof_init",
+          Type::getVoidTy(M.getContext()),
+          Type::getInt32Ty(M.getContext()));
+
+      Constant *InitFn = cast<Constant>(wrapper_InitFn.getCallee());
+
+      std::vector<Value*> Args(1);
+      Args[0] = ConstantInt::get(Type::getInt32Ty(M.getContext()), numLoops, false);
+
+      // Create the GlobalCtor function
+      std::vector<Type*>FuncTy_0_args;
+      FunctionType* FuncTy_0 = FunctionType::get(
+          /*Result=*/Type::getVoidTy( M.getContext() ),
+          /*Params=*/FuncTy_0_args,
+          /*isVarArg=*/false);
+
+      Function* func_initor = Function::Create(
+          /*Type=*/FuncTy_0,
+          /*Linkage=*/GlobalValue::ExternalLinkage,
+          /*Name=*/"prof_initor", &M);
+
+      BasicBlock *initor_entry = BasicBlock::Create(M.getContext(), "entry", func_initor,0);
+      CallInst::Create(InitFn, Args, "", initor_entry);
+      ReturnInst::Create(M.getContext(), initor_entry);
+
+      // Function has been created, now add it to the global ctor list
+      liberty::callBeforeMain(func_initor, 65535);
+
+      if (numLoops > 0)
+        return true;
+      else
+        return false;
     }
 
     // This function is invoked once at the initialization phase of the compiler
