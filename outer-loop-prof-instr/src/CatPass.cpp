@@ -64,7 +64,7 @@ namespace {
       return false;
     }
 
-    void visitAndRemoveFnRec(Function* f, std::set<Function*> &visited_fns, std::set<Function*> &keep_fns) {
+    void visitAndRemoveFnRec(Function* f, std::set<Function*> &visited_fns, std::set<Function*> &keep_fns, bool remove) {
       // visited
       if (visited_fns.find(f) != visited_fns.end())
         return;
@@ -73,7 +73,8 @@ namespace {
       visited_fns.insert(f);
 
       // remove this from keep functions
-      keep_fns.erase(f);
+      if (remove)
+        keep_fns.erase(f);
 
       for (BasicBlock &BB: *f){
         for (Instruction &I: BB) {
@@ -81,7 +82,7 @@ namespace {
             Function *f = cs->getCalledFunction();
             if (f) {
               if (f->isDeclaration()) continue;
-              visitAndRemoveFnRec(f, visited_fns, keep_fns);
+              visitAndRemoveFnRec(f, visited_fns, keep_fns, true);
             }
           }
         }
@@ -197,10 +198,17 @@ namespace {
             // if is a function
             for (Instruction &I: BB) {
               if (CallBase* cs = dyn_cast<CallBase>(&I)) { 
-                Function *f = cs->getCalledFunction();
-                if (f) {
-                  if (f->isDeclaration()) continue;
-                  visitAndRemoveFnRec(f, visited_fns, keep_fns);
+                Function *subf = cs->getCalledFunction();
+                if (subf) {
+                  if (subf->isDeclaration()) continue;
+
+                  // for now, ignore top level function calls within bench
+                  if (f->getName().startswith("bench")) {
+                    cs->addAttribute(AttributeList::FunctionIndex, Attribute::NoInline);
+                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, false); 
+                  }
+                  else
+                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, true);
                 }
               }
             }

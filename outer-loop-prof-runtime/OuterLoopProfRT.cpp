@@ -1,4 +1,3 @@
-#define DEBUG
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -32,7 +31,7 @@ void loop_exit(int numLoops) {
 
 #ifdef DEBUG  
   if (begin_ts == 0) {
-    cerr << "No begin timestamp!" << endl;
+    cerr << "No begin timestamp! Loop ID: " << numLoops  << endl;
   }
 #endif
 
