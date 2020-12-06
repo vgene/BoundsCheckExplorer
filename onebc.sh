@@ -13,4 +13,5 @@ RUSTFLAGS="-C opt-level=0 -C no-prepopulate-passes -C passes=name-anon-globals -
 mkdir -p explore
 cd explore
 cp ../target/release/deps/*.bc original.bc
+opt -simplifycfg original.bc -o original.bc
 opt -load ${root_path}/show-fn-names/build/install/lib/CAT.so -show-bc-names -disable-output original.bc > fn.txt

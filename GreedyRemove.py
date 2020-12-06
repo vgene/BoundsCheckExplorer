@@ -20,10 +20,34 @@ def runOneTest(bc_fname, arg):
         #s = s.replace(',', '')
         #result = int(s)
     except Exception:
+        print(out)
         print("Run experiment failed")
         return None
 
     return result
+
+
+def runExpWithName(exp_name, arg):
+    out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, _ = out.communicate()
+    out = out.decode("utf-8")  # convert to string from bytes
+
+    try:
+        m = re.search(r'Time ([0-9,.]+)', out)
+        # m = re.search(r'([0-9,]+) ns/iter', out)
+        s = m.group(1)
+        result  = float(s.strip())
+        #s = s.replace(',', '')
+        #result = int(s)
+    except Exception:
+        print("Run experiment failed")
+        return None
+
+    return result
+
+
+def genExp(bc_fname):
+    return subprocess.Popen([ROOT_PATH + '/genExp.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
 def genFunctionRemoveFile(fn_list):
@@ -41,6 +65,50 @@ def transform(ori_bc_fname, bc_fname):
 
     return True
 
+
+# non blocking transform
+def transformNB(ori_bc_fname, bc_fname, log=subprocess.DEVNULL):
+    return subprocess.Popen([ROOT_PATH + '/transform.sh', ori_bc_fname, bc_fname], stdout=subprocess.DEVNULL, stderr=log)
+
+# non-block transform
+def transformAll(list_of_fn_lists, ori_bc_fname):
+    if not os.path.exists('exps'):
+        os.makedirs('exps')
+
+    os.chdir('exps')
+
+    child_processes = []
+    fds = []
+    for idx, l in enumerate(list_of_fn_lists):
+        new_dir = 'exp-' + str(idx)
+        os.makedirs(new_dir)
+        os.chdir(new_dir)
+        genFunctionRemoveFile(l)
+        fd = open("bcs.txt", "w")
+        p = transformNB('../../' + ori_bc_fname, 'bcrm.bc', fd)
+        # start this one, and immediately return to start another
+        child_processes.append(p)
+        os.chdir('..')
+
+    for p in child_processes:
+        p.wait()
+
+    for fd in fds:
+        fd.close()
+
+    child_processes = []
+    for idx in range(len(list_of_fn_lists)):
+        new_dir = 'exp-' + str(idx)
+        os.chdir(new_dir)
+        p = genExp('bcrm.bc')
+        # start this one, and immediately return to start another
+        child_processes.append(p)
+        os.chdir('..')
+
+    for p in child_processes:
+        p.wait()
+
+    os.chdir('..')
 
 # try remove one function from remove list, if works
 def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
@@ -61,7 +129,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
     if time_og is None:
         print("Abort")
         return None
-    print("original time = ", time_og, " ns/iter")
+    print("original time = ", time_og, "s")  # " ns/iter")
 
     time_all_remove = testList(fn_list)
     if time_all_remove is None:
@@ -84,15 +152,24 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
 
     print("testing on ", len(fn_list), " functions")
     final_list = []
+
+    list_of_fn_lists = []
     for fn in fn_list:
         test_fn_list = fn_list.copy()
         test_fn_list.remove(fn)
+        list_of_fn_lists.append(test_fn_list)
+
+    # generate all bc all at once
+    #transformAll(list_of_fn_lists, ori_bc_fname)
+
+    for idx, fn in enumerate(fn_list):
+        test_fn_list = list_of_fn_lists[idx] 
 
         print("testing with function " + fn + " removed")
-        time_exp = testList(test_fn_list)
+        time_exp = runExpWithName('exps/exp-' + str(idx) + "/exp.exe", arg)
 
-        # 0.95 * time_og < time_all_remove < 1.05 * time_og
-        if time_exp < time_og * (1 - threshold):
+        # if relative speedup is smaller than threshold 
+        if time_exp * (1 - threshold) < time_all_remove:
             # good speedup
             print("  still shows good speedup (", time_og / time_exp, ")")
             print("  relative speedup (", time_all_remove / time_exp, ")")
@@ -147,7 +224,7 @@ def main():
 
     exp = greedyExperiment
 
-    final_fn_list = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.05)
+    final_fn_list = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.02)
 
     print(final_fn_list)
 

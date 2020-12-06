@@ -4,13 +4,10 @@ root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
 # clang -O3 $1 /u/ziyangx/bounds-check/rust-install/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.rlib /u/ziyangx/bounds-check/rust-install/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.rlib -ldl -lpthread -lc -lm -o exp.exe
 
-clang -O3 $1 /u/ziyangx/bounds-check/rust-install/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.rlib /u/ziyangx/bounds-check/rust-install/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.rlib /u/ziyangx/bounds-check/BoundsCheckExplorer/outer-loop-prof-runtime/libOuterLoopProfRT.a -lstdc++ -ldl -lpthread -lc -lm -o exp.exe
-
+$root_path/genExp.sh $1
 
 if [[ $# -eq 2 ]] ; then
-    echo time taskset 0x20000000 ./exp.exe $2
-    time taskset 0x20000000 ./exp.exe $2 #| grep "ns/iter"
+    $root_path/runExp.sh ./exp.exe $2
 else
-    echo time taskset 0x20000000 ./exp.exe
-    time taskset 0x20000000 ./exp.exe #| grep "ns/iter"
+    $root_path/runExp.sh ./exp.exe
 fi
