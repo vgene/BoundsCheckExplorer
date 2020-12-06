@@ -40,6 +40,7 @@ def runExpWithName(exp_name, arg):
         #s = s.replace(',', '')
         #result = int(s)
     except Exception:
+        print(out)
         print("Run experiment failed")
         return None
 
@@ -151,7 +152,6 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
         return
 
     print("testing on ", len(fn_list), " functions")
-    final_list = []
 
     list_of_fn_lists = []
     for fn in fn_list:
@@ -160,8 +160,10 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
         list_of_fn_lists.append(test_fn_list)
 
     # generate all bc all at once
-    #transformAll(list_of_fn_lists, ori_bc_fname)
+    transformAll(list_of_fn_lists, ori_bc_fname)
 
+    final_list = []
+    perf_list = []
     for idx, fn in enumerate(fn_list):
         test_fn_list = list_of_fn_lists[idx] 
 
@@ -175,7 +177,9 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
             print("  relative speedup (", time_all_remove / time_exp, ")")
         else:
             final_list.append(fn)
+            perf_list.append(time_all_remove / time_exp)
             print("  shows significant worse performance difference, speedup = (", time_og / time_exp, ")")
+            print("  relative speedup (", time_all_remove / time_exp, ")")
 
     print("Testing with the final list: ", final_list)
     time_final = testList(final_list)
@@ -184,7 +188,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
         # good speedup
         print("  still shows good speedup (", time_og / time_final, ")")
         print("  relative speedup (", time_all_remove / time_final, ")")
-        return final_list
+        return final_list, perf_list, time_og / time_final
     else:
         print("  shows significant worse performance difference, speedup = (", time_og / time_final, ")")
         print("  this greedy experiment failed")
@@ -224,9 +228,20 @@ def main():
 
     exp = greedyExperiment
 
-    final_fn_list = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.02)
+    final_fn_list, perf_list, final_speedup = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.05)
 
-    print(final_fn_list)
+    final_tuple = list(zip(final_fn_list, perf_list))
+    final_tuple.sort(key = lambda x: x[1])  
+
+    lines = []
+    lines.append("Final Speedup: " + str(final_speedup) + "\n\n")
+    lines.append("Function, Relative Speedup")
+    for (fn, perf) in final_tuple:
+        lines.append(fn + "," + str(perf) + "\n")
+
+
+    with open("greedy_result.txt", "w") as fd:
+        fd.writelines(lines)
 
 
 if __name__ == '__main__':
