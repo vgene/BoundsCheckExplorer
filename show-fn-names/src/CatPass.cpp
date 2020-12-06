@@ -44,7 +44,10 @@ namespace {
         BasicBlock* succ;
         for (Instruction &I: bb) {
           if (CallBase* cs = dyn_cast<CallBase>(&I)) {
-            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")) {
+            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")
+                || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_order_fail")
+                || getFunctionName(cs).startswith("_ZN4core5slice20slice_index_len_fail")
+                ) {
               std::cout << F.getName().str() << std::endl;
               return false;
             }
