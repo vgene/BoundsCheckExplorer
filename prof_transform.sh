@@ -2,4 +2,9 @@
 
 root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
-opt -loop-simplify -load $root_path/outer-loop-prof-instr/build/install/lib/CAT.so -outer-loop-prof-instr $1 -o $2
+exp_depth=0
+if [[ $# -eq 3 ]] ; then
+    exp_depth=$3
+fi
+
+opt -loop-simplify -load $root_path/outer-loop-prof-instr/build/install/lib/CAT.so -outer-loop-prof-instr -exp-depth=$exp_depth $1 -o $2

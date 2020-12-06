@@ -6,17 +6,19 @@ import os
 
 ROOT_PATH = "/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
-def runOneTest(bc_fname):
-    out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def runOneTest(bc_fname, arg):
+    out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
     out, _ = out.communicate()
     out = out.decode("utf-8")  # convert to string from bytes
 
     try:
-        m = re.search(r'([0-9,]+) ns/iter', out)
+        m = re.search(r'Time ([0-9,]+)', out)
+        # m = re.search(r'([0-9,]+) ns/iter', out)
         s = m.group(1)
-        s = s.replace(',', '')
-        result = int(s)
+        m = float(m)
+        #s = s.replace(',', '')
+        #result = int(s)
     except Exception:
         print("Run experiment failed")
         return None
@@ -41,7 +43,7 @@ def transform(ori_bc_fname, bc_fname):
 
 
 # try remove one function from remove list, if works
-def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
+def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
     rm_bc_fname = "bcrm.bc"
 
     def testList(fn_list):
@@ -49,7 +51,7 @@ def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
         if not transform(ori_bc_fname, rm_bc_fname):
             return None
 
-        time_exp = runOneTest(rm_bc_fname)
+        time_exp = runOneTest(rm_bc_fname, arg)
         if time_exp is None:
             return None
         return time_exp
@@ -90,7 +92,7 @@ def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
         time_exp = testList(test_fn_list)
 
         # 0.95 * time_og < time_all_remove < 1.05 * time_og
-        if time_exp < time_all_remove * 1.2:
+        if time_exp < time_og * (1 - threshold):
             # good speedup
             print("  still shows good speedup (", time_og / time_exp, ")")
             print("  relative speedup (", time_all_remove / time_exp, ")")
@@ -101,7 +103,7 @@ def greedyExperiment(fn_list, ori_bc_fname, threshold=0.05):
     print("Testing with the final list: ", final_list)
     time_final = testList(final_list)
     # 0.95 * time_og < time_all_remove < 1.05 * time_og
-    if time_final < time_all_remove * 1.2:
+    if time_final < time_og * (1 - threshold):
         # good speedup
         print("  still shows good speedup (", time_og / time_final, ")")
         print("  relative speedup (", time_all_remove / time_final, ")")
@@ -145,7 +147,7 @@ def main():
 
     exp = greedyExperiment
 
-    final_fn_list = exp(fn_list, ORI_BC_FNAME, threshold=0.05)
+    final_fn_list = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.05)
 
     print(final_fn_list)
 

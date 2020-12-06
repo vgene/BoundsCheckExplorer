@@ -11,6 +11,7 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include <fstream>
 
 #include <set>
@@ -60,13 +61,27 @@ namespace {
         }
       }
 
+      unsigned long bc_num = 0;
       typedef std::pair<Instruction*, BasicBlock*> edge;
       std::vector<edge> toRemove;
       for (BasicBlock &bb: F) {
         BasicBlock* succ;
         for (Instruction &I: bb) {
           if (CallBase* cs = dyn_cast<CallBase>(&I)) {
-            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")) {
+            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")
+                || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_order_fail")
+                || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_len_fail")
+                ) {
+              auto &debugLoc = I.getDebugLoc();
+              if (debugLoc) {
+                errs() << "  ";
+                auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
+                if (scope) {
+                  errs() << scope->getFilename() << " ";
+                }
+                errs() << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")\n";
+              }
+              bc_num++;
               // bad b/c we may be changing the semantics of the program
               /*
               if (InvokeInst* ii = dyn_cast<InvokeInst>(&I)) {
@@ -101,6 +116,7 @@ namespace {
           }
         }
       }
+      errs() << "  Bounds check removed: " << bc_num << '\n';
 
       for (auto &i : toRemove){
         auto term = i.first;

@@ -17,6 +17,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 
 #include "llvm/Pass.h"
 #include "llvm/PassSupport.h"
@@ -34,6 +35,9 @@
 
 using namespace llvm;
 
+static cl::opt<unsigned> ExplorationDepth(
+    "exp-depth", cl::init(0), cl::Hidden, cl::ZeroOrMore,
+    cl::desc("Max depth of loop nest to profile"));
 namespace {
 
   struct OuterLoopProfInstr: public ModulePass{
@@ -64,7 +68,7 @@ namespace {
       return false;
     }
 
-    void visitAndRemoveFnRec(Function* f, std::set<Function*> &visited_fns, std::set<Function*> &keep_fns, bool remove) {
+    void visitAndRemoveFnRec(Function* f, std::set<Function*> &visited_fns, std::set<Function*> &keep_fns, int depth) {
       // visited
       if (visited_fns.find(f) != visited_fns.end())
         return;
@@ -73,8 +77,10 @@ namespace {
       visited_fns.insert(f);
 
       // remove this from keep functions
-      if (remove)
+      if (depth == 0)
         keep_fns.erase(f);
+      else
+        depth -= 1;
 
       for (BasicBlock &BB: *f){
         for (Instruction &I: BB) {
@@ -82,7 +88,7 @@ namespace {
             Function *f = cs->getCalledFunction();
             if (f) {
               if (f->isDeclaration()) continue;
-              visitAndRemoveFnRec(f, visited_fns, keep_fns, true);
+              visitAndRemoveFnRec(f, visited_fns, keep_fns, depth);
             }
           }
         }
@@ -205,10 +211,10 @@ namespace {
                   // for now, ignore top level function calls within bench
                   if (f->getName().startswith("bench")) {
                     cs->addAttribute(AttributeList::FunctionIndex, Attribute::NoInline);
-                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, false); 
+                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, ExplorationDepth + 1); 
                   }
                   else
-                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, true);
+                    visitAndRemoveFnRec(subf, visited_fns, keep_fns, ExplorationDepth);
                 }
               }
             }
@@ -232,7 +238,23 @@ namespace {
 
         for (auto &bb : bbs) {
           auto l = LI.getLoopFor(bb);
-          file << numLoops <<  " "  << f->getName().str() << " " << l->getName().str() << std::endl;
+          file << numLoops <<  " "  << f->getName().str() << " " << l->getName().str();
+          auto &start = l->getLocRange().getStart();
+          if (start) {
+            auto *scope = dyn_cast<DIScope>(start->getScope());
+            if (scope) {
+              file << " " << scope->getFilename().str();
+            }
+            else {
+              file << " <unknown_file>";
+            }
+            file << " " << start.getLine();
+          }
+          else {
+            file << " <unknown_file> <unknown_line>";
+          }
+
+          file << std::endl;
           assert(l->getLoopDepth() == 1 && "loop depth has to be 1");
           instrumentProf(l, numLoops, &M);
           ++numLoops;
