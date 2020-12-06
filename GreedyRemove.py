@@ -13,10 +13,10 @@ def runOneTest(bc_fname, arg):
     out = out.decode("utf-8")  # convert to string from bytes
 
     try:
-        m = re.search(r'Time ([0-9,]+)', out)
+        m = re.search(r'Time ([0-9,.]+)', out)
         # m = re.search(r'([0-9,]+) ns/iter', out)
         s = m.group(1)
-        m = float(m)
+        result  = float(s.strip())
         #s = s.replace(',', '')
         #result = int(s)
     except Exception:

@@ -7,7 +7,8 @@ root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
 #RUSTFLAGS="-C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=0 -Cembed-bitcode=yes" cargo rustc --release --bench $1 -- --emit=llvm-bc  -Clto=fat
 
-RUSTFLAGS="-C opt-level=0 -C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
+#RUSTFLAGS="-C opt-level=0 -C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
+RUSTFLAGS="-C opt-level=3 -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
 
 mkdir -p explore
 cd explore

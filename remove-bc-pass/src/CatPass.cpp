@@ -98,6 +98,12 @@ namespace {
                 Instruction *term = pred->getTerminator();
                 int numSucc = term->getNumSuccessors();
                 if (numSucc == 2) { // one is bb, one is the original next block
+
+                  // for all the PHINode, remove the incoming edge
+                  for (PHINode &PHI: bb.phis()) {
+                    PHI.removeIncomingValue(pred, false); // don't delete phi if empty, will screw up the iterator
+                  }
+
                   if (term->getSuccessor(0) == &bb) {
                     succ = term->getSuccessor(1);
                   } else {
