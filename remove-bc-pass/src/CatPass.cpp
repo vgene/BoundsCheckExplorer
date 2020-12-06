@@ -56,9 +56,6 @@ namespace {
 
         if (s.find(fn_name) == s.end())
           return false;
-        else {
-          errs() << "Found function in list: " << fn_name << '\n';
-        }
       }
 
       unsigned long bc_num = 0;
@@ -115,21 +112,48 @@ namespace {
                 } else if (numSucc == 1) { // may be leading to a landing pad, so iteratively go up until conditional branch to panic_bounds_check
                   errs() << "only one successor in the previous block\n";
                 } else {
-                  errs() << "more than two successors in the previous block\n";
+                  // one should be the bounds check
+                  toRemove.push_back(edge(term, &bb));
+                  //errs() << "more than two successors in the previous block\n";
                 }
               }
             }
           }
         }
       }
-      errs() << "  Bounds check removed: " << bc_num << '\n';
 
       for (auto &i : toRemove){
         auto term = i.first;
         auto succ = i.second;
-        BranchInst::Create(succ, term);
-        term->eraseFromParent();
+        if (term->getNumSuccessors() == 2) {
+          BranchInst::Create(succ, term);
+          term->eraseFromParent();
+        }
+        else if (term->getNumSuccessors() > 2) {
+          // CAUTION: this case is not succ, but bb!!
+          SwitchInst* sw = dyn_cast<SwitchInst>(term);
+
+          if (!sw){
+            errs() << "multiple destination but not switch\n";
+          }
+          else {
+            auto *val = sw->findCaseDest(succ);
+            if (!val) {
+              errs() << "Couldn't find the destination in multiple destination case\n";
+            }
+            else {
+              SwitchInst::CaseIt it = sw->findCaseValue(val);
+              sw->removeCase(it);
+            }
+          }
+        }
+        else {
+          assert(false && "successor should be no less than 2");
+        }
+
       }
+      errs() << "Found function in list: " << fn_name << '\n';
+      errs() << "  Bounds check removed: " << bc_num << '\n';
       return true;
     }
 
