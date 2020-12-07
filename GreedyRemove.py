@@ -3,6 +3,7 @@
 import subprocess
 import re
 import os
+import pickle
 
 ROOT_PATH = "/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
@@ -72,17 +73,18 @@ def transformNB(ori_bc_fname, bc_fname, log=subprocess.DEVNULL):
     return subprocess.Popen([ROOT_PATH + '/transform.sh', ori_bc_fname, bc_fname], stdout=subprocess.DEVNULL, stderr=log)
 
 # non-block transform
-def transformAll(list_of_fn_lists, ori_bc_fname):
-    if not os.path.exists('exps'):
-        os.makedirs('exps')
+def transformAll(list_of_fn_lists, ori_bc_fname, dir_name):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
 
-    os.chdir('exps')
+    os.chdir(dir_name)
 
     child_processes = []
     fds = []
     for idx, l in enumerate(list_of_fn_lists):
         new_dir = 'exp-' + str(idx)
-        os.makedirs(new_dir)
+        if not os.path.exists(new_dir):
+            os.makedirs(new_dir)
         os.chdir(new_dir)
         genFunctionRemoveFile(l)
         fd = open("bcs.txt", "w")
@@ -137,7 +139,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
         print("Abort")
         return None
 
-    print("all removed time = ", time_all_remove, " ns/iter")
+    print("all removed time = ", time_all_remove, "s") #" ns/iter")
 
     # 0.95 * time_og < time_all_remove < 1.05 * time_og
     if time_all_remove < time_og * (1 - threshold):
@@ -160,7 +162,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
         list_of_fn_lists.append(test_fn_list)
 
     # generate all bc all at once
-    transformAll(list_of_fn_lists, ori_bc_fname)
+    transformAll(list_of_fn_lists, ori_bc_fname, "exps")
 
     final_list = []
     final_fn_list = []
@@ -196,7 +198,55 @@ def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
     else:
         print("  shows significant worse performance difference, speedup = (", time_og / time_final, ")")
         print("  this greedy experiment failed")
-    return final_list, final_fn_list,  perf_list, time_og / time_final
+    return final_list, final_fn_list,  perf_list, time_og,  time_final
+
+
+def getBCs(dir_name):
+    f = dir_name + "/bcs.txt"
+
+    with open(f, 'r') as fd:
+        lines = fd.readlines()
+
+    total_bc = 0
+    begin_str = "  Bounds check removed: "
+    for l in lines:
+        if l.startswith(begin_str):
+            bc_num = int(l[len(begin_str):].strip())
+            total_bc += bc_num
+
+    return total_bc
+
+
+def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
+    list_of_fn_lists = []
+    for i in range(N):
+        fn_list = list(map(lambda x: x[0], final_tuple[:i+1]))
+        list_of_fn_lists.append(fn_list)
+
+    transformAll(list_of_fn_lists, ori_bc_fname, "tops_exps")
+
+    list_of_final_fn_list = []
+    idx_list = []
+    time_list = []
+    bc_list = []
+    for idx in range(N):
+        test_fn_list = list_of_fn_lists[idx] 
+
+        print("testing with functions ",  test_fn_list, " removed")
+        dir_name = 'tops_exps/exp-' + str(idx)
+        time_exp = runExpWithName(dir_name + "/exp.exe", arg)
+        bcs = getBCs(dir_name)
+        
+        if time_exp is None:
+            continue
+
+        print(" time: " + str(time_exp) + "s")
+        list_of_final_fn_list.append(test_fn_list)
+        idx_list.append(idx + 1)
+        time_list.append(time_exp)
+        bc_list.append(bcs)
+
+    return list(zip(test_fn_list, idx_list, time_list, bc_list))
 
 
 def getFuncList(filename):
@@ -217,35 +267,58 @@ def getFuncList(filename):
     return fn_list
 
 
+def parseGreedyResults(file_name):
+    with open(file_name, 'r') as fd:
+        lines = fd.readlines()
+
+    speedup_tuple = []
+    for line in lines:
+        fn, rel_speed = line.split(',')
+        speedup_tuple.append((fn, float(rel_speed)))
+    
+    return speedup_tuple
+
+
 def main():
     FN_FNAME = "fn.txt"
     ORI_BC_FNAME = "original.bc"
 
-    fn_list = getFuncList(FN_FNAME)
-    if not fn_list:
-        print("Function list (fn.txt) is empty or does not exist")
-        return
+    # fn_list = getFuncList(FN_FNAME)
+    # if not fn_list:
+    #     print("Function list (fn.txt) is empty or does not exist")
+    #     return
 
-    if not os.path.isfile(ORI_BC_FNAME):
-        print(ORI_BC_FNAME + " does not exist")
+    # if not os.path.isfile(ORI_BC_FNAME):
+    #     print(ORI_BC_FNAME + " does not exist")
 
-    exp = greedyExperiment
+    # exp = greedyExperiment
 
-    final_list, final_fn_list, perf_list, final_speedup = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/ipsum.brotli", threshold=0.05)
+    # final_list, final_fn_list, perf_list, final_speedup = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
 
-    final_tuple = list(zip(final_fn_list, perf_list))
-    final_tuple.sort(key = lambda x: x[1])  
+    # final_tuple = list(zip(final_fn_list, perf_list))
+    # final_tuple.sort(key = lambda x: x[1])  
 
-    lines = []
-    lines.append("Final Speedup: " + str(final_speedup) + "\n\n")
-    lines.append("Function, Relative Speedup\n")
-    for (fn, perf) in final_tuple:
-        lines.append(fn + "," + str(perf) + "\n")
+    # lines = []
+    # lines.append("Final Speedup: " + str(final_speedup) + "\n\n")
+    # lines.append("Function, Relative Speedup\n")
+    # for (fn, perf) in final_tuple:
+    #     lines.append(fn + "," + str(perf) + "\n")
 
 
-    with open("greedy_result.txt", "w") as fd:
-        fd.writelines(lines)
+    # with open("greedy_result.txt", "w") as fd:
+    #     fd.writelines(lines)
 
+
+    topN_file = "topN.txt"
+    speedup_tuple = parseGreedyResults(topN_file)
+
+    result = tryTopN(speedup_tuple, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=50)
+
+    for (fn_list, idx, time, bc) in result:
+        print(str(idx) + "," + str(time) + "," +  str(bc))
+
+    with open("topN_result.pkl", 'wb') as fd:
+        pickle.dump(result, fd)
 
 if __name__ == '__main__':
     main()
