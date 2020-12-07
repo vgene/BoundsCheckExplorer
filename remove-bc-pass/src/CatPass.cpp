@@ -152,8 +152,10 @@ namespace {
         }
 
       }
-      errs() << "Found function in list: " << fn_name << '\n';
-      errs() << "  Bounds check removed: " << bc_num << '\n';
+      if (bc_num > 0) {
+        errs() << "Found function in list: " << fn_name << '\n';
+        errs() << "  Bounds check removed: " << bc_num << '\n';
+      }
       return true;
     }
 
