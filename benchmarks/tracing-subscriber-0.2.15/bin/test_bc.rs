@@ -48,11 +48,13 @@ fn bench() {
     let filter = "static_filter=info"
         .parse::<EnvFilter>()
         .expect("should parse");
-    black_box(tracing::subscriber::with_default(EnabledSubscriber.with(filter), || {
-        for _ in 0..50000 {
-            black_box(tracing::debug!(target: "static_filter", "hi"));
-        }
-    }))
+    tracing::subscriber::set_global_default(EnabledSubscriber.with(filter))
+        .expect("setting default subscriber failed");
+
+    let N_ITERATION: usize = 5000000000;
+    for _ in 0..N_ITERATION {
+        tracing::debug!(target: "static_filter", "hi");
+    };
 }
 
 fn main() {
