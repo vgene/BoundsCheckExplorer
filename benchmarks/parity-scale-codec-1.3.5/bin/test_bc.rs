@@ -1,5 +1,6 @@
-extern crate forpaper;
-extern crate rand;
+use std::{convert::{TryFrom, TryInto}};
+use criterion::black_box;
+use parity_scale_codec::*;
 
 use std::time::SystemTime;
 use std::time::Duration;
@@ -19,19 +20,22 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 
 #[no_mangle]
 #[inline(never)]
-fn unknown_size_bench() {
-    let mut app_buf: [u8; 320000] = [0; 320000];
-    let mut other_buf: [u8; 320000] = [0; 320000];
-    for i in 0..320000 {
-        other_buf[i] = rand::random();
-    }
+fn bench<T: TryFrom<u8> + Codec>() where T::Error: std::fmt::Debug {
+    let vec_size = 16384;
+    let vec: Vec<T> = (0..=127u8)
+        .cycle()
+        .take(vec_size)
+        .map(|v| v.try_into().unwrap())
+        .collect();
+
+    let vec = black_box(vec);
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 700;
+    let n_iterations: usize = 3000000;
 
     for _ in 0..n_iterations {
-        forpaper::unknown_size(&other_buf, &mut app_buf);
+        black_box(vec.encode());
     }
 
     let (total, err) = elapsed(start);
@@ -51,5 +55,5 @@ fn unknown_size_bench() {
 }
 
 fn main() {
-    unknown_size_bench();
+    bench::<i16>();
 }

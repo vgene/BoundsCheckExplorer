@@ -1,6 +1,3 @@
-extern crate forpaper;
-extern crate rand;
-
 use std::time::SystemTime;
 use std::time::Duration;
 use std::io;
@@ -19,20 +16,14 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 
 #[no_mangle]
 #[inline(never)]
-fn unknown_size_bench() {
-    let mut app_buf: [u8; 320000] = [0; 320000];
-    let mut other_buf: [u8; 320000] = [0; 320000];
-    for i in 0..320000 {
-        other_buf[i] = rand::random();
-    }
+fn bench() {
+    // setup
 
     let start = now();
     let mut timing_error: bool = false;
     let n_iterations: usize = 700;
 
-    for _ in 0..n_iterations {
-        forpaper::unknown_size(&other_buf, &mut app_buf);
-    }
+    // bench
 
     let (total, err) = elapsed(start);
     if err {
@@ -51,5 +42,5 @@ fn unknown_size_bench() {
 }
 
 fn main() {
-    unknown_size_bench();
+    bench();
 }
