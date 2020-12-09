@@ -1,0 +1,13 @@
+[package]
+name = "converted_phf_generator"
+version = "0.1.0"
+authors = ["np <nataliepopescu@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "test_bc"
+path = "bin/test_bc.rs"
+
+[dependencies]
+phf_generator = "0.8.0"
+rand = "0.7"
