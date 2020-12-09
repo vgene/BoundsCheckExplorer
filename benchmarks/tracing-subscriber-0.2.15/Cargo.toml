@@ -11,4 +11,4 @@ path = "bin/test_bc.rs"
 [dependencies]
 tracing = "0.1"
 tracing-subscriber = "0.2.15"
-bencher = "0.1.4"
+criterion = "0.3.0"
