@@ -44,7 +44,7 @@ fn bench() {
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 80000;
+    let n_iterations: usize = 8000;
 
     // bench
     bench_test(n_iterations);
