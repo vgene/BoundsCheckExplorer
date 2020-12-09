@@ -174,6 +174,10 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     final_list = []
     final_fn_list = []
     perf_list = []
+
+    # warm up
+    if len(fn_list) > 0:
+        time_exp = runExpWithName('exps/exp-' + str(0) + "/exp.exe", arg)
     for idx, fn in enumerate(fn_list):
         test_fn_list = list_of_fn_lists[idx] 
 
@@ -236,6 +240,10 @@ def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
     idx_list = []
     time_list = []
     bc_list = []
+    # warm up
+    if N > 0:
+        time_exp = runExpWithName('tops_exps/exp-' + str(0) + "/exp.exe", arg)
+
     for idx in range(N):
         test_fn_list = list_of_fn_lists[idx] 
 
