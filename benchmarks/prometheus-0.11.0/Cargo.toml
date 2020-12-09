@@ -1,0 +1,12 @@
+[package]
+name = "converted_prometheus"
+version = "0.1.0"
+authors = ["np <nataliepopescu@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "test_bc"
+path = "bin/test_bc.rs"
+
+[dependencies]
+prometheus = "0.11.0"
