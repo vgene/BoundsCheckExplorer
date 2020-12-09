@@ -1,0 +1,12 @@
+[package]
+name = "converted_itertools"
+version = "0.1.0"
+authors = ["np <nataliepopescu@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "test_bc"
+path = "bin/test_bc.rs"
+
+[dependencies]
+itertools = "0.9.0"
