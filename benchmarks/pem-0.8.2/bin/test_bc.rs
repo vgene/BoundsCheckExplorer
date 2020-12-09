@@ -1,3 +1,7 @@
+#![feature(test)]
+extern crate test;
+use test::black_box;
+
 extern crate pem;
 
 use std::time::SystemTime;
@@ -39,7 +43,7 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 
 fn bench_test(n_iter: usize) {
     for _ in 0..n_iter {
-        pem::parse_many(SAMPLE);
+        black_box(pem::parse_many(SAMPLE));
     }
 }
 

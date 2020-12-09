@@ -1,7 +1,8 @@
+#![feature(test)]
+extern crate test;
+use test::black_box;
 extern crate jpeg_decoder;
-extern crate criterion;
 
-use criterion::black_box;
 use std::time::SystemTime;
 use std::time::Duration;
 use std::io;

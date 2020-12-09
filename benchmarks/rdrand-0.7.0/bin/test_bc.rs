@@ -1,3 +1,6 @@
+#![feature(test)]
+extern crate test;
+use test::black_box;
 extern crate rand_core;
 
 use std::time::SystemTime;
@@ -19,7 +22,7 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 
 fn bench_test(n_iter: usize, gen: RdRand) {
     for _ in 0..n_iter {
-        gen.try_next_u16().unwrap();
+        black_box(gen.try_next_u16().unwrap());
     }
 }
 
