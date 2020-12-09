@@ -63,10 +63,16 @@ fn bench() {
     let filter = "static_filter=info"
         .parse::<EnvFilter>()
         .expect("should parse");
+    tracing::subscriber::set_global_default(EnabledSubscriber.with(filter))
+        .expect("setting default subscriber failed");
+
 
     let start= now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 150000000;
+    let n_iterations: usize = 15000000000;
+    for _ in 0..N_ITERATION {
+        tracing::debug!(target: "static_filter", "hi");
+    };
 
     black_box(tracing::subscriber::with_default(EnabledSubscriber.with(filter), || {
         for _ in 0..n_iterations{
@@ -88,6 +94,7 @@ fn bench() {
         total.as_secs(),
         total.subsec_nanos());
     }
+>>>>>>> 7a29231402fd6a512d2f9ba6e72cb411dc5d7653
 }
 
 fn main() {

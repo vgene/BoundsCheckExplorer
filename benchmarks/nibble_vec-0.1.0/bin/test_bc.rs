@@ -17,6 +17,14 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
     }
 }
 
+fn bench_test(nv: &Nibblet, v:&Vec<u8>, n_iterations:usize){
+    for _ in 0..n_iterations {
+        for (i, _) in v.iter().enumerate() {
+            nv.get(i);
+        }
+    }
+}
+
 #[no_mangle]
 #[inline(never)]
 fn bench() {
@@ -26,14 +34,10 @@ fn bench() {
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 10000000;
+    let n_iterations: usize = 1000000000;
 
     // bench
-    for _ in 0..n_iterations {
-        for (i, _) in v.iter().enumerate() {
-            nv.get(i);
-        }
-    }
+    bench_test(&nv, &v, n_iterations);
 
     let (total, err) = elapsed(start);
     if err {
@@ -44,8 +48,8 @@ fn bench() {
         let _r = writeln!(&mut io::stderr(), "{:}", "Timing error");
     } else {
         writeln!(&mut io::stderr(), "{:} {:} {:}.{:09}",
-        "Iterations; Time",
         n_iterations as u64,
+        "Iterations; Time",
         total.as_secs(),
         total.subsec_nanos());
     }

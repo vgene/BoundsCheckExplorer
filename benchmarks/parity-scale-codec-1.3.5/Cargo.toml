@@ -11,4 +11,3 @@ path = "bin/test_bc.rs"
 [dependencies]
 parity-scale-codec = "1.3.5"
 parity-scale-codec-derive = "^1.2.2"
-criterion = "0.3.0"

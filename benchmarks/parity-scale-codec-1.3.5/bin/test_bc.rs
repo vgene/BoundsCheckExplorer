@@ -1,5 +1,4 @@
 use std::{convert::{TryFrom, TryInto}};
-use criterion::black_box;
 use parity_scale_codec::*;
 
 use std::time::SystemTime;
@@ -18,25 +17,29 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
     }
 }
 
+fn encode_test<T: TryFrom<u8> + Codec>(vec: &Vec<T>, n_iterations: usize)  where T::Error: std::fmt::Debug{
+    for _ in 0..n_iterations {
+        vec.encode();
+    }
+}
+
 #[no_mangle]
 #[inline(never)]
 fn bench<T: TryFrom<u8> + Codec>() where T::Error: std::fmt::Debug {
-    let vec_size = 16384;
+    let vec_size = 1638400;
     let vec: Vec<T> = (0..=127u8)
         .cycle()
         .take(vec_size)
         .map(|v| v.try_into().unwrap())
         .collect();
 
-    let vec = black_box(vec);
+    let vec = vec;
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 3000000;
+    let n_iterations: usize = 30000;
 
-    for _ in 0..n_iterations {
-        black_box(vec.encode());
-    }
+    encode_test(&vec, n_iterations);
 
     let (total, err) = elapsed(start);
     if err {
@@ -55,5 +58,5 @@ fn bench<T: TryFrom<u8> + Codec>() where T::Error: std::fmt::Debug {
 }
 
 fn main() {
-    bench::<i16>();
+    bench::<i64>();
 }
