@@ -1,0 +1,13 @@
+[package]
+name = "converted_jpeg-decoder"
+version = "0.1.0"
+authors = ["np <nataliepopescu@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "test_bc"
+path = "bin/test_bc.rs"
+
+[dependencies]
+jpeg-decoder = "0.1.20"
+criterion = "0.3.0"
