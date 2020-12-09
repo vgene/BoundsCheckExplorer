@@ -44,8 +44,8 @@ fn bench() {
         let _r = writeln!(&mut io::stderr(), "{:}", "Timing error");
     } else {
         writeln!(&mut io::stderr(), "{:} {:} {:}.{:09}",
-        "Iterations; Time",
         n_iterations as u64,
+        "Iterations; Time",
         total.as_secs(),
         total.subsec_nanos());
     }

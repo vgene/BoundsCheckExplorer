@@ -19,7 +19,7 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 
 #[no_mangle]
 #[inline(never)]
-fn unknown_size_bench() {
+fn bench() {
     let mut app_buf: [u8; 320000] = [0; 320000];
     let mut other_buf: [u8; 320000] = [0; 320000];
     for i in 0..320000 {
@@ -51,5 +51,5 @@ fn unknown_size_bench() {
 }
 
 fn main() {
-    unknown_size_bench();
+    bench();
 }
