@@ -1,0 +1,14 @@
+[package]
+name = "converted_parity-scale-codec"
+version = "0.1.0"
+authors = ["np <nataliepopescu@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "test_bc"
+path = "bin/test_bc.rs"
+
+[dependencies]
+parity-scale-codec = "1.3.5"
+parity-scale-codec-derive = "^1.2.2"
+criterion = "0.3.0"
