@@ -1,7 +1,8 @@
-extern crate criterion;
+#![feature(test)]
+extern crate test;
+use test::black_box;
 extern crate uint;
-
-use criterion::black_box;
+//use criterion::black_box;
 use std::time::SystemTime;
 use std::time::Duration;
 use std::io;

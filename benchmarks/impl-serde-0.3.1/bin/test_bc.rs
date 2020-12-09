@@ -1,12 +1,15 @@
+#![feature(test)]
 //extern crate serde_derive;
 extern crate serde_json;
 extern crate impl_serde;
 extern crate uint;
+extern crate test;
 
 use std::time::SystemTime;
 use std::time::Duration;
 use std::io;
 use std::io::Write as IoWrite;
+use test::black_box;
 //use criterion::black_box
 
 use impl_serde::*; //impl_uint_serde;
@@ -31,7 +34,7 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 fn bench_test(n_iter: usize) {
     let param = r#""0x0""#;
     for _ in 0..n_iter {
-        serde_json::from_str::<U256>(&param);
+        black_box(serde_json::from_str::<U256>(&param));
     }
 }
 
@@ -46,6 +49,10 @@ fn bench() {
 
     // bench
     bench_test(n_iterations);
+    // let param = r#""0x0""#;
+    // for _ in 0..n_iterations{
+    //     black_box(serde_json::from_str::<U256>(&param));
+    // }
 
     let (total, err) = elapsed(start);
     if err {

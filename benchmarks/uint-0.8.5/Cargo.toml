@@ -10,4 +10,3 @@ path = "bin/test_bc.rs"
 
 [dependencies]
 uint = "0.8.5"
-criterion = "0.3.0"

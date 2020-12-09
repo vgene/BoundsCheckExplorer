@@ -20,6 +20,12 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
     }
 }
 
+fn bench_test(counter: &IntCounter, n_iterations:usize) {
+    for _ in 0..n_iterations {
+        counter.inc();
+    }
+}
+
 #[no_mangle]
 #[inline(never)]
 fn bench() {
@@ -45,9 +51,7 @@ fn bench() {
     let n_iterations: usize = 40000000;
 
     // bench
-    for _ in 0..n_iterations {
-        counter.inc();
-    }
+    bench_test(&counter, n_iterations);
 
     let (total, err) = elapsed(start);
     if err {

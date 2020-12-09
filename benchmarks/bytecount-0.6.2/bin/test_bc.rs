@@ -1,5 +1,10 @@
+#![feature(test)]
+extern crate test;
+use test::black_box;
+
 extern crate rand;
 extern crate bytecount;
+
 
 use std::time::SystemTime;
 use std::time::Duration;
@@ -47,7 +52,7 @@ fn elapsed(start: SystemTime) -> (Duration, bool) {
 fn bench_test(n_iter: usize, s: &usize) {
     let haystack = random_bytes(*s);
     for _ in 0..n_iter {
-        naive_count_32(&haystack, 10);
+        black_box(naive_count_32(&haystack, 10));
     }
 }
 
@@ -59,7 +64,7 @@ fn bench() {
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 100000000;
+    let n_iterations: usize = 1000000000;
 
     // bench
     bench_test(n_iterations, &0);
