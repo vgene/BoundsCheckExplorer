@@ -7,8 +7,11 @@ import pickle
 
 ROOT_PATH = "/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
-def runOneTest(bc_fname, arg):
-    out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def runOneTest(bc_fname, arg=None):
+    if arg is not None:
+        out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    else:
+        out = subprocess.Popen([ROOT_PATH + '/exp.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
     out, _ = out.communicate()
     out = out.decode("utf-8")  # convert to string from bytes
@@ -28,8 +31,12 @@ def runOneTest(bc_fname, arg):
     return result
 
 
-def runExpWithName(exp_name, arg):
-    out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def runExpWithName(exp_name, arg=None):
+    if arg is not None:
+        out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    else:
+        out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
     out, _ = out.communicate()
     out = out.decode("utf-8")  # convert to string from bytes
 
@@ -114,7 +121,7 @@ def transformAll(list_of_fn_lists, ori_bc_fname, dir_name):
     os.chdir('..')
 
 # try remove one function from remove list, if works
-def greedyExperiment(fn_list, ori_bc_fname, arg, threshold=0.05):
+def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     rm_bc_fname = "bcrm.bc"
 
     def testList(fn_list):
@@ -283,36 +290,37 @@ def main():
     FN_FNAME = "fn.txt"
     ORI_BC_FNAME = "original.bc"
 
-    # fn_list = getFuncList(FN_FNAME)
-    # if not fn_list:
-    #     print("Function list (fn.txt) is empty or does not exist")
-    #     return
+    fn_list = getFuncList(FN_FNAME)
+    if not fn_list:
+        print("Function list (fn.txt) is empty or does not exist")
+        return
 
-    # if not os.path.isfile(ORI_BC_FNAME):
-    #     print(ORI_BC_FNAME + " does not exist")
+    if not os.path.isfile(ORI_BC_FNAME):
+        print(ORI_BC_FNAME + " does not exist")
 
-    # exp = greedyExperiment
+    exp = greedyExperiment
 
-    # final_list, final_fn_list, perf_list, final_speedup = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
+    #final_list, final_fn_list, perf_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
+    final_list, final_fn_list, perf_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
 
-    # final_tuple = list(zip(final_fn_list, perf_list))
-    # final_tuple.sort(key = lambda x: x[1])  
+    final_tuple = list(zip(final_fn_list, perf_list))
+    final_tuple.sort(key = lambda x: x[1])  
 
-    # lines = []
-    # lines.append("Final Speedup: " + str(final_speedup) + "\n\n")
-    # lines.append("Function, Relative Speedup\n")
-    # for (fn, perf) in final_tuple:
-    #     lines.append(fn + "," + str(perf) + "\n")
-
-
-    # with open("greedy_result.txt", "w") as fd:
-    #     fd.writelines(lines)
+    lines = []
+    lines.append("Final Speedup: " + str(time_og / time_final) + "\n\n")
+    lines.append("Function, Relative Speedup\n")
+    for (fn, perf) in final_tuple:
+        lines.append(fn + "," + str(perf) + "\n")
 
 
-    topN_file = "topN.txt"
-    speedup_tuple = parseGreedyResults(topN_file)
+    with open("greedy_result.txt", "w") as fd:
+        fd.writelines(lines)
 
-    result = tryTopN(speedup_tuple, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=50)
+    # topN_file = "topN.txt"
+    # speedup_tuple = parseGreedyResults(topN_file)
+    # result = tryTopN(speedup_tuple, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=118)
+
+    result = tryTopN(final_tuple, ORI_BC_FNAME, arg=None, N=len(final_tuple))
 
     for (fn_list, idx, time, bc) in result:
         print(str(idx) + "," + str(time) + "," +  str(bc))
