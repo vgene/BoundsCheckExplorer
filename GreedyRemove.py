@@ -131,6 +131,16 @@ def transformAll(list_of_fn_lists, ori_bc_fname, dir_name):
 
     os.chdir('..')
 
+
+def findAllPoly(fn, fn_list):
+    poly_list = []
+    for fn_t in fn_list:
+        l = len(fn_t)
+        if fn[:len(fn) - 20] == fn_t[:len(fn_t) - 20]:
+            poly_list.append(fn_t)
+    return poly_list 
+
+
 # try remove one function from remove list, if works
 def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     rm_bc_fname = "bcrm.bc"
@@ -169,32 +179,47 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     else:
         print("all removed shows insignificant performance difference, speedup = (", time_og / time_all_remove, "),  stop here")
 
-    print("testing on ", len(fn_list), " functions")
+    print("testing on ", len(fn_list), "functions")
 
+    list_of_poly_fns = []
     list_of_fn_lists = []
+    addressed_list = []
     for fn in fn_list:
+        if fn in addressed_list:
+            continue
+        poly_list = findAllPoly(fn, fn_list)
+        addressed_list.extend(poly_list)
+
+        if len(poly_list) > 1:
+            print("Found :", len(poly_list), poly_list[0])
+
         test_fn_list = fn_list.copy()
-        test_fn_list.remove(fn)
+        for f in poly_list:
+            test_fn_list.remove(f)
+
         list_of_fn_lists.append(test_fn_list)
+        list_of_poly_fns.append(poly_list) 
+
+    print("testing on ", len(list_of_fn_lists), "poly functions")
 
     # generate all bc all at once
     transformAll(list_of_fn_lists, ori_bc_fname, "exps")
 
     final_list = []
-    final_fn_list = []
+    final_key_fn_list = []
     perf_list = []
     time_list = []
 
-    for idx, fn in enumerate(fn_list):
-        test_fn_list = list_of_fn_lists[idx] 
+    for idx, test_fn_list in enumerate(list_of_fn_lists):
+        # test_fn_list = list_of_fn_lists[idx] 
 
-        print("testing with function " + str(idx)+ " removed")
+        print("testing with poly function " + str(idx) + "(*" + str(len(fn_list) - len(test_fn_list))+ ") removed")
         time_exp = runExpWithName('exps/exp-' + str(idx) + "/exp.exe", arg)
         
         if time_exp is None:
             continue
 
-        final_fn_list.append(fn)
+        final_key_fn_list.append(list_of_poly_fns[idx][0])  # find a representative
         perf_list.append(time_all_remove / time_exp)
         time_list.append(time_exp)
         # if relative speedup is smaller than threshold 
@@ -203,7 +228,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
             print("  still shows good speedup (", time_og / time_exp, ")")
             print("  relative speedup (", time_all_remove / time_exp, ")")
         else:
-            final_list.append(fn)
+            final_list.extend(list_of_poly_fns[idx])
             print("  shows significant worse performance difference, speedup = (", time_og / time_exp, ")")
             print("  relative speedup (", time_all_remove / time_exp, ")")
 
@@ -218,7 +243,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
         print("  shows significant worse performance difference, speedup = (", time_og / time_final, ")")
         print("  this greedy experiment failed")
 
-    return final_list, final_fn_list,  perf_list, time_list, time_og,  time_final
+    return final_list, final_key_fn_list, perf_list, time_list, time_og,  time_final
 
 
 def getBCs(dir_name):
@@ -237,15 +262,23 @@ def getBCs(dir_name):
     return total_bc
 
 
-def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
+
+def tryTopN(final_tuple, fn_list, ori_bc_fname, arg, N=10):
     list_of_fn_lists = [[],]
+    # for i in range(N):
+    #     fn_list = list(map(lambda x: x[0], final_tuple[:i+1]))
+    #     list_of_fn_lists.append(fn_list)
+
+    addressed_list = []
     for i in range(N):
-        fn_list = list(map(lambda x: x[0], final_tuple[:i+1]))
-        list_of_fn_lists.append(fn_list)
+        fn = final_tuple[i][0]
+        poly_list = findAllPoly(fn, fn_list)
+        addressed_list.extend(poly_list)
+        tmp = addressed_list.copy()
+        list_of_fn_lists.append(tmp)
 
     transformAll(list_of_fn_lists, ori_bc_fname, "tops_exps")
 
-    list_of_final_fn_list = []
     idx_list = []
     time_list = []
     bc_list = []
@@ -262,7 +295,6 @@ def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
             continue
 
         print(" time: " + str(time_exp) + "s")
-        list_of_final_fn_list.append(test_fn_list)
         idx_list.append(idx)
         time_list.append(time_exp)
         bc_list.append(bcs)
@@ -286,6 +318,7 @@ def getFuncList(filename):
         return None
 
     return fn_list
+
 
 
 def parseGreedyResults(file_name):
@@ -314,10 +347,10 @@ def main():
 
     exp = greedyExperiment
 
-    #final_list, final_fn_list, perf_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
-    final_list, final_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
+    #final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
+    final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
 
-    final_tuple = list(zip(final_fn_list, perf_list))
+    final_tuple = list(zip(final_key_fn_list, perf_list))
     final_tuple.sort(key = lambda x: x[1])  
 
     lines = []
@@ -332,9 +365,9 @@ def main():
 
     # topN_file = "topN.txt"
     # speedup_tuple = parseGreedyResults(topN_file)
-    # result = tryTopN(speedup_tuple, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=118)
 
-    result = tryTopN(final_tuple, ORI_BC_FNAME, arg=None, N=len(final_tuple))
+    result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=len(final_tuple))
+    #result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg=None, N=len(final_tuple))
 
     for (fn_list, idx, time, bc) in result:
         print(str(idx) + "," + str(time) + "," +  str(bc))
