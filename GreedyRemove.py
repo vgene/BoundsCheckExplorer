@@ -31,28 +31,39 @@ def runOneTest(bc_fname, arg=None):
     return result
 
 
-def runExpWithName(exp_name, arg=None):
-    if arg is not None:
-        out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    else:
-        out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def runExpWithName(exp_name, arg=None, test_time=10):
 
-    out, _ = out.communicate()
-    out = out.decode("utf-8")  # convert to string from bytes
+    time_list = []
+    for i in range(test_time):
+        if arg is not None:
+            out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name, arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        else:
+            out = subprocess.Popen([ROOT_PATH + '/runExp.sh',  exp_name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    try:
-        m = re.search(r'Time ([0-9,.]+)', out)
-        # m = re.search(r'([0-9,]+) ns/iter', out)
-        s = m.group(1)
-        result  = float(s.strip())
-        #s = s.replace(',', '')
-        #result = int(s)
-    except Exception:
-        print(out)
-        print("Run experiment failed")
-        return None
+        out, _ = out.communicate()
+        out = out.decode("utf-8")  # convert to string from bytes
 
-    return result
+        try:
+            m = re.search(r'Time ([0-9,.]+)', out)
+            # m = re.search(r'([0-9,]+) ns/iter', out)
+            s = m.group(1)
+            result  = float(s.strip())
+            time_list.append(result)
+            #s = s.replace(',', '')
+            #result = int(s)
+        except Exception:
+            print(out)
+            print("Run experiment failed")
+            return None
+
+    time_list.sort()
+    # remove the first
+    time_list = time_list[2:]
+
+    # remove the last
+    time_list = time_list[:-2]
+
+    return sum(time_list) / len(time_list)
 
 
 def genExp(bc_fname):
@@ -155,10 +166,8 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
 
     elif time_all_remove > time_og * (1 + threshold):
         print("all removed shows worse performance, (", time_og / time_all_remove , "),  please check")
-        return
     else:
         print("all removed shows insignificant performance difference, speedup = (", time_og / time_all_remove, "),  stop here")
-        return
 
     print("testing on ", len(fn_list), " functions")
 
@@ -174,14 +183,12 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     final_list = []
     final_fn_list = []
     perf_list = []
+    time_list = []
 
-    # warm up
-    if len(fn_list) > 0:
-        time_exp = runExpWithName('exps/exp-' + str(0) + "/exp.exe", arg)
     for idx, fn in enumerate(fn_list):
         test_fn_list = list_of_fn_lists[idx] 
 
-        print("testing with function " + fn + " removed")
+        print("testing with function " + str(idx)+ " removed")
         time_exp = runExpWithName('exps/exp-' + str(idx) + "/exp.exe", arg)
         
         if time_exp is None:
@@ -189,6 +196,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
 
         final_fn_list.append(fn)
         perf_list.append(time_all_remove / time_exp)
+        time_list.append(time_exp)
         # if relative speedup is smaller than threshold 
         if time_exp * (1 - threshold) < time_all_remove:
             # good speedup
@@ -209,7 +217,8 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
     else:
         print("  shows significant worse performance difference, speedup = (", time_og / time_final, ")")
         print("  this greedy experiment failed")
-    return final_list, final_fn_list,  perf_list, time_og,  time_final
+
+    return final_list, final_fn_list,  perf_list, time_list, time_og,  time_final
 
 
 def getBCs(dir_name):
@@ -229,7 +238,7 @@ def getBCs(dir_name):
 
 
 def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
-    list_of_fn_lists = []
+    list_of_fn_lists = [[],]
     for i in range(N):
         fn_list = list(map(lambda x: x[0], final_tuple[:i+1]))
         list_of_fn_lists.append(fn_list)
@@ -240,14 +249,11 @@ def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
     idx_list = []
     time_list = []
     bc_list = []
-    # warm up
-    if N > 0:
-        time_exp = runExpWithName('tops_exps/exp-' + str(0) + "/exp.exe", arg)
 
     for idx in range(N):
         test_fn_list = list_of_fn_lists[idx] 
 
-        print("testing with functions ",  test_fn_list, " removed")
+        print("testing with " + str(idx) + " functions removed")
         dir_name = 'tops_exps/exp-' + str(idx)
         time_exp = runExpWithName(dir_name + "/exp.exe", arg)
         bcs = getBCs(dir_name)
@@ -257,7 +263,7 @@ def tryTopN(final_tuple, ori_bc_fname, arg, N=10):
 
         print(" time: " + str(time_exp) + "s")
         list_of_final_fn_list.append(test_fn_list)
-        idx_list.append(idx + 1)
+        idx_list.append(idx)
         time_list.append(time_exp)
         bc_list.append(bcs)
 
@@ -309,7 +315,7 @@ def main():
     exp = greedyExperiment
 
     #final_list, final_fn_list, perf_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
-    final_list, final_fn_list, perf_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
+    final_list, final_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
 
     final_tuple = list(zip(final_fn_list, perf_list))
     final_tuple.sort(key = lambda x: x[1])  
@@ -333,8 +339,15 @@ def main():
     for (fn_list, idx, time, bc) in result:
         print(str(idx) + "," + str(time) + "," +  str(bc))
 
-    with open("topN_result.pkl", 'wb') as fd:
-        pickle.dump(result, fd)
+
+    final_result_dict = { 
+            "time_original": time_og,
+            "time_final": time_final,
+            "phase1_result": time_list,
+            "phase2_result":  result 
+            }
+    with open("all_results.pkl", 'wb') as fd:
+        pickle.dump(final_result_dict, fd)
 
 if __name__ == '__main__':
     main()
