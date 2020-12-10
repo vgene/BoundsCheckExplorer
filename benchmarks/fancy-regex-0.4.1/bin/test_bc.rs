@@ -1,5 +1,4 @@
 extern crate fancy_regex;
-extern crate regex;
 
 use std::time::SystemTime;
 use std::time::Duration;
@@ -7,7 +6,6 @@ use std::io;
 use std::io::Write as IoWrite;
 use fancy_regex::internal::{analyze, compile, run_default};
 use fancy_regex::Expr;
-use regex::Regex;
 
 fn now() -> SystemTime {
     return SystemTime::now();
@@ -37,7 +35,7 @@ fn bench() {
 
     let start = now();
     let mut timing_error: bool = false;
-    let n_iterations: usize = 5;
+    let n_iterations: usize = 20;
 
     // bench
     for _ in 0..n_iterations {
