@@ -21,8 +21,8 @@ from os import path
 from pprint import pprint
 from collections import defaultdict
 
-BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "fancy-regex-0.4.1", "geo-0.16.0", "hex-0.4.2",
-        "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
+BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2",
+                  "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
 class ResultProvider:
 
     def __init__(self, path):
@@ -155,6 +155,7 @@ def getOneBenchmarkFig(benchmark, show_legend=False, show_title=False):
                         'ticksuffix': "%",
                     },
                     'xaxis': {
+                        'range': [0, xs[-1]],
                         'zeroline': True,
                         'zerolinewidth': 1,
                         'zerolinecolor': 'black',
@@ -204,8 +205,15 @@ def genFigs():
         fig.update_layout(showlegend=False, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
         fig.update_yaxes(title={"standoff": 1})
         fig.update_traces(marker={"line": {"width":0}}) # Remove border
+        fig.update_layout(showlegend=False, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
 
-        fig.write_image("images/" + benchmark + "-sweep.pdf")
+        index = benchmark.rfind('-')
+        if index == -1:
+            filename = benchmark
+        else:
+            filename = benchmark[:benchmark.rindex('-')]
+        filename = filename.replace('_', '-')
+        fig.write_image("images/" + filename  + ".pdf")
 
 
 if __name__ == '__main__':
