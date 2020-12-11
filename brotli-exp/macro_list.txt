@@ -1,0 +1,54 @@
+trasnform.rs 20
+    ToUpperCase 4
+    TransformDictionaryWord 16
+bit_reader/mod.rs 11 (+2)
+    BitMask 1
+    BrotliLoad16LE 2
+    BrotliLoad32LE 1 (+1 unitialized)
+    BrotliLoad64LE 1 (+1 unitialized)
+    BrotliPullByte 2
+    BrotliPeekByte 1
+    BrotliCopyBytes 3
+huffman/mod.rs 87 (+2)
+    HuffmanTreeGroup:get_tree_mut 2
+                    :get_tree 2
+                    :build_hgroup_cache 1
+    BrotliReverseBits 1
+    ReplicateValue 1
+    NextTableBitSize 1
+    BrotliBuildCodeLengthsHuffmanTable 13 (+2)
+    BrotliBuildHuffmanTable 10
+    BrotliBuildSimpleHuffmanTable 56
+decode.rs 145 (+1)
+    DecodeSymbol 2
+    SafeDecodeSymbol 4
+    PreloadSymbol 1
+    ReadPreloadedSymbol 1
+    ReadSimpleHuffmanSymbols 3
+    ProcessSingleCodeLength 4
+    ProcessRepeatedCodeLength 5
+    ReadSymbolCodeLengths 1
+    SafeReadSymbolCodeLengths 1
+    ReadCodeLengthCodeLengths 6
+    ReadHuffmanCode 4
+    ReadBlockLength 2
+    SafeReadBlockLengthFromIndex 2
+    InverseMoveToFrontTransform 7
+    HuffmanTreeGroupDecode 1
+    DecodeContextMapInner 3
+    DecodeBlockTypeAndLength 13
+    DetectTrivialLiteralBlockTypes 6
+    PrepareLiteralDecoding 5
+    DecodeCommandBlockSwitchInternal 1
+    DecodeDistanceBlockSwitchInternal 2
+    WriteRingBuffer 2
+    CopyUncompressedBlockToOutput 1
+    kRingBufferWriteAheadSlack 5
+    ReadContextModes 1
+    TakeDistanceFromRingBuffer 2
+    ReadDistanceInternal 4
+    ReadCommandInternal 5
+    memmove16 2 (+1)
+    memcpy_within_slice 4
+    ProcessCommandsInternal 24
+    BrotliDecompressStream 19
