@@ -21,7 +21,7 @@ from os import path
 from pprint import pprint
 from collections import defaultdict
 
-BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2",
+BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
 class ResultProvider:
 
@@ -130,7 +130,7 @@ def getOneBenchmarkFig(benchmark, show_legend=False, show_title=False):
     
     scatter_list.append(go.Scatter(x=xs, y=ys, line={'color': color},
                                    marker={"symbol": shape,
-                                           "size": 4, 'opacity': 1},
+                                           "size": 6, 'opacity': 1},
                                    mode='lines+markers',
                                    name=benchmark, showlegend=show_legend))
     # Set tick suffix
@@ -151,7 +151,7 @@ def getOneBenchmarkFig(benchmark, show_legend=False, show_title=False):
                         'linecolor': 'black',
                         'gridcolor': 'rgb(200, 200, 200)',
                         # 'nticks': 15,
-                        'title': {'text': "Speedup"},
+                        'title': {'text': "Speedup",'font': {'size': 18} },
                         'ticksuffix': "%",
                     },
                     'xaxis': {
@@ -162,7 +162,7 @@ def getOneBenchmarkFig(benchmark, show_legend=False, show_title=False):
                         'gridcolor': 'rgb(200, 200, 200)',
                         'linecolor': 'black',
                         'showline': True,
-                        'title': {'text': "#Functions with Bounds Check Removed"},
+                        'title': {'text': "#Functions with Bounds Check Removed", 'font': {'size': 18}},
                         'linewidth': 2,
                         'mirror': 'all',
                     },
@@ -203,7 +203,7 @@ def genFigs():
             continue
         print("Generating: " + benchmark)
         fig.update_layout(showlegend=False, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-        fig.update_yaxes(title={"standoff": 1})
+        fig.update_yaxes(title={"standoff": 4})
         fig.update_traces(marker={"line": {"width":0}}) # Remove border
         fig.update_layout(showlegend=False, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
 
