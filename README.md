@@ -1,6 +1,16 @@
-TODOs:
-- [ ] Try on outils
-- [ ] See if inlining can be turned off with LTO
+File Structure:
+- ./benchmarks: benchmarks evaluated with explorer
+- ./brotli-exp: brotli-decompressor experiment
+- ./outer-loop-prof-instr: instrumentation of outer-loop profile
+- ./outer-loop-prof-runtime: runtime for outer-loop profile
+- ./avoid-bench-inline: a way to modify LLVM IR to avoid inlining of function `bench` (not stable)
+- ./remove-bc-pass: remove bounds checks at the LLVM IR level
+- ./show-fn-names: show functions with bounds checks (including `slice_index_order/len_fail` in it)
+- ./images: plots of experiments included in the paper
+
+- \*.sh: bash scripts for running the experiments
+- GreedyRemove.py: main driver for the exploration
+- ResultPresenter.py: automatically create all plots
 
 Notes:
 - Need to turn off inlining by adding `#[inline(never)]` to the called library function, otherwise LTO will inline the called library function and do huge optimizations
