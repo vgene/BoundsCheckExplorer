@@ -1,4 +1,9 @@
-File Structure:
+## Steps to Run the Experiments
+1. Make sure LLVM 9.0.1 (remove-bc branch) is installed and confirm by `opt --version`
+2. Run `./compile_all.sh` to compile all LLVM passes
+3. Make sure rustc is installed
+
+## File Structure
 - ./benchmarks: benchmarks evaluated with explorer
 - ./brotli-exp: brotli-decompressor experiment
 - ./outer-loop-prof-instr: instrumentation of outer-loop profile
@@ -12,10 +17,10 @@ File Structure:
 - GreedyRemove.py: main driver for the exploration
 - ResultPresenter.py: automatically create all plots
 
-Notes:
+## Notes
 - Need to turn off inlining by adding `#[inline(never)]` to the called library function, otherwise LTO will inline the called library function and do huge optimizations
 
-Benchmarks:
+## Benchmarks
 - [x] assume_true | 0.1.0 | unknown_size_bench
 - [x] outils | 0.2.0 | aatree_big_random_insert_delete
 - [x] itertools | 0.9.0 | permutations_iter

@@ -3,13 +3,6 @@ import brotli
 import random
 import string
 
-# chars = "".join( [random.choice(string.printable) for i in range(150000000)] )
-# 
-# with open('ipsum.raw', 'w') as f:
-#     f.write(chars)
-# 
-# decoded=str.encode(chars)
-
 with open('./silesia.tar', 'rb') as f:
     decoded = f.read()
 
