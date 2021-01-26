@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Run brotli experiments
+
+script_path=`realpath $0`
+root_path=`dirname $script_path`
+
+# Create results folder
+mkdir -p $root_path/results
+
+cd brotli-exp
+
+# ./create_silesia.sh
+# python silesia_gen.py
+
+rm -rf target
+$root_path/upperbound_exp.sh test_bc
+cd explore
+python $root_path/GreedyRemove.py --arg $root_path/brotli-exp/silesia-5.brotli
+cp all_results.pkl $root_path/results/$dir.pkl
+

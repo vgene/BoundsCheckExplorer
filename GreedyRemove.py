@@ -1,5 +1,6 @@
 # We have original bc
 # Need to generate a list of  remove-bc-exp.sh
+import argparse
 import subprocess
 import re
 import os
@@ -333,7 +334,18 @@ def parseGreedyResults(file_name):
     return speedup_tuple
 
 
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--args", nargs='?', default=None,
+            help="Argument, default: None")
+    args = parser.parse_args()
+
+    return args.args
+
+
 def main():
+    arg = parseArgs()
+
     FN_FNAME = "fn.txt"
     ORI_BC_FNAME = "original.bc"
 
@@ -347,8 +359,7 @@ def main():
 
     exp = greedyExperiment
 
-    final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
-    #final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
+    final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=arg, threshold=0.03)
 
     final_tuple = list(zip(final_key_fn_list, perf_list))
     final_tuple.sort(key = lambda x: x[1])  
@@ -366,8 +377,7 @@ def main():
     # topN_file = "topN.txt"
     # speedup_tuple = parseGreedyResults(topN_file)
 
-    #result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=len(final_tuple))
-    result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg=None, N=len(final_tuple))
+    result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg=arg, N=len(final_tuple))
 
     for (fn_list, idx, time, bc) in result:
         print(str(idx) + "," + str(time) + "," +  str(bc))

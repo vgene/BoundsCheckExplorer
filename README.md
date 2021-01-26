@@ -1,7 +1,21 @@
 ## Steps to Run the Experiments
+
+### Preparation
 1. Make sure LLVM 9.0.1 (remove-bc branch) is installed and confirm by `opt --version`
 2. Run `./compile_all.sh` to compile all LLVM passes
 3. Make sure rustc is installed
+4. Change the hardcoded `rlib_path` in `genExp.sh`
+
+### Run Benchmarks
+1. Run `./all_exp.sh`, it will run all the experiments and create results under `benchmarks/results`
+
+### Run Brotli
+1. Create file `silesia-5.brotli` following steps in `brotli-exp/README.md`
+2. Run `./run_brotli_exp.sh`
+
+### Create Figures
+1. Use `python ResultPresenter.py -p benchmarks/results/` to view results on the webpage interactively.
+2. Run `python ResultPresenter.py -p benchmarks/results/ -g` to generate pdf files under `images`. Might overwrite existing files.
 
 ## File Structure
 - ./benchmarks: benchmarks evaluated with explorer
