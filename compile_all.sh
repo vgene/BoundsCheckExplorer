@@ -3,7 +3,6 @@
 # Compile all passes
 
 passes=( "outer-loop-prof-instr"
-         "outer-loop-prof-runtime"
          "avoid-bench-inline"
          "remove-bc-pass"
          "show-fn-names" )
@@ -16,3 +15,7 @@ do
     cd $root_path/$dir
     ./run_me.sh
 done
+
+cd $root_path/outer-loop-prof-runtime
+make
+
