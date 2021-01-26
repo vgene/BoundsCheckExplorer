@@ -1,10 +1,13 @@
 #!/bin/bash
 
-root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
+# Check whether the modified IRCE pass make a difference
+# Not included in the paper
+
+script_path=`realpath $0`
+root_path=`dirname $script_path`
 
 #opt --licm --indvars --simplifycfg --loop-simplify --lcssa --loop-rotate --irce original.bc -o new_pass.bc
 #opt --irce-print-range-checks=true --irce-print-changed-loops=true --irce-loop-size-cutoff=200 --irce-skip-profitability-checks=true --irce original.bc -o new_pass.bc
-root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
 
 #benchmarks=("hex-0.4.2")
 

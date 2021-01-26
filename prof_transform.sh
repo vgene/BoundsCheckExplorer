@@ -1,6 +1,7 @@
 #!/bin/bash
 
-root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
+script_path=`realpath $0`
+root_path=`dirname $script_path`
 
 exp_depth=0
 if [[ $# -eq 3 ]] ; then

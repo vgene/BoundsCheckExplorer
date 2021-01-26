@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# make sure it's the remove-bc toolchain
-# make sure it's the release version of LLVM 9.0.1
+# Compile a Rust crate and all its dependencies into one single bitcode
 
-root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
+# make sure it's using the remove-bc toolchain (rustc and llvm)
+# make sure it's the passes are compiled with LLVM 9.0.1
 
-#RUSTFLAGS="-C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=0 -Cembed-bitcode=yes" cargo rustc --release --bench $1 -- --emit=llvm-bc  -Clto=fat
+script_path=`realpath $0`
+root_path=`dirname $script_path`
 
 RUSTFLAGS="-C opt-level=0 -C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
+#RUSTFLAGS="-C no-prepopulate-passes -C passes=name-anon-globals -Cdebuginfo=0 -Cembed-bitcode=yes" cargo rustc --release --bench $1 -- --emit=llvm-bc  -Clto=fat
 #RUSTFLAGS="-C opt-level=3 -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
 
 mkdir -p explore

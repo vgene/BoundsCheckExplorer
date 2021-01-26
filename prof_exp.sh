@@ -1,9 +1,7 @@
 #!/bin/bash
 
-root_path="/u/ziyangx/bounds-check/BoundsCheckExplorer"
-
-#rm -rf ./target
-#rm -rf ./explore
+script_path=`realpath $0`
+root_path=`dirname $script_path`
 
 # the bench name has to be bench
 $root_path/onebc.sh $1

@@ -5,7 +5,7 @@ import re
 import os
 import pickle
 
-ROOT_PATH = "/u/ziyangx/bounds-check/BoundsCheckExplorer"
+ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def runOneTest(bc_fname, arg=None):
     if arg is not None:
@@ -347,8 +347,8 @@ def main():
 
     exp = greedyExperiment
 
-    #final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
-    final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
+    final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg=None, threshold=0.03)
+    #final_list, final_key_fn_list, perf_list, time_list, time_og, time_final = exp(fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", threshold=0.03)
 
     final_tuple = list(zip(final_key_fn_list, perf_list))
     final_tuple.sort(key = lambda x: x[1])  
@@ -366,8 +366,8 @@ def main():
     # topN_file = "topN.txt"
     # speedup_tuple = parseGreedyResults(topN_file)
 
-    result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=len(final_tuple))
-    #result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg=None, N=len(final_tuple))
+    #result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg="/u/ziyangx/bounds-check/unsafe-bench/rust-brotli-decompressor/testdata/silesia-5.brotli", N=len(final_tuple))
+    result = tryTopN(final_tuple, fn_list, ORI_BC_FNAME, arg=None, N=len(final_tuple))
 
     for (fn_list, idx, time, bc) in result:
         print(str(idx) + "," + str(time) + "," +  str(bc))
