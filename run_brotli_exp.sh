@@ -14,7 +14,7 @@ cd brotli-exp
 # python silesia_gen.py
 
 rm -rf target
-$root_path/upperbound_exp.sh test_bc
+$root_path/upperbound_exp.sh test_bc $root_path/brotli-exp/silesia-5.brotli
 cd explore
 python $root_path/GreedyRemove.py --arg $root_path/brotli-exp/silesia-5.brotli
 cp all_results.pkl $root_path/results/$dir.pkl
