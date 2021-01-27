@@ -7,15 +7,15 @@
 4. Change the hardcoded `rlib_path` in `genExp.sh`
 
 ### Run Benchmarks
-1. Run `./all_exp.sh`, it will run all the experiments and create results under `benchmarks/results`
+1. Run `./all_exp.sh`, it will run all the experiments and create results under `benchmarks/results` (might take several hours)
 
 ### Run Brotli
-1. Create file `silesia-5.brotli` following steps in `brotli-exp/README.md`
-2. Run `./run_brotli_exp.sh`
+1. Create file `silesia-5.brotli` following steps in [brotli-exp/README.md](brotli-exp/README.md)
+2. Run `./run_brotli_exp.sh` (might take around 1 hour)
 
 ### Create Figures
-1. Use `python ResultPresenter.py -p benchmarks/results/` to view results on the webpage interactively.
-2. Run `python ResultPresenter.py -p benchmarks/results/ -g` to generate pdf files under `images`. Might overwrite existing files.
+1. Use `python3 ResultPresenter.py -p results/` to view results on the webpage interactively.
+2. Run `python3 ResultPresenter.py -p results/ -g` to generate pdf files under `images`. Might overwrite existing files.
 
 ## File Structure
 - ./benchmarks: benchmarks evaluated with explorer

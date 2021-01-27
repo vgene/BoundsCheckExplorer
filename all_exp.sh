@@ -23,6 +23,6 @@ do
     rm -rf target
     $root_path/upperbound_exp.sh test_bc
     cd explore
-    python $root_path/GreedyRemove.py
+    python3 $root_path/GreedyRemove.py
     cp all_results.pkl $root_path/results/$dir.pkl
 done
