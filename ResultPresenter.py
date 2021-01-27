@@ -108,7 +108,7 @@ def getOneBenchmarkLayout(benchmark="assume_true"):
     fig = getOneBenchmarkFig(benchmark)
 
     if fig:
-        layout = [html.Div(children='Plot of' + benchmark),
+        layout = [html.Div(children='Plot of ' + benchmark),
                   dcc.Graph(
             id='bmark-graph',
             figure=fig)]
