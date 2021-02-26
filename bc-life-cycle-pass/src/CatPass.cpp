@@ -1,10 +1,14 @@
-#include "RemoveBoundsChecks.h"
+#include "MarkBCGEP.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Metadata.h"
 #include "llvm/PassSupport.h"
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
@@ -12,15 +16,18 @@
 #include "llvm/IR/PassManager.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/DebugInfoMetadata.h"
+#include <bits/stdint-uintn.h>
 #include <fstream>
 
 #include <set>
+#include <string>
 
 using namespace llvm;
 
+
 namespace {
 
-  struct RemoveBoundsChecks : public FunctionPass {
+  struct MarkBCGEP : public FunctionPass {
     static char ID; 
     
     static StringRef getFunctionName(CallBase *call) {
@@ -31,7 +38,41 @@ namespace {
             return StringRef("indirect call");
     }
 
-    RemoveBoundsChecks() : FunctionPass(ID) {}
+    static bool isBoundsCheck(CallBase *call) {
+      auto name = getFunctionName(call);
+      if (name.startswith("_ZN4core9panicking18panic_bounds_check")        
+          || name.startswith("_ZN4core5slice22slice_index_order_fail")
+          || name.startswith("_ZN4core5slice20slice_index_len_fail") ) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    // set the metadata for branches
+    static void setBcBrMetadata(LLVMContext &C, Instruction *inst, uint64_t uniqueID) {
+      Value* uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
+      Metadata *md = ValueAsMetadata::get(uniqueIDv);
+
+      MDNode* mdNode = MDNode::get(C, md);
+      char name[]="bcbrID";
+
+      inst->setMetadata(name, mdNode);
+    }
+
+    // set the metadata for branches
+    static void setGepMetadata(LLVMContext &C, Instruction *inst, uint64_t uniqueID) {
+      Value* uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
+      Metadata *md = ValueAsMetadata::get(uniqueIDv);
+
+      MDNode* mdNode = MDNode::get(C, md);
+      char name[]="GepID";
+
+      inst->setMetadata(name, mdNode);
+    }
+
+    MarkBCGEP() : FunctionPass(ID) {}
 
     // This function is invoked once at the initialization phase of the compiler
     // The LLVM IR of functions isn't ready at this point
@@ -58,17 +99,22 @@ namespace {
           return false;
       }
 
+      // for each bounds check block
+      // find the branch instruction, and mark it with an unique id
+      // also mark the GEP instruction that the bc protected with the same ID
+      LLVMContext &C = F.getContext();
+      uint64_t uniqueID = 0;
+
+
       unsigned long bc_num = 0;
-      typedef std::pair<Instruction*, BasicBlock*> edge;
-      std::vector<edge> toRemove;
+      // typedef std::pair<BasicBlock*, uint64_t> edge;
+      // std::vector<edge> toMark;
       for (BasicBlock &bb: F) {
         BasicBlock* succ;
         for (Instruction &I: bb) {
           if (CallBase* cs = dyn_cast<CallBase>(&I)) {
-            if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")
-                || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_order_fail")
-                || getFunctionName(cs).startswith("_ZN4core5slice20slice_index_len_fail")
-                ) {
+            if (isBoundsCheck(cs)) {
+              // print source code location
               auto &debugLoc = I.getDebugLoc();
               if (debugLoc) {
                 errs() << "  ";
@@ -78,15 +124,8 @@ namespace {
                 }
                 errs() << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")\n";
               }
+
               bc_num++;
-              // bad b/c we may be changing the semantics of the program
-              /*
-              if (InvokeInst* ii = dyn_cast<InvokeInst>(&I)) {
-                errs() << "panic_bounds_check INVOKED\n";
-              } else {
-                errs() << "panic_bounds_check CALLED\n";
-              }
-              */
               // get predecessor of the basic block
               // get the last branch inst of the predecessor
               // create a branch to the othe
@@ -96,25 +135,36 @@ namespace {
                 int numSucc = term->getNumSuccessors();
                 if (numSucc == 2) { // one is bb, one is the original next block
 
+                  setBcBrMetadata(C, term, uniqueID);
+                  /*
                   // for all the PHINode, remove the incoming edge
                   for (PHINode &PHI: bb.phis()) {
                     PHI.removeIncomingValue(pred, false); // don't delete phi if empty, will screw up the iterator
                   }
+                  */
 
                   if (term->getSuccessor(0) == &bb) {
                     succ = term->getSuccessor(1);
                   } else {
                     succ = term->getSuccessor(0);
                   }
-                  toRemove.push_back(edge(term, succ)); // log it in the vector
+
+                  // go to succ and mark the first GEPsucc
+                  for (Instruction &newI: *succ) {
+                    if (GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(&newI)) {
+                      setGepMetadata(C, gep, uniqueID);
+                      break;
+                    }
+                  }
+
                   // BranchInst::Create(succ, term);
                   // term->eraseFromParent();
                 } else if (numSucc == 1) { // may be leading to a landing pad, so iteratively go up until conditional branch to panic_bounds_check
                   errs() << "only one successor in the previous block\n";
                 } else {
                   // one should be the bounds check
-                  toRemove.push_back(edge(term, &bb));
-                  //errs() << "more than two successors in the previous block\n";
+                  // toRemove.push_back(edge(term, &bb));
+                  errs() << "more than two successors in the previous block\n";
                 }
               }
             }
@@ -122,6 +172,7 @@ namespace {
         }
       }
 
+      /*
       for (auto &i : toRemove){
         auto term = i.first;
         auto succ = i.second;
@@ -152,6 +203,7 @@ namespace {
         }
 
       }
+      */
       if (bc_num > 0) {
         errs() << "Found function in list: " << fn_name << '\n';
         errs() << "  Bounds check removed: " << bc_num << '\n';
@@ -163,27 +215,26 @@ namespace {
   };
 }
 
-PreservedAnalyses RemoveBoundsChecksPass::run(Function &F, FunctionAnalysisManager &AM) {
+PreservedAnalyses MarkBCGEPPass::run(Function &F, FunctionAnalysisManager &AM) {
   PreservedAnalyses PA;
   PA.preserve<BasicAA>();
   return PA;
 }
 
 // Next there is code to register your pass to "opt"
-char RemoveBoundsChecks::ID = 0;
-// INITIALIZE_PASS(RemoveBoundsChecks, "remove-bc", "Remove Bounds Checks", false, false)
-static RegisterPass<RemoveBoundsChecks> X("remove-bc", "Remove Bounds Checks"); // only registers for opt tool
+char MarkBCGEP::ID = 0;
+static RegisterPass<MarkBCGEP> X("mark-bc-gep", "Mark the GEP instructions protected by the bounds check"); // only registers for opt tool
 
-Pass *llvm::createRemoveBoundsChecksPass() { 
-        return new RemoveBoundsChecks();
+Pass *llvm::createMarkBCGEPPass() { 
+        return new MarkBCGEP();
 }
 
 // Next there is code to register your pass to "clang"
-/*static RemoveBoundsChecks * _PassMaker = NULL;
+/*static MarkBCGEP * _PassMaker = NULL;
 static RegisterStandardPasses _RegPass1(PassManagerBuilder::EP_OptimizerLast,
     [](const PassManagerBuilder&, legacy::PassManagerBase& PM) {
-        if(!_PassMaker){ PM.add(_PassMaker = new RemoveBoundsChecks()); }}); // ** for -Ox
+        if(!_PassMaker){ PM.add(_PassMaker = new MarkBCGEP()); }}); // ** for -Ox
 static RegisterStandardPasses _RegPass2(PassManagerBuilder::EP_EnabledOnOptLevel0,
     [](const PassManagerBuilder&, legacy::PassManagerBase& PM) {
-        if(!_PassMaker){ PM.add(_PassMaker = new RemoveBoundsChecks()); }}); // ** for -O0
+        if(!_PassMaker){ PM.add(_PassMaker = new MarkBCGEP()); }}); // ** for -O0
 */

@@ -11,11 +11,11 @@ namespace llvm {
 class Pass;
 class PassManagerBuilder;
 
-struct RemoveBoundsChecksPass : public PassInfoMixin<RemoveBoundsChecksPass> {
+struct MarkBCGEPPass : public PassInfoMixin<MarkBCGEPPass> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
-Pass *createRemoveBoundsChecksPass();
+Pass *createMarkBCGEPPass();
   
 }
 
