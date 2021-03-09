@@ -16,7 +16,7 @@
 #include "llvm/IR/PassManager.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/DebugInfoMetadata.h"
-#include <bits/stdint-uintn.h>
+#include <cstdint>
 #include <fstream>
 
 #include <set>
@@ -40,9 +40,9 @@ namespace {
 
     static bool isBoundsCheck(CallBase *call) {
       auto name = getFunctionName(call);
-      if (name.startswith("_ZN4core9panicking18panic_bounds_check")        
-          || name.startswith("_ZN4core5slice22slice_index_order_fail")
-          || name.startswith("_ZN4core5slice20slice_index_len_fail") ) {
+      if (name.startswith("_ZN4core9panicking18panic_bounds_check")) {
+         //  || name.startswith("_ZN4core5slice22slice_index_order_fail")
+         //  || name.startswith("_ZN4core5slice20slice_index_len_fail") ) {
         return true;
       }
       else {
@@ -114,16 +114,6 @@ namespace {
         for (Instruction &I: bb) {
           if (CallBase* cs = dyn_cast<CallBase>(&I)) {
             if (isBoundsCheck(cs)) {
-              // print source code location
-              auto &debugLoc = I.getDebugLoc();
-              if (debugLoc) {
-                errs() << "  ";
-                auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
-                if (scope) {
-                  errs() << scope->getFilename() << " ";
-                }
-                errs() << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")\n";
-              }
 
               bc_num++;
               // get predecessor of the basic block
@@ -150,13 +140,30 @@ namespace {
                   }
 
                   // go to succ and mark the first GEPsucc
+                  bool hasGep = false;
                   for (Instruction &newI: *succ) {
                     if (GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(&newI)) {
                       setGepMetadata(C, gep, uniqueID);
+                      hasGep = true;
                       break;
                     }
                   }
 
+                  if (!hasGep) {
+                    errs() << "No GEP for #" << uniqueID << " bc in function " << fn_name << '\n';
+                    // print source code location
+                    auto &debugLoc = I.getDebugLoc();
+                    if (debugLoc) {
+                      errs() << "  ";
+                      auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
+                      if (scope) {
+                        errs() << scope->getFilename() << " ";
+                      }
+                      errs() << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")\n";
+                    }
+                  }
+
+                  ++uniqueID;
                   // BranchInst::Create(succ, term);
                   // term->eraseFromParent();
                 } else if (numSucc == 1) { // may be leading to a landing pad, so iteratively go up until conditional branch to panic_bounds_check
@@ -204,10 +211,10 @@ namespace {
 
       }
       */
-      if (bc_num > 0) {
-        errs() << "Found function in list: " << fn_name << '\n';
-        errs() << "  Bounds check removed: " << bc_num << '\n';
-      }
+      // if (bc_num > 0) {
+      //   errs() << "Found function in list: " << fn_name << '\n';
+      //   errs() << "  Bounds check removed: " << bc_num << '\n';
+      // }
       return true;
     }
 
