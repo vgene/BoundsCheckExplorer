@@ -100,8 +100,6 @@ namespace {
       if (md == NULL)
         return false;
 
-      errs() << "Found MD\n";
-
       MDString *MDS = dyn_cast<MDString> (md->getOperand(0));
       if (!MDS)
         return false;

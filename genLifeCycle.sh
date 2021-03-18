@@ -42,4 +42,11 @@ genEdgeProf $MetaO3 $MetaO3Prof
 llvm-dis $MetaO0Prof.bc
 llvm-dis $MetaO3Prof.bc
 
+# Parsing the results
+echo "Parsing the results"
+opt -load $root_path/instr-cnt-dump-pass/build/install/lib/CAT.so $MetaO0Prof.bc -instr-cnt-dump --disable-output
+mv cnts.txt cnts-o0.txt
+opt -load $root_path/instr-cnt-dump-pass/build/install/lib/CAT.so $MetaO3Prof.bc -instr-cnt-dump --disable-output
+mv cnts.txt cnts-o3.txt
+
 
