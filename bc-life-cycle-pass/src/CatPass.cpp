@@ -51,22 +51,28 @@ namespace {
     }
 
     // set the metadata for branches
-    static void setBcBrMetadata(LLVMContext &C, Instruction *inst, uint64_t uniqueID) {
-      Value* uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
+    static void setBcBrMetadata(LLVMContext &C, Instruction *inst, std::string fn_name, uint64_t uniqueID) {
+      ConstantInt *uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
       Metadata *md = ValueAsMetadata::get(uniqueIDv);
+      MDString *fcnname = MDString::get(C, fn_name);
 
-      MDNode* mdNode = MDNode::get(C, md);
+      Metadata *values[] = { fcnname, md};
+
+      MDNode* mdNode = MDNode::get(C, values);
       char name[]="bcbrID";
 
       inst->setMetadata(name, mdNode);
     }
 
     // set the metadata for branches
-    static void setGepMetadata(LLVMContext &C, Instruction *inst, uint64_t uniqueID) {
-      Value* uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
+    static void setGepMetadata(LLVMContext &C, Instruction *inst, std::string fn_name, uint64_t uniqueID) {
+      ConstantInt *uniqueIDv = ConstantInt::get(Type::getInt32Ty(C), uniqueID);
       Metadata *md = ValueAsMetadata::get(uniqueIDv);
+      MDString *fcnname = MDString::get(C, fn_name);
 
-      MDNode* mdNode = MDNode::get(C, md);
+      Metadata *values[] = { fcnname, md};
+
+      MDNode* mdNode = MDNode::get(C, values);
       char name[]="GepID";
 
       inst->setMetadata(name, mdNode);
@@ -125,7 +131,7 @@ namespace {
                 int numSucc = term->getNumSuccessors();
                 if (numSucc == 2) { // one is bb, one is the original next block
 
-                  setBcBrMetadata(C, term, uniqueID);
+                  setBcBrMetadata(C, term, fn_name, uniqueID);
                   /*
                   // for all the PHINode, remove the incoming edge
                   for (PHINode &PHI: bb.phis()) {
@@ -143,7 +149,7 @@ namespace {
                   bool hasGep = false;
                   for (Instruction &newI: *succ) {
                     if (GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(&newI)) {
-                      setGepMetadata(C, gep, uniqueID);
+                      setGepMetadata(C, gep, fn_name, uniqueID);
                       hasGep = true;
                       break;
                     }
