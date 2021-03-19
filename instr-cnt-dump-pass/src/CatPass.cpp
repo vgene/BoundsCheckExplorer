@@ -29,16 +29,21 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <sstream>
 #include <vector>
 #include <map>
 
 using namespace llvm;
+
+static cl::opt<bool> DumpDbg("dump-dbg", cl::init(false),
+    cl::NotHidden, cl::desc("Dump Debug Mapping"));
 
 namespace {
 
   struct InstrCountDump: public ModulePass{
     static char ID; 
     typedef std::map<std::pair<std::string, uint32_t>, std::array<uint32_t, 4>> MapIDStat_t;
+    typedef std::map<std::pair<std::string, uint32_t>, std::string> MapIDDbg_t;
     
     static StringRef getFunctionName(CallBase *call) {
         Function *fun = call->getCalledFunction();
@@ -85,7 +90,7 @@ namespace {
       }
     }
 
-    bool registerCnt(Instruction &I, MapIDStat_t &m) {
+    bool registerCnt(Instruction &I, MapIDStat_t &m, MapIDDbg_t &dbg) {
       bool isGep = (dyn_cast<GetElementPtrInst>(&I) != NULL);
 
       MDNode *md; 
@@ -129,6 +134,18 @@ namespace {
         m[key][3] += instCnt;
       }
 
+      auto &debugLoc = I.getDebugLoc();
+      std::stringstream ss;
+      if (debugLoc) {
+        auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
+        if (scope) {
+          ss << scope->getFilename().str() << " ";
+        }
+        ss << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")";
+      }
+
+      dbg[key] = ss.str();
+                    
       return true;
     }
 
@@ -139,6 +156,7 @@ namespace {
 
       // map from <string, u32> to array<unsigned long, 4>
       MapIDStat_t map_id_stat;
+      MapIDDbg_t map_id_dbg;
 
       for (auto IF = M.begin(), E = M.end(); IF != E; ++IF) {
         Function &F = *IF;
@@ -149,7 +167,7 @@ namespace {
           for (Instruction &I: bb) {
             // check each instruction
             if (dyn_cast<BranchInst>(&I) || dyn_cast<GetElementPtrInst>(&I)) {
-              registerCnt(I, map_id_stat);
+              registerCnt(I, map_id_stat, map_id_dbg);
             }
           }
         }
@@ -158,16 +176,46 @@ namespace {
       // print the map into json
       std::ofstream file("cnts.txt");
       file << "{\n";
+
+      auto item_left = map_id_stat.size();
       for (auto &[k, v] : map_id_stat){
         auto &[str, id] = k;
         auto &[gep_st, gep_dyn, br_st, br_dyn] = v;
 
         file << "\"" << str << "-" << id << "\": ["
           << gep_st << ", " << gep_dyn << ", " << br_st
-          << ", " << br_dyn << "], \n";
+          << ", " << br_dyn << "]";
+
+        // handle the json syntax, no trailinng comma
+        if (--item_left != 0)
+          file << ", \n";
+        else
+          file << "\n";
       }
       file << "}";
       file.close();
+
+      if (DumpDbg) {
+        std::ofstream file("debug-map.txt");
+        file << "{\n";
+
+        auto item_left = map_id_dbg.size();
+        for (auto &[k, v] : map_id_dbg){
+          auto &[str, id] = k;
+          auto &dbg_str = v;
+
+          file << "\"" << str << "-" << id << "\": \"" 
+            << dbg_str << "\"";
+
+          // handle the json syntax, no trailinng comma
+          if (--item_left != 0)
+            file << ", \n";
+          else
+            file << "\n";
+        }
+        file << "}";
+        file.close();
+      }
 
       return false;
     }

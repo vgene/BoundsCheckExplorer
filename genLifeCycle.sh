@@ -31,22 +31,29 @@ genEdgeProf() {
     # Add Edge Prof 
     opt -pgo-instr-gen -instrprof $in.bc -o $in-prof.bc
     clang -O3 $in-prof.bc $rlib_path/*.rlib $rlib_path/*.rlib -fprofile-generate -lstdc++ -ldl -lpthread -lc -lm -o $in-prof.exe
-    LLVM_PROFILE_FILE=edge.profraw ./$in-prof.exe
+    if [ -z "$3" ]; then
+        LLVM_PROFILE_FILE=edge.profraw ./$in-prof.exe
+    else
+        LLVM_PROFILE_FILE=edge.profraw ./$in-prof.exe $3
+    fi
     llvm-profdata merge edge.profraw -output=edgeprof.out
     opt -block-freq -pgo-instr-use -pgo-test-profile-file=./edgeprof.out $in.bc -o $out.bc 
 }
 
-genEdgeProf $MetaO0 $MetaO0Prof
-genEdgeProf $MetaO3 $MetaO3Prof
+genEdgeProf $MetaO0 $MetaO0Prof $2
+genEdgeProf $MetaO3 $MetaO3Prof $2
 
 llvm-dis $MetaO0Prof.bc
 llvm-dis $MetaO3Prof.bc
 
 # Parsing the results
 echo "Parsing the results"
-opt -load $root_path/instr-cnt-dump-pass/build/install/lib/CAT.so $MetaO0Prof.bc -instr-cnt-dump --disable-output
-mv cnts.txt cnts-o0.txt
+opt -load $root_path/instr-cnt-dump-pass/build/install/lib/CAT.so $MetaO0Prof.bc -instr-cnt-dump -dump-dbg --disable-output
+mv cnts.txt cnts-o0.json
+mv debug-map.txt debug-map.json
 opt -load $root_path/instr-cnt-dump-pass/build/install/lib/CAT.so $MetaO3Prof.bc -instr-cnt-dump --disable-output
-mv cnts.txt cnts-o3.txt
+mv cnts.txt cnts-o3.json
+python $root_path/ParseCount.py
 
+echo "Finished! Results dumped in category.csv"
 
