@@ -5,7 +5,9 @@
 passes=( "outer-loop-prof-instr"
          "avoid-bench-inline"
          "remove-bc-pass"
-         "show-fn-names" )
+         "show-fn-names"
+         "instr-cnt-dump-pass"
+         "bc-life-cycle-pass")
 
 script_path=`realpath $0`
 root_path=`dirname $script_path`
