@@ -4,7 +4,7 @@
 #include "llvm/Analysis/Passes.h"
 
 #include "llvm/IR/CFG.h"
-#include "llvm/IR/CallSite.h"
+//#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DebugInfo.h"
@@ -20,7 +20,7 @@
 #include "llvm/IR/DebugInfoMetadata.h"
 
 #include "llvm/Pass.h"
-#include "llvm/PassSupport.h"
+//#include "llvm/PassSupport.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
@@ -111,7 +111,7 @@ namespace {
       FunctionCallee wrapper =  M->getOrInsertFunction(InvocName,
           Type::getVoidTy(M->getContext()), Type::getInt32Ty(M->getContext()));
 
-      Constant *InvocFn = cast<Constant>(wrapper.getCallee());
+      //Constant *InvocFn = cast<Constant>(wrapper.getCallee());
       //sot
       //Type::getVoidTy(M->getContext()), Type::getInt32Ty(M->getContext()), (Type *)0);
       std::vector<Value*> Args(1);
@@ -120,10 +120,10 @@ namespace {
       assert(preHeader && "Null preHeader -- Did you run loopsimplify?");
 
       if (!preHeader->empty()) {
-        CallInst::Create(InvocFn, Args, "", (preHeader->getTerminator()));
+        CallInst::Create(wrapper, Args, "", (preHeader->getTerminator()));
       }
       else {
-        CallInst::Create(InvocFn, Args, "", (preHeader));
+        CallInst::Create(wrapper, Args, "", (preHeader));
       }
 
       // insert loop end at beginning of exit blocks
@@ -131,7 +131,7 @@ namespace {
       FunctionCallee wrapper_end = M->getOrInsertFunction(LoopEndName,
           Type::getVoidTy(M->getContext()), Type::getInt32Ty(M->getContext()));
 
-      Constant *LoopEndFn= cast<Constant>(wrapper_end.getCallee());
+      //Constant *LoopEndFn= cast<Constant>(wrapper_end.getCallee());
       //sot
       //Type::getVoidTy(M->getContext()), Type::getInt32Ty(M->getContext()), (Type *)0);
 
@@ -150,7 +150,7 @@ namespace {
 
         //CallInst::Create(IterEndFn, "", ii);  // iter end placed before exit call
 
-        CallInst::Create(LoopEndFn, Args, "", &*ii);
+        CallInst::Create(wrapper_end, Args, "", &*ii);
         //CallInst::Create(LoopEndFn, "", ii);  // loop exiting
       }
     }
@@ -267,7 +267,7 @@ namespace {
           Type::getVoidTy(M.getContext()),
           Type::getInt32Ty(M.getContext()));
 
-      Constant *InitFn = cast<Constant>(wrapper_InitFn.getCallee());
+      //Constant *InitFn = cast<Constant>(wrapper_InitFn.getCallee());
 
       std::vector<Value*> Args(1);
       Args[0] = ConstantInt::get(Type::getInt32Ty(M.getContext()), numLoops, false);
@@ -285,7 +285,7 @@ namespace {
           /*Name=*/"prof_initor", &M);
 
       BasicBlock *initor_entry = BasicBlock::Create(M.getContext(), "entry", func_initor,0);
-      CallInst::Create(InitFn, Args, "", initor_entry);
+      CallInst::Create(wrapper_InitFn, Args, "", initor_entry);
       ReturnInst::Create(M.getContext(), initor_entry);
 
       // Function has been created, now add it to the global ctor list
