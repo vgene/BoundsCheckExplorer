@@ -1,10 +1,13 @@
 #include "RemoveBoundsChecks.h"
 //#include "llvm/PassSupport.h"
+#include "llvm/IR/Instruction.h"
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
@@ -126,6 +129,24 @@ namespace {
         auto term = i.first;
         auto succ = i.second;
         if (term->getNumSuccessors() == 2) {
+          BranchInst* br = dyn_cast<BranchInst>(term);
+          if (!br) {
+            errs() << "two destinations but not branch\n";
+            continue;
+          }
+
+          Value* condition;
+          if (term->getSuccessor(0) == succ) {
+            condition = br->getCondition();
+          } else {
+            condition = br->getCondition();
+            condition = BinaryOperator::CreateNot(condition, "", term);
+          }
+
+          // create assume
+          Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
+          CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
+
           BranchInst::Create(succ, term);
           term->eraseFromParent();
         }
@@ -143,6 +164,15 @@ namespace {
             }
             else {
               SwitchInst::CaseIt it = sw->findCaseValue(val);
+
+              Value* condition;
+              condition = sw->getCondition();
+              condition = CmpInst::Create(Instruction::ICmp, llvm::CmpInst::ICMP_NE, condition, val, "", term);
+
+              // create assume
+              Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
+              CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
+
               sw->removeCase(it);
             }
           }
