@@ -18,14 +18,16 @@
 #include <fstream>
 
 #include <set>
+#include <tuple>
+#include <optional>
 
 using namespace llvm;
 
 namespace {
 
   struct RemoveBoundsChecks : public FunctionPass {
-    static char ID; 
-    
+    static char ID;
+
     static StringRef getFunctionName(CallBase *call) {
         Function *fun = call->getCalledFunction();
         if (fun) // thanks @Anton Korobeynikov
@@ -40,6 +42,25 @@ namespace {
     // The LLVM IR of functions isn't ready at this point
     bool doInitialization (Module &M) override {
       return false;
+    }
+
+    typedef std::tuple<unsigned, unsigned, std::string> DebugLoc;
+    // parse from the debug info
+    std::optional<std::set<DebugLoc>> parseFromDebug(std::string filename) {
+      std::ifstream file(filename);
+
+      std::set<DebugLoc> debugLines;
+
+      // assuming the file format: line column filename on each line
+      if (!file.fail()) {
+        int line, column;
+        std::string srcFile;
+        while (file >> line >> column >> srcFile) {
+          debugLines.insert(std::make_tuple(line, column, srcFile));
+        }
+      }
+
+      return debugLines;
     }
 
     // This function is invoked once per function compiled
@@ -61,6 +82,16 @@ namespace {
           return false;
       }
 
+
+      bool onlyDebugLocs = false;
+      std::set<DebugLoc> debugLocs;
+      auto filename = "bc_loc.txt";
+      auto ret = parseFromDebug(filename);
+      if (ret.has_value()) {
+        debugLocs = *ret;
+        onlyDebugLocs = true;
+      }
+
       unsigned long bc_num = 0;
       typedef std::pair<Instruction*, BasicBlock*> edge;
       std::vector<edge> toRemove;
@@ -72,7 +103,26 @@ namespace {
                 || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_order_fail")
                 || getFunctionName(cs).startswith("_ZN4core5slice20slice_index_len_fail")
                 ) {
+
               auto &debugLoc = I.getDebugLoc();
+              if (onlyDebugLocs) {
+                if (!debugLoc)
+                  continue;
+
+                auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
+                if (!scope) {
+                  continue;
+                }
+
+                std::string bcFile = scope->getFilename().str();
+                unsigned line = debugLoc.getLine();
+                unsigned column = debugLoc.getCol();
+
+                auto tu = std::make_tuple(line, column, bcFile);
+                if (debugLocs.find(tu) == debugLocs.end())
+                  continue;
+              }
+
               if (debugLoc) {
                 errs() << "  ";
                 auto *scope = dyn_cast<DIScope>(debugLoc->getScope());
@@ -81,6 +131,8 @@ namespace {
                 }
                 errs() << "(" << debugLoc.getLine() << ", " << debugLoc.getCol() << ")\n";
               }
+
+
               bc_num++;
               // bad b/c we may be changing the semantics of the program
               /*
@@ -204,7 +256,7 @@ char RemoveBoundsChecks::ID = 0;
 // INITIALIZE_PASS(RemoveBoundsChecks, "remove-bc", "Remove Bounds Checks", false, false)
 static RegisterPass<RemoveBoundsChecks> X("remove-bc", "Remove Bounds Checks"); // only registers for opt tool
 
-Pass *llvm::createRemoveBoundsChecksPass() { 
+Pass *llvm::createRemoveBoundsChecksPass() {
         return new RemoveBoundsChecks();
 }
 
