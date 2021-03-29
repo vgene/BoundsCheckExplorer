@@ -59,6 +59,9 @@ namespace {
           debugLines.insert(std::make_tuple(line, column, srcFile));
         }
       }
+      else {
+	return std::nullopt;
+      }
 
       return debugLines;
     }
