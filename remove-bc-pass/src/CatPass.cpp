@@ -56,7 +56,8 @@ namespace {
         int line, column;
         std::string srcFile;
         while (file >> line >> column >> srcFile) {
-          debugLines.insert(std::make_tuple(line, column, srcFile));
+          //debugLines.insert(std::make_tuple(line, column, srcFile));
+          debugLines.insert(std::make_tuple(line, 0, srcFile));
         }
       }
       else {
@@ -121,7 +122,8 @@ namespace {
                 unsigned line = debugLoc.getLine();
                 unsigned column = debugLoc.getCol();
 
-                auto tu = std::make_tuple(line, column, bcFile);
+                //auto tu = std::make_tuple(line, column, bcFile);
+                auto tu = std::make_tuple(line, 0, bcFile);
                 if (debugLocs.find(tu) == debugLocs.end())
                   continue;
               }
