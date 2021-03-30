@@ -1,6 +1,5 @@
 #![feature(prelude_import)]
-
-// To handle weird 
+// To handle weird
 #![feature(libstd_sys_internals)]
 #![feature(fmt_internals)]
 #![feature(core_panic)]
@@ -16,7 +15,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #[prelude_import]
-use ::core::prelude::v1::*;
+use core::prelude::v1::*;
 extern crate alloc as std_alloc;
 //#[macro_use]
 //extern crate core;
@@ -31,10 +30,12 @@ use std::io::{self, Error, ErrorKind, Read, Write};
 extern crate alloc_stdlib;
 #[macro_use]
 extern crate alloc_no_stdlib as alloc;
-pub use alloc::{AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator, bzero};
-use core::ops;
+pub use alloc::{
+    bzero, AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator,
+};
 #[cfg(feature = "std")]
 pub use alloc_stdlib::StandardAlloc;
+use core::ops;
 #[macro_use]
 mod memory {
     #![allow(unused_macros)]
@@ -8668,11 +8669,11 @@ mod huffman {
     #![allow(non_snake_case)]
     #![allow(non_upper_case_globals)]
     mod tests {}
-    use :: core;
     use alloc;
     use alloc::Allocator;
     use alloc::SliceWrapper;
     use alloc::SliceWrapperMut;
+    use core;
     use core::default::Default;
     pub const BROTLI_HUFFMAN_MAX_CODE_LENGTH: usize = 15;
     pub const BROTLI_HUFFMAN_MAX_CODE_LENGTHS_SIZE: usize = 704;
@@ -9166,14 +9167,14 @@ mod state {
     #![allow(non_snake_case)]
     #![allow(non_upper_case_globals)]
     use alloc;
-    use core;
-    use context::kContextLookup;
-    use bit_reader::{BrotliBitReader, BrotliGetAvailableBits, BrotliInitBitReader};
-    use huffman::{
-        BROTLI_HUFFMAN_MAX_CODE_LENGTH, BROTLI_HUFFMAN_MAX_CODE_LENGTHS_SIZE,
-        BROTLI_HUFFMAN_MAX_TABLE_SIZE, HuffmanCode, HuffmanTreeGroup,
-    };
     use alloc::SliceWrapper;
+    use bit_reader::{BrotliBitReader, BrotliGetAvailableBits, BrotliInitBitReader};
+    use context::kContextLookup;
+    use core;
+    use huffman::{
+        HuffmanCode, HuffmanTreeGroup, BROTLI_HUFFMAN_MAX_CODE_LENGTH,
+        BROTLI_HUFFMAN_MAX_CODE_LENGTHS_SIZE, BROTLI_HUFFMAN_MAX_TABLE_SIZE,
+    };
     #[allow(dead_code)]
     pub enum WhichTreeGroup {
         LITERAL,
@@ -16991,27 +16992,29 @@ mod decode {
     #![allow(non_snake_case)]
     #![allow(non_upper_case_globals)]
     #![allow(unused_macros)]
-    use core;
     use super::alloc;
-    pub use alloc::{AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator};
-    use core::mem;
     use super::bit_reader;
     use super::huffman;
-    use super::state;
     use super::prefix;
-    use super::transform::{TransformDictionaryWord, kNumTransforms};
-    use state::{
-        BlockTypeAndLengthState, BrotliRunningContextMapState, BrotliRunningDecodeUint8State,
-        BrotliRunningHuffmanState, BrotliRunningMetablockHeaderState,
-        BrotliRunningReadBlockLengthState, BrotliRunningState, BrotliRunningTreeGroupState,
-        BrotliRunningUncompressedState, kLiteralContextBits, BrotliDecoderErrorCode,
+    use super::state;
+    use super::transform::{kNumTransforms, TransformDictionaryWord};
+    pub use alloc::{
+        AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator,
     };
-    use context::{kContextLookup};
-    use ::dictionary::{
+    use context::kContextLookup;
+    use core;
+    use core::mem;
+    use dictionary::{
         kBrotliDictionary, kBrotliDictionaryOffsetsByLength, kBrotliDictionarySizeBitsByLength,
         kBrotliMaxDictionaryWordLength, kBrotliMinDictionaryWordLength,
     };
     pub use huffman::{HuffmanCode, HuffmanTreeGroup};
+    use state::{
+        kLiteralContextBits, BlockTypeAndLengthState, BrotliDecoderErrorCode,
+        BrotliRunningContextMapState, BrotliRunningDecodeUint8State, BrotliRunningHuffmanState,
+        BrotliRunningMetablockHeaderState, BrotliRunningReadBlockLengthState, BrotliRunningState,
+        BrotliRunningTreeGroupState, BrotliRunningUncompressedState,
+    };
     #[repr(C)]
     #[no_mangle]
     pub enum BrotliResult {
@@ -20361,17 +20364,19 @@ pub mod io_wrappers {
     }
 }
 pub mod reader {
-    #[cfg(feature = "std")]
-    use std::io::{self, Error, ErrorKind, Read};
+    pub use super::decode::{BrotliDecompressStream, BrotliResult};
+    pub use alloc::{
+        AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator,
+    };
     #[cfg(feature = "std")]
     pub use alloc_stdlib::StandardAlloc;
     pub use huffman::{HuffmanCode, HuffmanTreeGroup};
-    pub use state::BrotliState;
     pub use io_wrappers::{CustomRead, CustomWrite};
     #[cfg(feature = "std")]
     pub use io_wrappers::{IntoIoReader, IoReaderWrapper, IoWriterWrapper};
-    pub use super::decode::{BrotliDecompressStream, BrotliResult};
-    pub use alloc::{AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator};
+    pub use state::BrotliState;
+    #[cfg(feature = "std")]
+    use std::io::{self, Error, ErrorKind, Read};
     #[cfg(feature = "std")]
     pub struct DecompressorCustomAlloc<
         R: Read,
@@ -20685,18 +20690,20 @@ pub mod reader {
     }
 }
 pub mod writer {
-    use core;
-    #[cfg(feature = "std")]
-    use std::io::{self, Error, ErrorKind, Write};
+    pub use super::decode::{BrotliDecompressStream, BrotliResult};
+    pub use alloc::{
+        AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator,
+    };
     #[cfg(feature = "std")]
     pub use alloc_stdlib::StandardAlloc;
+    use core;
     pub use huffman::{HuffmanCode, HuffmanTreeGroup};
-    pub use state::BrotliState;
-    pub use io_wrappers::{CustomWrite};
+    pub use io_wrappers::CustomWrite;
     #[cfg(feature = "std")]
     pub use io_wrappers::{IntoIoWriter, IoWriterWrapper};
-    pub use super::decode::{BrotliDecompressStream, BrotliResult};
-    pub use alloc::{AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator};
+    pub use state::BrotliState;
+    #[cfg(feature = "std")]
+    use std::io::{self, Error, ErrorKind, Write};
     #[cfg(feature = "std")]
     pub struct DecompressorWriterCustomAlloc<
         W: Write,
@@ -21072,16 +21079,16 @@ pub use huffman::{HuffmanCode, HuffmanTreeGroup};
 pub use state::BrotliState;
 pub mod ffi {
     #![cfg(not(feature = "safe"))]
-    #[no_mangle]
-    #[cfg(feature = "std")]
-    use std::{thread, panic, io, boxed, any, string};
+    use core;
+    use core::ops;
+    use core::slice;
     #[cfg(feature = "std")]
     use std::io::Write;
-    use core;
-    use core::slice;
-    use core::ops;
+    #[no_mangle]
+    #[cfg(feature = "std")]
+    use std::{any, boxed, io, panic, string, thread};
     pub mod interface {
-        use :: BrotliResult;
+        use BrotliResult;
         #[allow(non_camel_case_types)]
         #[repr(u8)]
         pub enum c_void {
@@ -21152,15 +21159,15 @@ pub mod ffi {
         unsafe impl Send for CAllocator {}
     }
     pub mod alloc_util {
+        use super::interface::{c_void, CAllocator};
+        use alloc;
         use core;
         #[cfg(feature = "std")]
         use std;
-        use :: alloc;
-        use super::interface::{c_void, CAllocator};
-        #[cfg(feature = "std")]
-        use std::vec::Vec;
         #[cfg(feature = "std")]
         pub use std::boxed::Box;
+        #[cfg(feature = "std")]
+        use std::vec::Vec;
         #[cfg(feature = "std")]
         pub struct MemoryBlock<Ty: Sized + Default>(Box<[Ty]>);
         #[cfg(feature = "std")]
@@ -21280,16 +21287,18 @@ pub mod ffi {
         }
     }
     use self::alloc_util::SubclassableAllocator;
-    use alloc::{Allocator, SliceWrapper, SliceWrapperMut, StackAllocator, AllocatedStackMemory, bzero};
     use self::interface::{
-        CAllocator, c_void, BrotliDecoderParameter, BrotliDecoderResult, brotli_alloc_func,
-        brotli_free_func,
+        brotli_alloc_func, brotli_free_func, c_void, BrotliDecoderParameter, BrotliDecoderResult,
+        CAllocator,
     };
-    use :: BrotliResult;
-    use :: BrotliDecoderReturnInfo;
-    use :: brotli_decode;
-    pub use :: HuffmanCode;
     pub use super::state::{BrotliDecoderErrorCode, BrotliState};
+    use alloc::{
+        bzero, AllocatedStackMemory, Allocator, SliceWrapper, SliceWrapperMut, StackAllocator,
+    };
+    use brotli_decode;
+    use BrotliDecoderReturnInfo;
+    use BrotliResult;
+    pub use HuffmanCode;
     pub unsafe fn slice_from_raw_parts_or_nil<'a, T>(data: *const T, len: usize) -> &'a [T] {
         if len == 0 {
             return &[];
@@ -21686,19 +21695,19 @@ pub mod ffi {
         0x1000f00
     }
 }
-pub use reader::{DecompressorCustomIo};
-#[cfg(feature = "std")]
-pub use reader::{Decompressor};
-pub use writer::{DecompressorWriterCustomIo};
-#[cfg(feature = "std")]
-pub use writer::{DecompressorWriter};
+pub use decode::{
+    BrotliDecoderHasMoreOutput, BrotliDecoderIsFinished, BrotliDecoderTakeOutput,
+    BrotliDecompressStream, BrotliResult,
+};
 pub use io_wrappers::{CustomRead, CustomWrite};
 #[cfg(feature = "std")]
-pub use io_wrappers::{IntoIoReader, IoReaderWrapper, IntoIoWriter, IoWriterWrapper};
-pub use decode::{
-    BrotliDecompressStream, BrotliResult, BrotliDecoderHasMoreOutput, BrotliDecoderIsFinished,
-    BrotliDecoderTakeOutput,
-};
+pub use io_wrappers::{IntoIoReader, IntoIoWriter, IoReaderWrapper, IoWriterWrapper};
+#[cfg(feature = "std")]
+pub use reader::Decompressor;
+pub use reader::DecompressorCustomIo;
+#[cfg(feature = "std")]
+pub use writer::DecompressorWriter;
+pub use writer::DecompressorWriterCustomIo;
 #[cfg(feature = "std")]
 pub fn BrotliDecompress<InputType, OutputType>(
     r: &mut InputType,
