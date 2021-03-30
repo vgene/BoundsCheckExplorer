@@ -28,9 +28,9 @@ if logfile:
 else: 
     logs = None
 
-mutregex_in = r'([a-zA-Z_][a-zA-Z0-9_\.]*)\.get_unchecked_mut[(]([a-zA-Z_][a-zA-Z0-9_\.]*)[)]'
+mutregex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_mut[(]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
 mutregex_out = r'(&mut \1[\2])'
-regex_in = r'([a-zA-Z_][a-zA-Z0-9_\.]*)\.get_unchecked[(]([a-zA-Z_][a-zA-Z0-9_\.]*)[)]'
+regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked[(]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
 regex_out = r'(&\1[\2])'
 left_brack = r'\['
 
