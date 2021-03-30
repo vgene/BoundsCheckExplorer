@@ -190,17 +190,17 @@ namespace {
             continue;
           }
 
-          Value* condition;
-          if (term->getSuccessor(0) == succ) {
-            condition = br->getCondition();
-          } else {
-            condition = br->getCondition();
-            condition = BinaryOperator::CreateNot(condition, "", term);
-          }
+          //Value* condition;
+          //if (term->getSuccessor(0) == succ) {
+            //condition = br->getCondition();
+          //} else {
+            //condition = br->getCondition();
+            //condition = BinaryOperator::CreateNot(condition, "", term);
+          //}
 
-          // create assume
-          Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
-          CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
+          //// create assume
+          //Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
+          //CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
 
           BranchInst::Create(succ, term);
           term->eraseFromParent();
@@ -220,13 +220,13 @@ namespace {
             else {
               SwitchInst::CaseIt it = sw->findCaseValue(val);
 
-              Value* condition;
-              condition = sw->getCondition();
-              condition = CmpInst::Create(Instruction::ICmp, llvm::CmpInst::ICMP_NE, condition, val, "", term);
+              //Value* condition;
+              //condition = sw->getCondition();
+              //condition = CmpInst::Create(Instruction::ICmp, llvm::CmpInst::ICMP_NE, condition, val, "", term);
 
-              // create assume
-              Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
-              CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
+              //// create assume
+              //Function *FnAssume = Intrinsic::getDeclaration(F.getParent(), Intrinsic::assume);
+              //CallInst *call = CallInst::Create(FnAssume, {condition}, "", term);
 
               sw->removeCase(it);
             }
