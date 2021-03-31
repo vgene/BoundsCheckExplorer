@@ -101,23 +101,11 @@ mod memory {
         (($ slice : expr) [$ index : expr]) =>
         (unsafe { * $ slice . get_unchecked($ index) }) ;
         (($ slice : expr) [$ start : expr ; $ end : expr]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts(($ slice) . as_ptr() . offset($ start as isize), $
-                            end - $ start)
-         } ;) ; (($ slice : expr) [$ start : expr ;]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts(($ slice) . as_ptr() . offset($ start as isize), $
-                            slice . len() - $ start)
-         } ;) ; (($ slice : expr) [; $ end : expr]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts(($ slice) . as_ptr(), $ slice . len())
-         } ;) ;
+        (unsafe { $ slice . get_unchecked_raw($ start .. $ end) } ;) ;
+        (($ slice : expr) [$ start : expr ;]) =>
+        (unsafe { $ slice . get_unchecked_raw($ start ..) } ;) ;
+        (($ slice : expr) [; $ end : expr]) =>
+        (unsafe { $ slice . get_unchecked_raw(.. $ end) } ;) ;
     }
     macro_rules! fast_slice {
         (($ slice : expr) [$ index : expr]) =>
@@ -140,24 +128,11 @@ mod memory {
         (($ slice : expr) [$ index : expr]) =>
         (* unsafe { $ slice . get_unchecked_mut($ index) }) ;
         (($ slice : expr) [$ start : expr ; $ end : expr]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts_mut(($ slice) . as_mut_ptr() .
-                                offset($ start as isize), $ end - $ start)
-         } ;) ; (($ slice : expr) [$ start : expr ;]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts_mut(($ slice) . as_mut_ptr() .
-                                offset($ start as isize), $ slice . len() - $
-                                start)
-         } ;) ; (($ slice : expr) [; $ end : expr]) =>
-        (unsafe
-         {
-             :: core :: slice ::
-             from_raw_parts_mut(($ slice) . as_mut_ptr(), $ slice . len())
-         } ;) ;
+        (unsafe { $ slice . get_unchecked_raw_mut($ start .. $ end) } ;) ;
+        (($ slice : expr) [$ start : expr ;]) =>
+        (unsafe { $ slice . get_unchecked_raw_mut($ start ..) } ;) ;
+        (($ slice : expr) [; $ end : expr]) =>
+        (unsafe { $ slice . get_unchecked_raw_mut(.. $ end) } ;) ;
     }
     #[cfg(feature = "unsafe")]
     macro_rules! fast_uninitialized {
@@ -11561,12 +11536,9 @@ mod bit_reader {
         let next_in: usize = next_in_u32 as usize;
         let mut four_byte: [u8; 4] = [0; 4];
         four_byte.clone_from_slice(unsafe {
-                                       ::core::slice::from_raw_parts((input).as_ptr().offset(next_in
-                                                                                                 as
-                                                                                                 isize),
-                                                                     next_in +
-                                                                         4 -
-                                                                         next_in)
+                                       input.get_unchecked_raw(next_in..next_in
+                                                                            +
+                                                                            4)
                                    });
         (four_byte[0] as u32) | ((four_byte[1] as u32) << 8) |
             ((four_byte[2] as u32) << 16) | ((four_byte[3] as u32) << 24)
@@ -11576,13 +11548,9 @@ mod bit_reader {
         let next_in: usize = next_in_u32 as usize;
         let mut eight_byte: [u8; 8] = [0; 8];
         eight_byte.clone_from_slice(unsafe {
-                                        ::core::slice::from_raw_parts((input).as_ptr().offset(next_in
-                                                                                                  as
-                                                                                                  isize),
-                                                                      next_in
-                                                                          + 8
-                                                                          -
-                                                                          next_in)
+                                        input.get_unchecked_raw(next_in..next_in
+                                                                             +
+                                                                             8)
                                     });
         (eight_byte[0] as u64) | ((eight_byte[1] as u64) << 8) |
             ((eight_byte[2] as u64) << 16) | ((eight_byte[3] as u64) << 24) |
@@ -11979,26 +11947,14 @@ mod huffman {
             let start: usize =
                 unsafe { *self.htrees.slice().get_unchecked(index as usize) }
                     as usize;
-            unsafe {
-                ::core::slice::from_raw_parts_mut((self.codes.slice_mut()).as_mut_ptr().offset(start
-                                                                                                   as
-                                                                                                   isize),
-                                                  self.codes.slice_mut().len()
-                                                      - start)
-            }
+            unsafe { self.codes.slice_mut().get_unchecked_raw_mut(start..) }
         }
         #[allow(dead_code)]
         pub fn get_tree(&self, index: u32) -> &[HuffmanCode] {
             let start: usize =
                 unsafe { *self.htrees.slice().get_unchecked(index as usize) }
                     as usize;
-            unsafe {
-                ::core::slice::from_raw_parts((self.codes.slice()).as_ptr().offset(start
-                                                                                       as
-                                                                                       isize),
-                                              self.codes.slice().len() -
-                                                  start)
-            }
+            unsafe { self.codes.slice().get_unchecked_raw(start..) }
         }
         pub fn reset(self: &mut Self, alloc_u32: &mut AllocU32,
                      alloc_hc: &mut AllocHC) {
@@ -12013,13 +11969,8 @@ mod huffman {
             for htree in self.htrees.slice() {
                 ret[index] =
                     unsafe {
-                        ::core::slice::from_raw_parts(((&self.codes).slice()).as_ptr().offset(*htree
-                                                                                                  as
-                                                                                                  usize
-                                                                                                  as
-                                                                                                  isize),
-                                                      (&self.codes).slice().len()
-                                                          - *htree as usize)
+                        (&self.codes).slice().get_unchecked_raw(*htree as
+                                                                    usize..)
                     };
                 index += 1;
             }
@@ -12072,7 +12023,7 @@ mod huffman {
              (BROTLI_REVERSE_BITS_MAX as u32 - 1 +
                   BROTLI_REVERSE_BITS_BASE as u32));
     fn BrotliReverseBits(num: u32) -> u32 {
-        (unsafe { *kReverseBits.get_unchecked(num as usize) } as u32)
+        unsafe { *kReverseBits.get_unchecked(num as usize) as u32}
     }
     fn ReplicateValue(table: &mut [HuffmanCode], offset: u32, step: i32,
                       mut end: i32, code: HuffmanCode) {
@@ -12144,10 +12095,7 @@ mod huffman {
                                 unsafe { *sorted.get_unchecked(0) } as u16,};
             for val in
                 unsafe {
-                    ::core::slice::from_raw_parts_mut((table).as_mut_ptr().offset(0
-                                                                                      as
-                                                                                      isize),
-                                                      table_size as usize - 0)
+                    table.get_unchecked_raw_mut(0..table_size as usize)
                 }.iter_mut() {
                 *val = code;
             }
@@ -18568,18 +18516,10 @@ pub mod transform {
         {
             let prefix =
                 &unsafe {
-                     ::core::slice::from_raw_parts((kPrefixSuffix).as_ptr().offset((*kTransforms.get_unchecked(transform
-                                                                                                                   as
-                                                                                                                   usize)).prefix_id
-                                                                                       as
-                                                                                       usize
-                                                                                       as
-                                                                                       isize),
-                                                   kPrefixSuffix.len() -
-                                                       (*kTransforms.get_unchecked(transform
-                                                                                       as
-                                                                                       usize)).prefix_id
-                                                           as usize)
+                     kPrefixSuffix.get_unchecked_raw((*kTransforms.get_unchecked(transform
+                                                                                     as
+                                                                                     usize)).prefix_id
+                                                         as usize..)
                  };
             while (unsafe { *prefix.get_unchecked(idx as usize) } != 0) {
                 *unsafe { dst.get_unchecked_mut(idx as usize) } =
@@ -18598,15 +18538,7 @@ pub mod transform {
                 } else { t as i32 - (kOmitFirst1 - 1) as i32 };
             let mut i: i32 = 0;
             if (skip > len) { skip = len; }
-            word =
-                unsafe {
-                    ::core::slice::from_raw_parts((word).as_ptr().offset(skip
-                                                                             as
-                                                                             usize
-                                                                             as
-                                                                             isize),
-                                                  word.len() - skip as usize)
-                };
+            word = unsafe { word.get_unchecked_raw(skip as usize..) };
             len -= skip;
             if (t <= kOmitLast9) { len -= t as i32; }
             while (i < len) {
@@ -18617,16 +18549,7 @@ pub mod transform {
             }
             let uppercase =
                 &mut unsafe {
-                         ::core::slice::from_raw_parts_mut((dst).as_mut_ptr().offset((idx
-                                                                                          -
-                                                                                          len)
-                                                                                         as
-                                                                                         usize
-                                                                                         as
-                                                                                         isize),
-                                                           dst.len() -
-                                                               (idx - len) as
-                                                                   usize)
+                         dst.get_unchecked_raw_mut((idx - len) as usize..)
                      };
             if (t == kUppercaseFirst) {
                 ToUpperCase(uppercase);
@@ -18635,12 +18558,7 @@ pub mod transform {
                 while (len > 0) {
                     let step =
                         ToUpperCase(&mut unsafe {
-                                             ::core::slice::from_raw_parts_mut((uppercase).as_mut_ptr().offset(uppercase_offset
-                                                                                                                   as
-                                                                                                                   isize),
-                                                                               uppercase.len()
-                                                                                   -
-                                                                                   uppercase_offset)
+                                             uppercase.get_unchecked_raw_mut(uppercase_offset..)
                                          });
                     uppercase_offset += step as usize;
                     len -= step;
@@ -18650,18 +18568,10 @@ pub mod transform {
         {
             let suffix =
                 &unsafe {
-                     ::core::slice::from_raw_parts((kPrefixSuffix).as_ptr().offset((*kTransforms.get_unchecked(transform
-                                                                                                                   as
-                                                                                                                   usize)).suffix_id
-                                                                                       as
-                                                                                       usize
-                                                                                       as
-                                                                                       isize),
-                                                   kPrefixSuffix.len() -
-                                                       (*kTransforms.get_unchecked(transform
-                                                                                       as
-                                                                                       usize)).suffix_id
-                                                           as usize)
+                     kPrefixSuffix.get_unchecked_raw((*kTransforms.get_unchecked(transform
+                                                                                     as
+                                                                                     usize)).suffix_id
+                                                         as usize..)
                  };
             let mut i: usize = 0;
             while (unsafe { *suffix.get_unchecked(i as usize) } != 0) {
@@ -19229,14 +19139,13 @@ mod decode {
         let num_symbols = s.symbol;
         for symbols_lists_item in
             unsafe {
-                ::core::slice::from_raw_parts_mut((s.symbols_lists_array).as_mut_ptr().offset(s.sub_loop_counter
-                                                                                                  as
-                                                                                                  usize
-                                                                                                  as
-                                                                                                  isize),
-                                                  num_symbols as usize + 1 -
-                                                      s.sub_loop_counter as
-                                                          usize)
+                s.symbols_lists_array.get_unchecked_raw_mut(s.sub_loop_counter
+                                                                as
+                                                                usize..num_symbols
+                                                                           as
+                                                                           usize
+                                                                           +
+                                                                           1)
             }.iter_mut() {
             let mut v: u32 = 0;
             if !bit_reader::BrotliSafeReadBits(&mut s.br, max_bits, &mut v,
@@ -19257,22 +19166,16 @@ mod decode {
         i = 0;
         for symbols_list_item in
             unsafe {
-                ::core::slice::from_raw_parts((s.symbols_lists_array).as_ptr().offset(0
-                                                                                          as
-                                                                                          isize),
-                                              num_symbols as usize - 0)
+                s.symbols_lists_array.get_unchecked_raw(0..num_symbols as
+                                                               usize)
             }.iter() {
             for other_item in
                 unsafe {
-                    ::core::slice::from_raw_parts((s.symbols_lists_array).as_ptr().offset((i
-                                                                                               as
-                                                                                               usize
-                                                                                               +
-                                                                                               1)
-                                                                                              as
-                                                                                              isize),
-                                                  num_symbols as usize + 1 -
-                                                      (i as usize + 1))
+                    s.symbols_lists_array.get_unchecked_raw(i as usize +
+                                                                1..num_symbols
+                                                                       as
+                                                                       usize +
+                                                                       1)
                 }.iter() {
                 if (*symbols_list_item == *other_item) {
                     return BrotliDecoderErrorCode::BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME;
@@ -19517,13 +19420,8 @@ mod decode {
         let mut i = s.sub_loop_counter;
         for code_length_code_order in
             unsafe {
-                ::core::slice::from_raw_parts((kCodeLengthCodeOrder).as_ptr().offset(s.sub_loop_counter
-                                                                                         as
-                                                                                         usize
-                                                                                         as
-                                                                                         isize),
-                                              CODE_LENGTH_CODES -
-                                                  s.sub_loop_counter as usize)
+                kCodeLengthCodeOrder.get_unchecked_raw(s.sub_loop_counter as
+                                                           usize..CODE_LENGTH_CODES)
             }.iter() {
             let code_len_idx = *code_length_code_order;
             let mut ix: u32 = 0;
@@ -19610,11 +19508,7 @@ mod decode {
                                 as usize + 1;
                         for code_length_histo in
                             unsafe {
-                                ::core::slice::from_raw_parts_mut((s.code_length_histo).as_mut_ptr().offset(0
-                                                                                                                as
-                                                                                                                isize),
-                                                                  max_code_len_len
-                                                                      - 0)
+                                s.code_length_histo.get_unchecked_raw_mut(0..max_code_len_len)
                             }.iter_mut() {
                             *code_length_histo = 0;
                         }
@@ -19699,11 +19593,7 @@ mod decode {
                         huffman::BROTLI_HUFFMAN_MAX_CODE_LENGTH as usize + 1;
                     for (i, next_symbol_mut) in
                         unsafe {
-                            ::core::slice::from_raw_parts_mut((s.next_symbol).as_mut_ptr().offset(0
-                                                                                                      as
-                                                                                                      isize),
-                                                              max_code_length
-                                                                  - 0)
+                            s.next_symbol.get_unchecked_raw_mut(0..max_code_length)
                         }.iter_mut().enumerate() {
                         *next_symbol_mut =
                             i as i32 - (max_code_length as i32);
@@ -19750,12 +19640,7 @@ mod decode {
                     }
                     table_size =
                         huffman::BrotliBuildHuffmanTable(unsafe {
-                                                             ::core::slice::from_raw_parts_mut((table).as_mut_ptr().offset(offset
-                                                                                                                               as
-                                                                                                                               isize),
-                                                                                               table.len()
-                                                                                                   -
-                                                                                                   offset)
+                                                             table.get_unchecked_raw_mut(offset..)
                                                          },
                                                          HUFFMAN_TABLE_BITS as
                                                              i32,
@@ -19868,21 +19753,14 @@ mod decode {
         let mut upper_bound: u32 = *mtf_upper_bound;
         for (i, item) in
             unsafe {
-                ::core::slice::from_raw_parts_mut((mtf).as_mut_ptr().offset(0
-                                                                                as
-                                                                                isize),
-                                                  (upper_bound as usize +
-                                                       1usize) - 0)
+                mtf.get_unchecked_raw_mut(0..(upper_bound as usize + 1usize))
             }.iter_mut().enumerate() {
             *item = i as u8;
         }
         upper_bound = 0;
         for v_i in
             unsafe {
-                ::core::slice::from_raw_parts_mut((v).as_mut_ptr().offset(0usize
-                                                                              as
-                                                                              isize),
-                                                  (v_len as usize) - 0usize)
+                v.get_unchecked_raw_mut(0usize..(v_len as usize))
             }.iter_mut() {
             let mut index = (*v_i) as i32;
             let value = unsafe { *mtf.get_unchecked(index as usize) };
@@ -19975,14 +19853,10 @@ mod decode {
         let mut result = BrotliDecoderErrorCode::BROTLI_DECODER_SUCCESS;
         for htree_iter in
             unsafe {
-                ::core::slice::from_raw_parts_mut((htrees.slice_mut()).as_mut_ptr().offset(s.htree_index
-                                                                                               as
-                                                                                               usize
-                                                                                               as
-                                                                                               isize),
-                                                  (group_num_htrees as usize)
-                                                      -
-                                                      s.htree_index as usize)
+                htrees.slice_mut().get_unchecked_raw_mut(s.htree_index as
+                                                             usize..(group_num_htrees
+                                                                         as
+                                                                         usize))
             }.iter_mut() {
             let mut table_size: u32 = 0;
             result =
@@ -20343,31 +20217,16 @@ mod decode {
         if (!safe) {
             block_type =
                 ReadSymbol(unsafe {
-                               ::core::slice::from_raw_parts((s.block_type_trees.slice()).as_ptr().offset(tree_offset
-                                                                                                              as
-                                                                                                              isize),
-                                                             s.block_type_trees.slice().len()
-                                                                 -
-                                                                 tree_offset)
+                               s.block_type_trees.slice().get_unchecked_raw(tree_offset..)
                            }, br, input);
             *unsafe { s.block_length.get_unchecked_mut(tree_type as usize) } =
                 ReadBlockLength(unsafe {
-                                    ::core::slice::from_raw_parts((s.block_len_trees.slice()).as_ptr().offset(tree_offset
-                                                                                                                  as
-                                                                                                                  isize),
-                                                                  s.block_len_trees.slice().len()
-                                                                      -
-                                                                      tree_offset)
+                                    s.block_len_trees.slice().get_unchecked_raw(tree_offset..)
                                 }, br, input);
         } else {
             let memento = bit_reader::BrotliBitReaderSaveState(br);
             if (!SafeReadSymbol(unsafe {
-                                    ::core::slice::from_raw_parts((s.block_type_trees.slice()).as_ptr().offset(tree_offset
-                                                                                                                   as
-                                                                                                                   isize),
-                                                                  s.block_type_trees.slice().len()
-                                                                      -
-                                                                      tree_offset)
+                                    s.block_type_trees.slice().get_unchecked_raw(tree_offset..)
                                 }, br, &mut block_type, input)) {
                 return false;
             }
@@ -20376,12 +20235,7 @@ mod decode {
                 SafeReadBlockLengthIndex(&s.substate_read_block_length,
                                          s.block_length_index,
                                          unsafe {
-                                             ::core::slice::from_raw_parts((s.block_len_trees.slice()).as_ptr().offset(tree_offset
-                                                                                                                           as
-                                                                                                                           isize),
-                                                                           s.block_len_trees.slice().len()
-                                                                               -
-                                                                               tree_offset)
+                                             s.block_len_trees.slice().get_unchecked_raw(tree_offset..)
                                          }, br, input);
             if !SafeReadBlockLengthFromIndex(s, br, &mut block_length_out,
                                              index_ret, input) {
@@ -20395,16 +20249,8 @@ mod decode {
         }
         let ringbuffer: &mut [u32] =
             &mut unsafe {
-                     ::core::slice::from_raw_parts_mut((s.block_type_rb).as_mut_ptr().offset((tree_type
-                                                                                                  as
-                                                                                                  usize
-                                                                                                  *
-                                                                                                  2)
-                                                                                                 as
-                                                                                                 isize),
-                                                       s.block_type_rb.len() -
-                                                           tree_type as usize
-                                                               * 2)
+                     s.block_type_rb.get_unchecked_raw_mut(tree_type as usize
+                                                               * 2..)
                  };
         if (block_type == 1) {
             block_type = unsafe { *ringbuffer.get_unchecked(1) } + 1;
@@ -20648,21 +20494,17 @@ mod decode {
             (s.partial_pos_out & s.ringbuffer_mask as usize) as usize;
         let start =
             unsafe {
-                ::core::slice::from_raw_parts((s.ringbuffer.slice()).as_ptr().offset(start_index
-                                                                                         as
-                                                                                         isize),
-                                              start_index +
-                                                  num_written as usize -
-                                                  start_index)
+                s.ringbuffer.slice().get_unchecked_raw(start_index..start_index
+                                                                        +
+                                                                        num_written
+                                                                            as
+                                                                            usize)
             };
         if let Some(output) = opt_output {
             unsafe {
-                ::core::slice::from_raw_parts_mut((output).as_mut_ptr().offset(*output_offset
-                                                                                   as
-                                                                                   isize),
-                                                  *output_offset +
-                                                      num_written as usize -
-                                                      *output_offset)
+                output.get_unchecked_raw_mut(*output_offset..*output_offset +
+                                                                 num_written
+                                                                     as usize)
             }.clone_from_slice(start);
         }
         *output_offset += num_written;
@@ -20733,16 +20575,9 @@ mod decode {
                         nbytes = s.ringbuffer_size - s.pos;
                     }
                     bit_reader::BrotliCopyBytes(unsafe {
-                                                    ::core::slice::from_raw_parts_mut((s.ringbuffer.slice_mut()).as_mut_ptr().offset(s.pos
-                                                                                                                                         as
-                                                                                                                                         usize
-                                                                                                                                         as
-                                                                                                                                         isize),
-                                                                                      s.ringbuffer.slice_mut().len()
-                                                                                          -
-                                                                                          s.pos
-                                                                                              as
-                                                                                              usize)
+                                                    s.ringbuffer.slice_mut().get_unchecked_raw_mut(s.pos
+                                                                                                       as
+                                                                                                       usize..)
                                                 }, &mut s.br, nbytes as u32,
                                                 input);
                     s.pos += nbytes;
@@ -20802,28 +20637,21 @@ mod decode {
                 if s.custom_dict_size as usize > max_dict_size {
                     let cd =
                         unsafe {
-                            ::core::slice::from_raw_parts((s.custom_dict.slice()).as_ptr().offset((s.custom_dict_size
-                                                                                                       as
-                                                                                                       usize
-                                                                                                       -
-                                                                                                       max_dict_size)
-                                                                                                      as
-                                                                                                      isize),
-                                                          s.custom_dict_size
-                                                              as usize -
-                                                              (s.custom_dict_size
-                                                                   as usize -
-                                                                   max_dict_size))
+                            s.custom_dict.slice().get_unchecked_raw((s.custom_dict_size
+                                                                         as
+                                                                         usize
+                                                                         -
+                                                                         max_dict_size)..s.custom_dict_size
+                                                                                             as
+                                                                                             usize)
                         };
                     s.custom_dict_size = max_dict_size as i32;
                     cd
                 } else {
                     unsafe {
-                        ::core::slice::from_raw_parts((s.custom_dict.slice()).as_ptr().offset(0
-                                                                                                  as
-                                                                                                  isize),
-                                                      s.custom_dict_size as
-                                                          usize - 0)
+                        s.custom_dict.slice().get_unchecked_raw(0..s.custom_dict_size
+                                                                       as
+                                                                       usize)
                     }
                 };
             if (is_last != 0) {
@@ -20856,13 +20684,11 @@ mod decode {
                 let offset =
                     ((-s.custom_dict_size) & s.ringbuffer_mask) as usize;
                 unsafe {
-                    ::core::slice::from_raw_parts_mut((s.ringbuffer.slice_mut()).as_mut_ptr().offset(offset
-                                                                                                         as
-                                                                                                         isize),
-                                                      offset +
-                                                          s.custom_dict_size
-                                                              as usize -
-                                                          offset)
+                    s.ringbuffer.slice_mut().get_unchecked_raw_mut(offset..offset
+                                                                               +
+                                                                               s.custom_dict_size
+                                                                                   as
+                                                                                   usize)
                 }.clone_from_slice(custom_dict);
             }
         }
@@ -20884,13 +20710,10 @@ mod decode {
         let mut i: i32 = s.loop_counter;
         for context_mode_iter in
             unsafe {
-                ::core::slice::from_raw_parts_mut((s.context_modes.slice_mut()).as_mut_ptr().offset(i
-                                                                                                        as
-                                                                                                        usize
-                                                                                                        as
-                                                                                                        isize),
-                                                  (s.block_type_length_state.num_block_types[0]
-                                                       as usize) - i as usize)
+                s.context_modes.slice_mut().get_unchecked_raw_mut(i as
+                                                                      usize..(s.block_type_length_state.num_block_types[0]
+                                                                                  as
+                                                                                  usize))
             }.iter_mut() {
             let mut bits: u32 = 0;
             if (!bit_reader::BrotliSafeReadBits(&mut s.br, 2, &mut bits,
@@ -21112,29 +20935,16 @@ mod decode {
         let off_src = u32off_src as usize;
         let mut local_array: [u8; 16] = [0; 16];
         local_array.clone_from_slice(unsafe {
-                                         ::core::slice::from_raw_parts((data).as_ptr().offset(off_src
-                                                                                                  as
-                                                                                                  usize
-                                                                                                  as
-                                                                                                  isize),
-                                                                       off_src
-                                                                           as
-                                                                           usize
-                                                                           +
-                                                                           16
-                                                                           -
-                                                                           off_src
+                                         data.get_unchecked_raw(off_src as
+                                                                    usize..off_src
                                                                                as
-                                                                               usize)
+                                                                               usize
+                                                                               +
+                                                                               16)
                                      });
         unsafe {
-            ::core::slice::from_raw_parts_mut((data).as_mut_ptr().offset(off_dst
-                                                                             as
-                                                                             usize
-                                                                             as
-                                                                             isize),
-                                              off_dst as usize + 16 -
-                                                  off_dst as usize)
+            data.get_unchecked_raw_mut(off_dst as
+                                           usize..off_dst as usize + 16)
         }.clone_from_slice(&local_array);
     }
     fn memcpy_within_slice(data: &mut [u8], off_dst: usize, off_src: usize,
@@ -21142,31 +20952,15 @@ mod decode {
         if off_dst > off_src {
             let (src, dst) = data.split_at_mut(off_dst);
             let src_slice =
-                unsafe {
-                    ::core::slice::from_raw_parts((src).as_ptr().offset(off_src
-                                                                            as
-                                                                            isize),
-                                                  off_src + size - off_src)
-                };
+                unsafe { src.get_unchecked_raw(off_src..off_src + size) };
             unsafe {
-                ::core::slice::from_raw_parts_mut((dst).as_mut_ptr().offset(0
-                                                                                as
-                                                                                isize),
-                                                  size - 0)
+                dst.get_unchecked_raw_mut(0..size)
             }.clone_from_slice(src_slice);
         } else {
             let (dst, src) = data.split_at_mut(off_src);
-            let src_slice =
-                unsafe {
-                    ::core::slice::from_raw_parts((src).as_ptr().offset(0 as
-                                                                            isize),
-                                                  size - 0)
-                };
+            let src_slice = unsafe { src.get_unchecked_raw(0..size) };
             unsafe {
-                ::core::slice::from_raw_parts_mut((dst).as_mut_ptr().offset(off_dst
-                                                                                as
-                                                                                isize),
-                                                  off_dst + size - off_dst)
+                dst.get_unchecked_raw_mut(off_dst..off_dst + size)
             }.clone_from_slice(src_slice);
         }
     }
@@ -21618,51 +21412,30 @@ mod decode {
                                     let mut len = i;
                                     let word =
                                         unsafe {
-                                            ::core::slice::from_raw_parts((kBrotliDictionary).as_ptr().offset(offset
-                                                                                                                  as
-                                                                                                                  usize
-                                                                                                                  as
-                                                                                                                  isize),
-                                                                          (offset
-                                                                               +
-                                                                               len)
-                                                                              as
-                                                                              usize
-                                                                              -
-                                                                              offset
-                                                                                  as
-                                                                                  usize)
+                                            kBrotliDictionary.get_unchecked_raw(offset
+                                                                                    as
+                                                                                    usize..(offset
+                                                                                                +
+                                                                                                len)
+                                                                                               as
+                                                                                               usize)
                                         };
                                     if (transform_idx == 0) {
                                         unsafe {
-                                            ::core::slice::from_raw_parts_mut((s.ringbuffer.slice_mut()).as_mut_ptr().offset(pos
-                                                                                                                                 as
-                                                                                                                                 usize
-                                                                                                                                 as
-                                                                                                                                 isize),
-                                                                              ((pos
-                                                                                    +
-                                                                                    len)
-                                                                                   as
-                                                                                   usize)
-                                                                                  -
-                                                                                  pos
-                                                                                      as
-                                                                                      usize)
+                                            s.ringbuffer.slice_mut().get_unchecked_raw_mut(pos
+                                                                                               as
+                                                                                               usize..((pos
+                                                                                                            +
+                                                                                                            len)
+                                                                                                           as
+                                                                                                           usize))
                                         }.clone_from_slice(word);
                                     } else {
                                         len =
                                             TransformDictionaryWord(unsafe {
-                                                                        ::core::slice::from_raw_parts_mut((s.ringbuffer.slice_mut()).as_mut_ptr().offset(pos
-                                                                                                                                                             as
-                                                                                                                                                             usize
-                                                                                                                                                             as
-                                                                                                                                                             isize),
-                                                                                                          s.ringbuffer.slice_mut().len()
-                                                                                                              -
-                                                                                                              pos
-                                                                                                                  as
-                                                                                                                  usize)
+                                                                        s.ringbuffer.slice_mut().get_unchecked_raw_mut(pos
+                                                                                                                           as
+                                                                                                                           usize..)
                                                                     }, word,
                                                                     len,
                                                                     transform_idx);
@@ -21925,44 +21698,25 @@ mod decode {
                                *available_in);
             if copy_len > 0 {
                 unsafe {
-                    ::core::slice::from_raw_parts_mut((saved_buffer).as_mut_ptr().offset(s.buffer_length
-                                                                                             as
-                                                                                             usize
-                                                                                             as
-                                                                                             isize),
-                                                      (s.buffer_length as
-                                                           usize + copy_len) -
-                                                          s.buffer_length as
-                                                              usize)
+                    saved_buffer.get_unchecked_raw_mut(s.buffer_length as
+                                                           usize..(s.buffer_length
+                                                                       as
+                                                                       usize +
+                                                                       copy_len))
                 }.clone_from_slice(unsafe {
-                                       ::core::slice::from_raw_parts((xinput).as_ptr().offset(*input_offset
-                                                                                                  as
-                                                                                                  isize),
-                                                                     copy_len
-                                                                         +
-                                                                         *input_offset
-                                                                         -
-                                                                         *input_offset)
+                                       xinput.get_unchecked_raw(*input_offset..copy_len
+                                                                                   +
+                                                                                   *input_offset)
                                    });
                 unsafe {
-                    ::core::slice::from_raw_parts_mut((s.buffer).as_mut_ptr().offset(s.buffer_length
-                                                                                         as
-                                                                                         usize
-                                                                                         as
-                                                                                         isize),
-                                                      (s.buffer_length as
-                                                           usize + copy_len) -
-                                                          s.buffer_length as
-                                                              usize)
+                    s.buffer.get_unchecked_raw_mut(s.buffer_length as
+                                                       usize..(s.buffer_length
+                                                                   as usize +
+                                                                   copy_len))
                 }.clone_from_slice(unsafe {
-                                       ::core::slice::from_raw_parts((xinput).as_ptr().offset(*input_offset
-                                                                                                  as
-                                                                                                  isize),
-                                                                     copy_len
-                                                                         +
-                                                                         *input_offset
-                                                                         -
-                                                                         *input_offset)
+                                       xinput.get_unchecked_raw(*input_offset..copy_len
+                                                                                   +
+                                                                                   *input_offset)
                                    });
             }
             local_input = &saved_buffer[..];
@@ -22329,16 +22083,9 @@ mod decode {
                             SafeReadBlockLengthIndex(&s.block_type_length_state.substate_read_block_length,
                                                      s.block_type_length_state.block_length_index,
                                                      unsafe {
-                                                         ::core::slice::from_raw_parts((s.block_type_length_state.block_len_trees.slice()).as_ptr().offset(tree_offset
-                                                                                                                                                               as
-                                                                                                                                                               usize
-                                                                                                                                                               as
-                                                                                                                                                               isize),
-                                                                                       s.block_type_length_state.block_len_trees.slice().len()
-                                                                                           -
-                                                                                           tree_offset
-                                                                                               as
-                                                                                               usize)
+                                                         s.block_type_length_state.block_len_trees.slice().get_unchecked_raw(tree_offset
+                                                                                                                                 as
+                                                                                                                                 usize..)
                                                      }, &mut s.br,
                                                      local_input);
                         if !SafeReadBlockLengthFromIndex(&mut s.block_type_length_state,
