@@ -109,12 +109,12 @@ def secondRoundExp(cargo_root, old_fname, new_fname, impact_tuple, arg=None):
     time_list = []
 
     for idx, line_num in enumerate(sorted_line_nums):
-        print("Exp", idx)
         exp_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx), "exp.exe")
         time_exp = runExpWithName(exp_name, arg, test_time=5)
         if time_exp is None:
             exit()
 
+        print("Exp", idx, ":", time_exp)
         cur_lines.append(line_num)
         time_list.append(time_exp)
         lines_list.append(cur_lines.copy())
@@ -147,6 +147,19 @@ if __name__ == "__main__":
     line_nums = getUnsafeLines(old_fname)
     print("Running Corvair on ", len(line_nums), " bounds checks")
 
+    # all safe baseline
+    genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
+    exp_name = os.path.join(cargo_root, "baseline", "exp-safe/exp.exe")
+    safe_time = runExpWithName(exp_name, arg, test_time=5)
+    print("Safe baseline:", safe_time)
+
+    # all unsafe baseline
+    genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
+    exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
+    unsafe_time = runExpWithName(exp_name, arg, test_time=5)
+    print("Unsafe baseline:", safe_time)
+
+    # start the experiment
     impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
 
     print("Top 10 Impact")
@@ -160,7 +173,8 @@ if __name__ == "__main__":
         print(idx + 1, ": ", final_tuple[idx][1])
         print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
-    results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple}
+    results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple,
+            "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     os.chdir(cargo_root)
     with open("final_results.pkl", "wb") as fd:
         pickle.dump(results, fd)
