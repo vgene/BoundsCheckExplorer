@@ -22081,7 +22081,7 @@ mod decode {
                                                   kNumInsertAndCopyCodes,
                                                   kNumInsertAndCopyCodes,
                                                   unsafe {
-                                                      *s.block_type_length_state.num_block_types.get_unchecked(1)
+                                                      *(&s.block_type_length_state.num_block_types[1])
                                                   } as u16);
                         s.distance_hgroup.init(&mut s.alloc_u32,
                                                &mut s.alloc_hc,

@@ -35,7 +35,8 @@ def genSourceExpNB(cargo_root, explore_name, old_fname, new_fname, exp_num, line
 
     os.chdir(dir_name)
 
-    shutil.copyfile(os.path.join(cargo_root, new_fname), os.path.join(dir_name, "lib.rs"))
+    os.makedirs("./src")
+    shutil.copyfile(os.path.join(cargo_root, new_fname), os.path.join(dir_name, "src/lib.rs"))
     # dump the unsafe lines
     with open("unsafe_lines.txt", "w") as fd:
         fd.writelines([str(num) + "\n" for num in line_nums])
@@ -81,12 +82,12 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None):
 
     time_list = []
     for idx, line_num in enumerate(all_line_nums):
-        print("Exp", idx)
         exp_name = os.path.join(cargo_root, "explore-src-r1", "exp-" + str(idx), "exp.exe")
         time_exp = runExpWithName(exp_name, arg, test_time=5)
         if time_exp is None:
             exit()
 
+        print("Exp", idx, ":", time_exp)
         time_list.append(time_exp)
 
     impact_tuple = list(zip(all_line_nums, time_list))
