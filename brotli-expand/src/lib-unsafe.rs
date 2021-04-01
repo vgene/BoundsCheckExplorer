@@ -12071,13 +12071,15 @@ mod huffman {
                 symbol -= 1;
                 let index =
                     unsafe {
-                        *offset.get_unchecked(*code_lengths.get_unchecked(symbol
+                        *offset.get_unchecked(
+                            *code_lengths.get_unchecked(symbol
                                                                               as
                                                                               usize)
                                                   as usize)
                     };
                 *unsafe {
-                     offset.get_unchecked_mut(*code_lengths.get_unchecked(symbol
+                     offset.get_unchecked_mut(
+                         *code_lengths.get_unchecked(symbol
                                                                               as
                                                                               usize)
                                                   as usize)

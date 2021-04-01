@@ -8,4 +8,5 @@ root_path=`dirname $script_path`
 
 rlib_path=`rustc --print target-libdir`
 
-clang -O3 $1 $rlib_path/*.rlib $rlib_path/*.rlib $root_path/outer-loop-prof-runtime/libOuterLoopProfRT.a -lstdc++ -ldl -lpthread -lc -lm -o exp.exe -mllvm -inline-threshold=275
+clang -O3 $1 $rlib_path/*.rlib $rlib_path/*.rlib -lstdc++ -ldl -lpthread -lc -lm -o exp.exe -mllvm -inline-threshold=275
+#clang -O3 $1 $rlib_path/*.rlib $rlib_path/*.rlib $root_path/outer-loop-prof-runtime/libOuterLoopProfRT.a -lstdc++ -ldl -lpthread -lc -lm -o exp.exe -mllvm -inline-threshold=275

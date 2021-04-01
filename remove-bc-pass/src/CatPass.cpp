@@ -106,6 +106,7 @@ namespace {
             if (getFunctionName(cs).startswith("_ZN4core9panicking18panic_bounds_check")
                 || getFunctionName(cs).startswith("_ZN4core5slice22slice_index_order_fail")
                 || getFunctionName(cs).startswith("_ZN4core5slice20slice_index_len_fail")
+                || getFunctionName(cs).startswith("_ZN4core5slice24slice_end_index_len_fail")
                 ) {
 
               auto &debugLoc = I.getDebugLoc();
