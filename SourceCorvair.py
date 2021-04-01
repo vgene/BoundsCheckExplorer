@@ -5,6 +5,7 @@ import subprocess
 import pickle
 import time
 import shutil
+import argparse
 from regexify import convertFile
 from GreedyRemove import runExpWithName
 
@@ -34,7 +35,7 @@ def genSourceExpNB(cargo_root, explore_name, old_fname, new_fname, exp_num, line
 
     os.chdir(dir_name)
 
-    shutil.copyfile(os.path.join(cargo_root, new_fname), dir_name)
+    shutil.copyfile(os.path.join(cargo_root, new_fname), os.path.join(dir_name, "lib.rs"))
     # dump the unsafe lines
     with open("unsafe_lines.txt", "w") as fd:
         fd.writelines([str(num) + "\n" for num in line_nums])
@@ -121,16 +122,28 @@ def secondRoundExp(cargo_root, old_fname, new_fname, impact_tuple, arg=None):
 
     return final_tuple
 
+
+def argParse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cargo-root", "-r",
+            metavar="path",
+            type=str,
+            help="root path of the cargo directory")
+    parser.add_argument("--arg", "-a",
+            type=str,
+            nargs="?",
+            help="argument for the exp binary")
+    args = parser.parse_args()
+    return args.cargo_root, args.arg
+
 if __name__ == "__main__":
     old_fname = "src/lib-unsafe.rs"
     new_fname = "src/lib.rs"
-    cargo_root = "/u/ziyangx/bounds-check/BoundsCheckExplorer/brotli-expand"
-    arg = "/u/ziyangx/bounds-check/BoundsCheckExplorer/brotli-exp/silesia-5.brotli"
+    cargo_root, arg = argParse()
 
     # get all lines with unsafe
     os.chdir(cargo_root)
     line_nums = getUnsafeLines(old_fname)
-    line_nums = line_nums[:15] 
     print("Running Corvair on ", len(line_nums), " bounds checks")
 
     impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
