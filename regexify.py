@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Convert get_unchecked(_mut), and from_raw_parts(_mut) to safe version
 import re
 import os
 import subprocess
@@ -61,6 +62,12 @@ def convertFile(fname):
     mutregex_out = r'(&mut \1[' #\2])'
     regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     regex_out = r'(&\1[' #\2])'
+    
+    # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
+    raw_mutregex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_mutregex_out = r'(&mut \1[' #\2])'
+    raw_regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_regex_out = r'(&\1[' #\2])'
 
     with open(fname, 'r') as fd:
         old_block = fd.read()
@@ -70,12 +77,23 @@ def convertFile(fname):
         print("Conversion failed in file %s" % fname)
         exit()
 
-    new_block, bcs_immut = convertBlock(block, regex_in, regex_out)
-    if new_block == None or bcs_immut == None:
+    block, bcs_immut = convertBlock(block, regex_in, regex_out)
+    if block == None or bcs_immut == None:
         print("Conversion failed in file %s" % fname)
         exit()
 
-    bcs = bcs_mut + bcs_immut
+    block, bcs_raw_mut = convertBlock(block, raw_mutregex_in, raw_mutregex_out)
+    if block == None or bcs_raw_mut == None:
+        print("Conversion failed in file %s" % fname)
+        exit()
+
+    block, bcs_raw_immut = convertBlock(block, raw_regex_in, raw_regex_out)
+    if block == None or bcs_raw_immut == None:
+        print("Conversion failed in file %s" % fname)
+        exit()
+
+    new_block = block
+    bcs = bcs_mut + bcs_immut + bcs_raw_mut + bcs_raw_immut 
 
     with open(fname, 'w') as fd:
         fd.write(new_block)
