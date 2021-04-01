@@ -21,8 +21,9 @@ from os import path
 from pprint import pprint
 from collections import defaultdict
 
-BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
-                  "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
+# BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
+#                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
+BENCHMARK_LIST = ["brotli-expand"]
 class ResultProvider:
 
     def __init__(self, path):
@@ -42,7 +43,21 @@ class ResultProvider:
 
         self._results = results
 
+    def getSourceCorvairPairs(self, benchmark):
+        fns = [0]
+        speedups = [1.0]
+        time_original = self._results[benchmark]['safe_baseline']
+
+        for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
+            fns.append(idx + 1)
+            speedups.append((time_original / item[1] - 1) *100)
+
+        return fns, speedups
+
     def getPhase2Pairs(self, benchmark):
+        if benchmark == "brotli-expand":
+            return self.getSourceCorvairPairs(benchmark)
+
         fns = []
         speedups = []
 

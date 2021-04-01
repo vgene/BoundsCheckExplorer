@@ -25,17 +25,17 @@ def getUnsafeLines(fname):
 def genSourceExpNB(cargo_root, explore_name, old_fname, new_fname, exp_num, line_nums):
     os.chdir(cargo_root) # go to cargo_root
 
-    # convert and save to new file
-    convertFile(old_fname, new_fname, line_nums)
-
     # compile to original.bc
     dir_name = os.path.join(cargo_root, explore_name, "exp-" + str(exp_num))
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
+    # convert and save to new file
+    convertFile(old_fname, new_fname, line_nums)
+
     os.chdir(dir_name)
 
-    os.makedirs("./src")
+    os.makedirs("./src", exist_ok=True)
     shutil.copyfile(os.path.join(cargo_root, new_fname), os.path.join(dir_name, "src/lib.rs"))
     # dump the unsafe lines
     with open("unsafe_lines.txt", "w") as fd:
@@ -157,7 +157,8 @@ if __name__ == "__main__":
     genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
     exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
     unsafe_time = runExpWithName(exp_name, arg, test_time=5)
-    print("Unsafe baseline:", safe_time)
+    print("Unsafe baseline:", unsafe_time)
+    exit()
 
     # start the experiment
     impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
