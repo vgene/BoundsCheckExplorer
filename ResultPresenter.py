@@ -309,10 +309,10 @@ def genFigs():
 
     print("Generating comparison")
     fig = getComparisonFig(BENCHMARK_LIST, False, False)
-    fig.update_layout(showlegend=False, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=False, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
+    fig.update_layout(showlegend=True, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
     fig.write_image("images/comparison.pdf")
 
 
