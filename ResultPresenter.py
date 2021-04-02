@@ -308,7 +308,7 @@ def genFigs():
         fig.write_image("images/" + filename  + ".pdf")
 
     print("Generating comparison")
-    fig = getComparisonFig(BENCHMARK_LIST, False, False)
+    fig = getComparisonFig(BENCHMARK_LIST, True, False)
     fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
