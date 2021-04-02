@@ -171,7 +171,7 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
     fig = go.Figure({
         'data': scatter_list,
         'layout': {
-                    'legend': {'orientation': 'h', 'x': -0.05, 'y': 2.5},
+                    'legend': {'orientation': 'h', 'x': -0.05, 'y': 1.1},
                     'yaxis': {
                         'zeroline': True,
                         'zerolinewidth': 1,
