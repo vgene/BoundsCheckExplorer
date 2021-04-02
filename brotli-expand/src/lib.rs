@@ -18448,7 +18448,7 @@ pub mod transform {
             let mut i: usize = 0;
             while (unsafe { *suffix.get_unchecked(i as usize) } != 0) {
                 *unsafe { dst.get_unchecked_mut(idx as usize) } =
-                    unsafe { *suffix.get_unchecked(i) };
+                    unsafe { *(&suffix[i]) };
                 idx += 1;
                 i += 1;
             }

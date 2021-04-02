@@ -9,6 +9,7 @@ import argparse
 from regexify import convertFile
 from GreedyRemove import runExpWithName
 
+CLANG_ARGS=""
 
 def getUnsafeLines(fname):
     line_nums = []
@@ -41,7 +42,7 @@ def genSourceExpNB(cargo_root, explore_name, old_fname, new_fname, exp_num, line
     with open("unsafe_lines.txt", "w") as fd:
         fd.writelines([str(num) + "\n" for num in line_nums])
 
-    p = subprocess.Popen(["../../../oneGenFromSource.sh", "test_bc"]) #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    p = subprocess.Popen(["../../../oneGenFromSource.sh", "test_bc", CLANG_ARGS]) #, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(0.2)
     return p
 
@@ -132,15 +133,29 @@ def argParse():
             help="root path of the cargo directory")
     parser.add_argument("--arg", "-a",
             type=str,
-            nargs="?",
             help="argument for the exp binary")
+    parser.add_argument("--output", "-o",
+            type=str,
+            default="final_results",
+            help="output pickle name")
+    parser.add_argument("--clang-arg", "-c",
+            type=str,
+            help="additional clang args")
+    parser.add_argument("--test-times", "-t",
+            metavar="path",
+            type=int,
+            default=5,
+            help="times to run the experiment")
     args = parser.parse_args()
-    return args.cargo_root, args.arg
+    return args.cargo_root, args.arg, args.output, args.clang_arg, args.test_times
 
 if __name__ == "__main__":
     old_fname = "src/lib-unsafe.rs"
     new_fname = "src/lib.rs"
-    cargo_root, arg = argParse()
+    cargo_root, arg, pickle_name, clang_arg, test_times = argParse()
+
+    if clang_arg is not None:
+        CLANG_ARGS = clang_arg
 
     # get all lines with unsafe
     os.chdir(cargo_root)
@@ -150,15 +165,14 @@ if __name__ == "__main__":
     # all safe baseline
     genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
     exp_name = os.path.join(cargo_root, "baseline", "exp-safe/exp.exe")
-    safe_time = runExpWithName(exp_name, arg, test_time=5)
+    safe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Safe baseline:", safe_time)
 
     # all unsafe baseline
     genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
     exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
-    unsafe_time = runExpWithName(exp_name, arg, test_time=5)
+    unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Unsafe baseline:", unsafe_time)
-    exit()
 
     # start the experiment
     impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
@@ -177,6 +191,10 @@ if __name__ == "__main__":
     results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple,
             "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     os.chdir(cargo_root)
-    with open("final_results.pkl", "wb") as fd:
+
+    if not pickle_name.endswith("pkl"):
+        pickle_name += ".pkl"
+
+    with open(pickle_name, "wb") as fd:
         pickle.dump(results, fd)
 
