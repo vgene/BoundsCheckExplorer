@@ -100,9 +100,7 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None):
 
 
 # Get the impact of combined bounds check
-def secondRoundExp(cargo_root, old_fname, new_fname, impact_tuple, arg=None):
-    sorted_line_nums = [x[0] for x in impact_tuple]
-
+def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None):
     genAllSecondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums)
 
     cur_lines = []
@@ -141,21 +139,29 @@ def argParse():
     parser.add_argument("--clang-arg", "-c",
             type=str,
             help="additional clang args")
+    parser.add_argument("--p2-src", "-s",
+            type=str,
+            help="the pkl file with impact tuple, and only execute phase 2")
     parser.add_argument("--test-times", "-t",
             metavar="path",
             type=int,
             default=5,
             help="times to run the experiment")
     args = parser.parse_args()
-    return args.cargo_root, args.arg, args.output, args.clang_arg, args.test_times
+    return args.cargo_root, args.arg, args.output, args.clang_arg, args.p2_src, args.test_times
 
 if __name__ == "__main__":
     old_fname = "src/lib-unsafe.rs"
     new_fname = "src/lib.rs"
-    cargo_root, arg, pickle_name, clang_arg, test_times = argParse()
+    cargo_root, arg, pickle_name, clang_arg, p2_src, test_times = argParse()
 
     if clang_arg is not None:
         CLANG_ARGS = clang_arg
+
+    impact_obj = {}
+    if p2_src is not None:
+        with open(p2_src, 'rb') as fd:
+            impact_obj = pickle.load(fd)
 
     # get all lines with unsafe
     os.chdir(cargo_root)
@@ -181,14 +187,24 @@ if __name__ == "__main__":
     unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Unsafe baseline:", unsafe_time)
 
-    # start the experiment
-    impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
+    # do P1, other wise the impact tuple is loaded from the pickle file
+    if p2_src is None:
+        # start the experiment
+        impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
 
-    print("Top 10 Impact")
-    for idx in range(min(10, len(impact_tuple))):
-        print("Line ", impact_tuple[idx][0], ": ", impact_tuple[idx][1])
+        print("Top 10 Impact")
+        for idx in range(min(10, len(impact_tuple))):
+            print("Line ", impact_tuple[idx][0], ": ", impact_tuple[idx][1])
+    else:
+        try:
+            impact_tuple = impact_obj['impact_tuple']
+        except Exception as e:
+            print("Cannot load the impact tuple")
+            print(e)
+            exit()
 
-    final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, impact_tuple, arg)
+    sorted_line_nums = [x[0] for x in impact_tuple]
+    final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg)
 
     print("Top 10 Combined")
     for idx in range(min(10, len(final_tuple))):
