@@ -163,7 +163,8 @@ if __name__ == "__main__":
     print("Running Corvair on ", len(line_nums), " bounds checks")
 
     # all safe baseline
-    genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
+    p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
+    p.wait()
     exp_name = os.path.join(cargo_root, "baseline", "exp-safe/exp.exe")
     # warm up
     runExpWithName(exp_name, arg, test_time=10)
@@ -172,7 +173,8 @@ if __name__ == "__main__":
     print("Safe baseline:", safe_time)
 
     # all unsafe baseline
-    genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
+    p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
+    p.wait()
     exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
     # warmup
     runExpWithName(exp_name, arg, test_time=10)
