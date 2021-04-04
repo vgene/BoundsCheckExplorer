@@ -24,7 +24,7 @@ from collections import defaultdict
 # BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
 #                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
 # BENCHMARK_LIST = ["brotli-expand"]
-BENCHMARK_LIST = ["brotli_llvm11_no_vec", "brotli_llvm11_vec"] #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
+BENCHMARK_LIST = ["brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"] #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
 
 class ResultProvider:
 
