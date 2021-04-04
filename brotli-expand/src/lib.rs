@@ -11941,11 +11941,11 @@ mod huffman {
                 symbol -= 1;
                 let index =
                     unsafe {
-                        *offset.get_unchecked(
+                        *(&offset[
                             *code_lengths.get_unchecked(symbol
                                                                               as
                                                                               usize)
-                                                  as usize)
+                                                  as usize])
                     };
                 *unsafe {
                      offset.get_unchecked_mut(

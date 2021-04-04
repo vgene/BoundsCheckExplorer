@@ -165,12 +165,17 @@ if __name__ == "__main__":
     # all safe baseline
     genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
     exp_name = os.path.join(cargo_root, "baseline", "exp-safe/exp.exe")
+    # warm up
+    runExpWithName(exp_name, arg, test_time=10)
+
     safe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Safe baseline:", safe_time)
 
     # all unsafe baseline
     genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "unsafe", line_nums)
     exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
+    # warmup
+    runExpWithName(exp_name, arg, test_time=10)
     unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Unsafe baseline:", unsafe_time)
 
