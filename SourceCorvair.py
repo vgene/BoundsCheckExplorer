@@ -84,7 +84,7 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None):
     time_list = []
     for idx, line_num in enumerate(all_line_nums):
         exp_name = os.path.join(cargo_root, "explore-src-r1", "exp-" + str(idx), "exp.exe")
-        time_exp = runExpWithName(exp_name, arg, test_time=5)
+        time_exp, _, _ = runExpWithName(exp_name, arg, test_time=5)
         if time_exp is None:
             exit()
 
@@ -106,19 +106,23 @@ def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None)
     cur_lines = []
     lines_list = []
     time_list = []
+    top_error_list = [] # longer
+    bottom_error_list = [] # shorter
 
     for idx, line_num in enumerate(sorted_line_nums):
         exp_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx), "exp.exe")
-        time_exp = runExpWithName(exp_name, arg, test_time=5)
+        time_exp, shortest_run, longest_run = runExpWithName(exp_name, arg, test_time=5)
         if time_exp is None:
             exit()
 
         print("Exp", idx, ":", time_exp)
         cur_lines.append(line_num)
         time_list.append(time_exp)
+        top_error_list.append(longest_run - time_exp)
+        bottom_error_list.append(time_exp - shortest_run)
         lines_list.append(cur_lines.copy())
 
-    final_tuple = list(zip(lines_list, time_list))
+    final_tuple = list(zip(lines_list, time_list, top_error_list, bottom_error_list))
 
     return final_tuple
 
