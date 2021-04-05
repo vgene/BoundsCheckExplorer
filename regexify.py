@@ -61,15 +61,15 @@ def findTargetFiles(single_file):
 # new_fname is the file after conversion 
 # selective unsafe contains the lines that we want to keep the unsafe
 def convertFile(old_fname, new_fname, selective_unsafe=[]):
-    mutregex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     mutregex_out = r'(&mut \1[' #\2])'
-    regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     regex_out = r'(&\1[' #\2])'
     
     # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
-    raw_mutregex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     raw_mutregex_out = r'(&mut \1[' #\2])'
-    raw_regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     raw_regex_out = r'(&\1[' #\2])'
 
     with open(old_fname, 'r') as fd:
@@ -137,6 +137,21 @@ def convertBlock(block, regex_in, regex_out, cur_line=1, selective_unsafe=[]):
         cur_block = block[match.span()[0]:match.span()[1]]
         post_block = block[match.span()[1]:]
 
+        # handle within function call
+        # foo(xx.get_uncheck(
+
+        right = 0
+        for idx in reversed(range(len(cur_block) - 1)): # exclude the last '('
+            if cur_block[idx] == ')':
+                right += 1
+            if cur_block[idx] == '(':
+                right -= 1
+            if right < 0:
+                # found function start
+                pre_block += cur_block[:idx+1]
+                cur_block = cur_block[idx + 1:]
+                break
+
         # calculate line and col
         skipped_lines = pre_block.count('\n')
         cur_line += skipped_lines
@@ -154,15 +169,21 @@ def convertBlock(block, regex_in, regex_out, cur_line=1, selective_unsafe=[]):
             block = post_block
             continue
 
-        # replace with the safe syntax
-        cur_block = re.sub(regex_in, regex_out, cur_block, count=1)
-        new_col = old_col + len(cur_block) - 1
-
         # find match parenthesis in post_block
         pos = findMatchingParenthsis(post_block)
+        # self.get_unchecked() syntax, need to ignore
+        if pos == 0: 
+            new_block += pre_block + cur_block
+            block = post_block
+            continue
+
         if pos == -1:
             print("No enclosing parenthesis found, Line %d" % (cur_line))
             return None, None
+
+        # replace with the safe syntax
+        cur_block = re.sub(regex_in, regex_out, cur_block, count=1)
+        new_col = old_col + len(cur_block) - 1
 
         new_middle_block, addition_bcs = convertBlock(post_block[:pos], regex_in, regex_out, cur_line, selective_unsafe)
 
