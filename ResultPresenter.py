@@ -52,6 +52,8 @@ class ResultProvider:
         fns = [0]
         speedups = [1.0]
         time_original = self._results[benchmark]['safe_baseline']
+        if type(time_original) is tuple:
+            time_original = time_original[0]
 
         for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
             fns.append(idx + 1)
@@ -61,16 +63,25 @@ class ResultProvider:
 
     def getAbsoluteTime(self, benchmark):
         fns = []
-        times = []
         time_original = self._results[benchmark]['safe_baseline']
         fns.append(0)
-        times.append(time_original)
+
+        if type(time_original) is tuple:
+            times = [time_original[0]]
+            top_error = [time_original[2] - time_original[0]]
+            bottom_error = [time_original[0] - time_original[1]]
+        else:
+            times = [time_original]
+            top_error = [0]
+            bottom_error = [0]
 
         for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
             fns.append(idx + 1)
             times.append(item[1])
+            top_error.append(item[2])
+            bottom_error.append(item[3])
 
-        return fns, times
+        return fns, times, top_error, bottom_error
 
 
     def getPhase2Pairs(self, benchmark):
@@ -155,7 +166,7 @@ def getOneBenchmarkLayout(benchmark="assume_true"):
 def getComparisonFig(benchmarks, show_legend=False, show_title=False):
     scatter_list = []
     for benchmark in benchmarks:
-        xs, ys = app._resultProvider.getAbsoluteTime(benchmark)
+        xs, ys, top_error, bottom_error = app._resultProvider.getAbsoluteTime(benchmark)
 
         # color = '#0429A1'
         shape = 0
@@ -164,6 +175,7 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
             return None
     
         scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
+                                       error_y=dict(type='data', symmetric=True, array=bottom_error), #, arrayminus=bottom_error),
                                        marker={"symbol": shape,
                                                "size": 6, 'opacity': 1},
                                        mode='lines+markers',
@@ -315,7 +327,7 @@ def genFigs():
     fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
+    fig.update_layout(showlegend=True, width=500, height=400, margin=dict(l=2, r=2, t=2, b=2))
     fig.write_image("images/comparison.pdf")
 
 
