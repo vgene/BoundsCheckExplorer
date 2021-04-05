@@ -61,9 +61,9 @@ def findTargetFiles(single_file):
 # new_fname is the file after conversion 
 # selective unsafe contains the lines that we want to keep the unsafe
 def convertFile(old_fname, new_fname, selective_unsafe=[]):
-    mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    mutregex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     mutregex_out = r'(&mut \1[' #\2])'
-    regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    regex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     regex_out = r'(&\1[' #\2])'
     
     # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
