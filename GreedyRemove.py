@@ -72,6 +72,10 @@ def runExpWithName(exp_name, arg=None, test_time=10):
     return median_run, shortest_run, longest_run # sum(time_list) / len(time_list)
 
 
+def genExpNoLLVMPass(bc_fname):
+    return subprocess.Popen([ROOT_PATH + '/genExpO0.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+
 def genExp(bc_fname):
     return subprocess.Popen([ROOT_PATH + '/genExp.sh', bc_fname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
