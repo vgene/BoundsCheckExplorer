@@ -15,9 +15,10 @@ root_path=`dirname $script_path`
 for dir in "${passes[@]}"
 do
     cd $root_path/$dir
-    ./run_me.sh
+    ./run_me.sh &
 done
 
 cd $root_path/outer-loop-prof-runtime
 make
 
+wait

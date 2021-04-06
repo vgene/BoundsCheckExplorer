@@ -1,3 +1,4 @@
+#![feature(stmt_expr_attributes)]
 #![no_std]
 #![allow(non_snake_case)]
 #![allow(unused_parens)]

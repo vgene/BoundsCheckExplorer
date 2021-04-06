@@ -7,8 +7,8 @@
 
 if [[ $# -eq 2 ]] ; then
     echo time taskset 0x00000002 $1 $2
-    time taskset 0x00000002 $1 $2  #| grep "ns/iter"
+    time taskset 0x00000002 nice -n -20 $1 $2  #| grep "ns/iter"
 else
     echo time taskset 0x00000002 $1 
-    time taskset 0x00000002 $1 #| grep "ns/iter"
+    time taskset 0x00000002 nice -n -20 $1 #| grep "ns/iter"
 fi

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Convert get_unchecked(_mut), and from_raw_parts(_mut) to safe version
 import re
 import os
 import subprocess
@@ -56,32 +57,52 @@ def findTargetFiles(single_file):
 
 
 # Convert all things in place in one file
-def convertFile(fname):
-    mutregex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+# old_fname is the file before conversion
+# new_fname is the file after conversion 
+# selective unsafe contains the lines that we want to keep the unsafe
+def convertFile(old_fname, new_fname, selective_unsafe=[]):
+    mutregex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     mutregex_out = r'(&mut \1[' #\2])'
-    regex_in = r'([a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    regex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
     regex_out = r'(&\1[' #\2])'
+    
+    # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
+    raw_mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_mutregex_out = r'(&mut \1[' #\2])'
+    raw_regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_regex_out = r'(&\1[' #\2])'
 
-    with open(fname, 'r') as fd:
+    with open(old_fname, 'r') as fd:
         old_block = fd.read()
 
-    block, bcs_mut = convertBlock(old_block, mutregex_in, mutregex_out)
+    block, bcs_mut = convertBlock(old_block, mutregex_in, mutregex_out, 1, selective_unsafe)
     if block == None or bcs_mut == None:
-        print("Conversion failed in file %s" % fname)
+        print("Conversion failed in file %s" % old_fname)
         exit()
 
-    new_block, bcs_immut = convertBlock(block, regex_in, regex_out)
-    if new_block == None or bcs_immut == None:
-        print("Conversion failed in file %s" % fname)
+    block, bcs_immut = convertBlock(block, regex_in, regex_out, 1, selective_unsafe)
+    if block == None or bcs_immut == None:
+        print("Conversion failed in file %s" % old_fname)
         exit()
 
-    bcs = bcs_mut + bcs_immut
+    block, bcs_raw_mut = convertBlock(block, raw_mutregex_in, raw_mutregex_out)
+    if block == None or bcs_raw_mut == None:
+        print("Conversion failed in file %s" % old_fname)
+        exit()
 
-    with open(fname, 'w') as fd:
+    block, bcs_raw_immut = convertBlock(block, raw_regex_in, raw_regex_out)
+    if block == None or bcs_raw_immut == None:
+        print("Conversion failed in file %s" % old_fname)
+        exit()
+
+    new_block = block
+    bcs = bcs_mut + bcs_immut + bcs_raw_mut + bcs_raw_immut 
+
+    with open(new_fname, 'w') as fd:
         fd.write(new_block)
 
     # add fname to the bcs
-    bcs = [ (line, col, fname) for (line, col) in bcs ] 
+    bcs = [ (line, col, new_fname) for (line, col) in bcs ] 
 
     return bcs
 
@@ -105,17 +126,31 @@ def findMatchingParenthsis(block):
 # Step 1: go back and replace the handle with regex
 # Step 2: go forward and find matching parenthesis, replace it as "])"
 # Step 3: convert whatever is inside
-def convertBlock(block, regex_in, regex_out):
+def convertBlock(block, regex_in, regex_out, cur_line=1, selective_unsafe=[]):
     bcs = []
     new_block = ""
 
-    cur_line = 1
     # convert all instances of regex_in (per line) one at a time
     while (match := re.search(regex_in, block)): 
         # put whatever before in it 
         pre_block = block[:match.span()[0]]
         cur_block = block[match.span()[0]:match.span()[1]]
         post_block = block[match.span()[1]:]
+
+        # handle within function call
+        # foo(xx.get_uncheck(
+
+        right = 0
+        for idx in reversed(range(len(cur_block) - 1)): # exclude the last '('
+            if cur_block[idx] == ')':
+                right += 1
+            if cur_block[idx] == '(':
+                right -= 1
+            if right < 0:
+                # found function start
+                pre_block += cur_block[:idx+1]
+                cur_block = cur_block[idx + 1:]
+                break
 
         # calculate line and col
         skipped_lines = pre_block.count('\n')
@@ -128,21 +163,35 @@ def convertBlock(block, regex_in, regex_out):
         else:
             old_col = len(pre_block) - old_col
 
-        # replace with the safe syntax
-        cur_block = re.sub(regex_in, regex_out, cur_block, count=1)
-        new_col = old_col + len(cur_block) - 1
+        # if choose not to convert this line to safe
+        if cur_line in selective_unsafe:
+            new_block += pre_block + cur_block
+            block = post_block
+            continue
 
         # find match parenthesis in post_block
         pos = findMatchingParenthsis(post_block)
+        # self.get_unchecked() syntax, need to ignore
+        if pos == 0: 
+            new_block += pre_block + cur_block
+            block = post_block
+            continue
+
         if pos == -1:
             print("No enclosing parenthesis found, Line %d" % (cur_line))
             return None, None
 
-        new_middle_block, addition_bcs = convertBlock(post_block[:pos], regex_in, regex_out)
+        # replace with the safe syntax
+        cur_block = re.sub(regex_in, regex_out, cur_block, count=1)
+        new_col = old_col + len(cur_block) - 1
 
-        # adjust the line based on current line
-        for (line, col) in addition_bcs:
-            bcs.append((line + cur_line - 1, col))
+        new_middle_block, addition_bcs = convertBlock(post_block[:pos], regex_in, regex_out, cur_line, selective_unsafe)
+
+        # add bounds checks from the middle block to the bcs
+        if addition_bcs is None:
+            return None, None
+        else:
+            bcs.extend(addition_bcs)
 
         # update new block
         new_block += pre_block + cur_block + new_middle_block + "])"  # use the right parenthesis
@@ -174,7 +223,7 @@ if __name__ == "__main__":
     # List of all bounds checks
     bcs = []
     for fname in filelist:
-        bcs.extend(convertFile(fname))
+        bcs.extend(convertFile(fname, fname))
 
     dumpBCs(bcs, logfile)
 

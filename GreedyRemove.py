@@ -5,6 +5,7 @@ import subprocess
 import re
 import os
 import pickle
+from numpy import median
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -55,16 +56,20 @@ def runExpWithName(exp_name, arg=None, test_time=10):
         except Exception:
             print(out)
             print("Run experiment failed")
-            return None
+            return None, None, None
 
     time_list.sort()
-    # remove the first
-    time_list = time_list[2:]
+    # #r emove the first
+    # time_list = time_list[2:]
 
-    # remove the last
-    time_list = time_list[:-2]
+    # # remove the last
+    # time_list = time_list[:-2]
 
-    return sum(time_list) / len(time_list)
+    median_run = median(time_list)
+    shortest_run = time_list[0]
+    longest_run = time_list[-1]
+
+    return median_run, shortest_run, longest_run # sum(time_list) / len(time_list)
 
 
 def genExp(bc_fname):
@@ -215,7 +220,7 @@ def greedyExperiment(fn_list, ori_bc_fname, arg=None, threshold=0.05):
         # test_fn_list = list_of_fn_lists[idx] 
 
         print("testing with poly function " + str(idx) + "(*" + str(len(fn_list) - len(test_fn_list))+ ") removed")
-        time_exp = runExpWithName('exps/exp-' + str(idx) + "/exp.exe", arg)
+        time_exp, _, _ = runExpWithName('exps/exp-' + str(idx) + "/exp.exe", arg)
         
         if time_exp is None:
             continue
@@ -289,7 +294,7 @@ def tryTopN(final_tuple, fn_list, ori_bc_fname, arg, N=10):
 
         print("testing with " + str(idx) + " functions removed")
         dir_name = 'tops_exps/exp-' + str(idx)
-        time_exp = runExpWithName(dir_name + "/exp.exe", arg)
+        time_exp, _, _ = runExpWithName(dir_name + "/exp.exe", arg)
         bcs = getBCs(dir_name)
         
         if time_exp is None:

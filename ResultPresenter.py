@@ -21,8 +21,14 @@ from os import path
 from pprint import pprint
 from collections import defaultdict
 
-BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
-                  "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
+# BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
+#                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
+# BENCHMARK_LIST = ["brotli-expand"]
+BENCHMARK_LIST = ["brotli_llvm9_vec_fixed_order", "brotli_llvm9_no_vec_fixed_order",
+        "brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order"]
+        #"brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"]
+        #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
+
 class ResultProvider:
 
     def __init__(self, path):
@@ -42,7 +48,46 @@ class ResultProvider:
 
         self._results = results
 
+    def getSourceCorvairPairs(self, benchmark):
+        fns = [0]
+        speedups = [1.0]
+        time_original = self._results[benchmark]['safe_baseline']
+        if type(time_original) is tuple:
+            time_original = time_original[0]
+
+        for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
+            fns.append(idx + 1)
+            speedups.append((time_original / item[1] - 1) *100)
+
+        return fns, speedups
+
+    def getAbsoluteTime(self, benchmark):
+        fns = []
+        time_original = self._results[benchmark]['safe_baseline']
+        fns.append(0)
+
+        if type(time_original) is tuple:
+            times = [time_original[0]]
+            top_error = [time_original[2] - time_original[0]]
+            bottom_error = [time_original[0] - time_original[1]]
+        else:
+            times = [time_original]
+            top_error = [0]
+            bottom_error = [0]
+
+        for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
+            fns.append(idx + 1)
+            times.append(item[1])
+            top_error.append(item[2])
+            bottom_error.append(item[3])
+
+        return fns, times, top_error, bottom_error
+
+
     def getPhase2Pairs(self, benchmark):
+        if benchmark.startswith("brotli"):
+            return self.getSourceCorvairPairs(benchmark)
+
         fns = []
         speedups = []
 
@@ -117,6 +162,68 @@ def getOneBenchmarkLayout(benchmark="assume_true"):
 
     return layout
 
+
+def getComparisonFig(benchmarks, show_legend=False, show_title=False):
+    scatter_list = []
+    for benchmark in benchmarks:
+        xs, ys, top_error, bottom_error = app._resultProvider.getAbsoluteTime(benchmark)
+
+        # color = '#0429A1'
+        shape = 0
+
+        if xs is None or ys is None:
+            return None
+    
+        scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
+                                       error_y=dict(type='data', symmetric=True, array=bottom_error), #, arrayminus=bottom_error),
+                                       marker={"symbol": shape,
+                                               "size": 6, 'opacity': 1},
+                                       mode='lines+markers',
+                                       name=benchmark, showlegend=show_legend))
+        # Set tick suffix
+    height = 350
+
+    fig = go.Figure({
+        'data': scatter_list,
+        'layout': {
+                    'legend': {'orientation': 'h', 'x': -0.05, 'y': 1.1},
+                    'yaxis': {
+                        'zeroline': True,
+                        'zerolinewidth': 1,
+                        'zerolinecolor': 'black',
+                        'showline': True,
+                        'linewidth': 2,
+                        'ticks': "inside",
+                        'mirror': 'all',
+                        'linecolor': 'black',
+                        'gridcolor': 'rgb(200, 200, 200)',
+                        # 'nticks': 15,
+                        'title': {'text': "Time",'font': {'size': 18} },
+                        'ticksuffix': "s",
+                    },
+                    'xaxis': {
+                        'range': [0, xs[-1]],
+                        'zeroline': True,
+                        'zerolinewidth': 1,
+                        'zerolinecolor': 'black',
+                        'gridcolor': 'rgb(200, 200, 200)',
+                        'linecolor': 'black',
+                        'showline': True,
+                        'title': {'text': "#Bounds Check Removed", 'font': {'size': 18}},
+                        'linewidth': 2,
+                        'mirror': 'all',
+                    },
+                    'font': {'family': 'Helvetica', 'color': "Black"},
+                    'plot_bgcolor': 'white',
+                    'autosize': False,
+                    'width': 500,
+                    'height': height}
+    })
+
+    fig.update_xaxes(title_standoff = 1) # title_font = {"size": 28},)
+    fig.update_yaxes(title_standoff = 1)
+
+    return fig
 
 def getOneBenchmarkFig(benchmark, show_legend=False, show_title=False):
     xs, ys = app._resultProvider.getPhase2Pairs(benchmark)
@@ -214,6 +321,14 @@ def genFigs():
             filename = benchmark[:benchmark.rindex('-')]
         filename = filename.replace('_', '-')
         fig.write_image("images/" + filename  + ".pdf")
+
+    print("Generating comparison")
+    fig = getComparisonFig(BENCHMARK_LIST, True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=500, height=400, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison.pdf")
 
 
 if __name__ == '__main__':
