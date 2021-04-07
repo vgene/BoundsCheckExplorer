@@ -24,9 +24,9 @@ from collections import defaultdict
 # BENCHMARK_LIST = ["assume_true", "crc-any-2.3.5", "geo-0.16.0", "hex-0.4.2", "rust-brotli-decompress-2.3.1",
 #                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
 # BENCHMARK_LIST = ["brotli-expand"]
-BENCHMARK_LIST = ["brotli_llvm9_vec_fixed_order", "brotli_llvm9_no_vec_fixed_order",
-        "brotli_llvm11_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order"]
-        # "brotli_llvm11_no_vec_fixed_order"]
+BENCHMARK_LIST = [ "brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order",
+        "brotli_llvm9_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order"]
+        # "brotli_llvm9_no_vec_fixed_order", ]
         #"brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"]
         #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
 
@@ -176,7 +176,7 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
             return None
     
         scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
-                                       error_y=dict(type='data', symmetric=True, array=bottom_error), #, arrayminus=bottom_error),
+            error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(255,255,255, 0.3)', arrayminus=bottom_error),
                                        marker={"symbol": shape,
                                                "size": 6, 'opacity': 1},
                                        mode='lines+markers',
@@ -323,13 +323,45 @@ def genFigs():
         filename = filename.replace('_', '-')
         fig.write_image("images/" + filename  + ".pdf")
 
-    print("Generating comparison")
+    print("Generating comparison Vec/NoVec")
+    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-vec-11.pdf")
+
+    print("Generating comparison LLVM9/11")
+    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm9_vec_fixed_order"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-llvm.pdf")
+
+    print("Generating comparison fat/cargo")
+    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-cargo.pdf")
+
+    print("Generating comparison cargo/vec")
+    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-cargo-vec.pdf")
+
+    print("Generating comparison All")
     fig = getComparisonFig(BENCHMARK_LIST, True, False)
     fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=500, height=400, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison.pdf")
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-all.pdf")
 
 
 if __name__ == '__main__':
