@@ -176,7 +176,7 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
             return None
     
         scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
-            error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(255,255,255, 0.3)', arrayminus=bottom_error),
+            error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
                                        marker={"symbol": shape,
                                                "size": 6, 'opacity': 1},
                                        mode='lines+markers',
