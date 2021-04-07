@@ -5,5 +5,7 @@
 #
 # Usage: ./run_regex_exp.sh exp.exe [$ARGS]
 
-echo taskset 0x00000002 $1 --bench
-taskset 0x00000002 $1 --bench
+#echo taskset 0x00000006 $1 --bench
+#taskset 0x00000006 $1 --bench
+echo $1 --bench
+$1 --bench
