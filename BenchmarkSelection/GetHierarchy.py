@@ -17,7 +17,7 @@ def loadCrates(fname):
 
 
 # parse dependencies from the toml
-def parseToml(fname):
+def parseTomlForDeps(fname):
     try:
         with open(fname, 'r') as fd:
             obj = toml.load(fd)
@@ -31,13 +31,31 @@ def parseToml(fname):
         return []
 
 
+def parseTomlForInfo(fname):
+    has_bench = False
+    package = None
+    try:
+        with open(fname, 'r') as fd:
+            obj = toml.load(fd)
+
+        if "bench" in obj:
+            has_bench = True
+
+        if "package" in obj:
+            package = obj['package']
+
+    except Exception as e:
+        print(e)
+
+    return has_bench, package
+
 # seperate all the directories
 def parseApps(fname):
     dir_name = os.path.split(fname)[0]
 
     dirs = dir_name.split(os.sep)
     
-    return dirs[1:]
+    return dirs[1:], dirs[-1]
 
 # find all Cargo.toml file
 def findTargetFiles(target):
@@ -72,11 +90,35 @@ if __name__ == "__main__":
     print(len(filelist), "toml file to parse")
 
     tainted_apps = set() 
+    has_bench_set = set()
+    pack_map = {}
+
     for fname in filelist:
-        deps = parseToml(fname)
+        deps = parseTomlForDeps(fname)
+        apps, this_app = parseApps(fname)
+        has_bench, package = parseTomlForInfo(fname)
+        if has_bench:
+            has_bench_set.add(this_app)
+        if package:
+            pack_map[this_app] = package
+
         if (set(deps) & unchecked_set):
-            apps = parseApps(fname)
             tainted_apps.update(apps)
 
     with open("tainted_apps.txt", "w") as fd:
-        fd.write("\n".join(list(tainted_apps)))
+        for app in tainted_apps:
+            if app in has_bench_set:
+                s = "Y"
+            else:
+                s = "N"
+
+            desc = ""
+            rep = ""
+            if app in pack_map:
+                pack = pack_map[app]
+                if "description" in pack:
+                    desc = pack['description']
+                if "repository" in pack:
+                    rep = pack['repository']
+
+            fd.write(app + "," + s + ",\"" + desc +"\","+ rep + "\n" )
