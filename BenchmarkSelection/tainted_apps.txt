@@ -1,0 +1,277 @@
+sequoia,N,"",
+ethcore-blockchain,N,"OpenEthereum Blockchain Database, Test Generator, Configuration, Caching, Importing Blocks, and Block Information",
+melib,N,"mail library",https://git.meli.delivery/meli/meli.git
+grep-printer,N,"An implementation of the grep crate's Sink trait that provides standard
+printing of search results, similar to grep itself.
+",https://github.com/BurntSushi/ripgrep/tree/master/crates/printer
+libimagrt,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+ajour,N,"A World of Warcraft addon manager",https://github.com/ajour/ajour
+alass,N,"",
+ag,Y,"CLI App to slice and dice logfiles",https://github.com/rcoh/angle-grinder
+noaa-apt,N,"",
+resvg,N,"An SVG rendering library.",https://github.com/RazrFalcon/resvg
+imag-bookmark,N,"Part of the imag core distribution: imag-bookmark command",https://github.com/matthiasbeyer/imag
+whitebox-tools,N,"",
+habitat_common,N,"",
+sycli,N,"",
+nix-du,N,"",
+alacritty_terminal,N,"Library for writing terminal emulators",
+gitui,N,"blazing fast terminal-ui for git",https://github.com/extrawurst/gitui
+click,N,"A command-line REPL for Kubernetes that integrates into existing cli workflows",https://github.com/databricks/click
+tdns-cli,N,"DNS update client (RFC 2136)",https://github.com/rotty/tdns-cli
+typeracer,N,"A terminal typing game. Race to see the fastest time you can get!",https://gitlab.com/ttyperacer/terminal-typeracer
+grep-regex,N,"Use Rust's regex library with the 'grep' crate.
+",https://github.com/BurntSushi/ripgrep/tree/master/crates/regex
+fontfor,N,"find fonts which can show a specified character and preview them in terminal or browser",https://github.com/7sDream/fontfor
+config,N,"",
+git-backup,N,"",
+habitat-sup-client,N,"",
+diskus,N,"A minimal, fast alternative to 'du -sh'.",https://github.com/sharkdp/diskus
+manix,N,"Nix documentation searcher",
+tremor-value,N,"Tremor Script Interpreter",
+tiny,N,"An IRC client",https://github.com/osa1/tiny
+miniserve,N,"For when you really just want to serve some files over HTTP right now!",https://github.com/svenstaro/miniserve
+tab-pty,N,"the pty module for the tab terminal multiplexer",https://github.com/austinjones/tab-rs
+tremor-runtime,N,"Tremor Runtime",https://github.com/tremor-rs/tremor-runtime
+synapse-bt,N,"Synapse BitTorrent client",https://github.com/Luminarys/synapse
+ripgrep_all,N,"rga: ripgrep, but also search in PDFs, E-Books, Office documents, zip, tar.gz, etc.",https://github.com/phiresky/ripgrep-all
+netease-music-tui,N,"",
+protos,N,"",
+libimagentrylink,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+rbw,N,"Unofficial Bitwarden CLI",https://git.tozt.net/rbw
+habitat,N,"",
+clipcat,N,"",
+disk,N,"",
+termwiz,N,"Terminal Wizardry for Unix and Windows",https://github.com/wez/wezterm
+handlr,N,"Manage mimeapps.list and default applications with ease",
+afterburn,N,"A simple cloud provider agent",https://github.com/coreos/afterburn
+gateway-requests,N,"",
+eip-712,N,"eip-712 encoding",https://github.com/openethereum/openethereum
+terminal-typeracer,N,"",
+finalfrontier,N,"Train/use word embeddings with subword units",https://github.com/finalfusion/finalfrontier.git
+onefetch,N,"Git repository summary on your terminal",https://github.com/o2sh/onefetch
+sozu-lib,N,"sozu library to build hot reconfigurable HTTP reverse proxies",https://github.com/sozu-proxy/sozu
+fst,N,"Use finite state transducers to compactly represents sets or maps of many
+strings (> 1 billion is possible).
+",https://github.com/BurntSushi/fst
+blake3,N,"the BLAKE3 hash function",https://github.com/BLAKE3-team/BLAKE3
+tremor-cli,N,"Tremor CLI Tool",
+netease_music_tui,N,"",https://github.com/betta-cyber/netease-music-tui
+yabridgectl,N,"Optional utility to help set up yabridge",https://github.com/robbert-vdh/yabridge
+tickrs,N,"Realtime ticker data in your terminal 📈",https://github.com/tarkah/tickrs
+starship,N,"The minimal, blazing-fast, and infinitely customizable prompt for any shell! ☄🌌️
+",https://github.com/starship/starship
+ethstore,N,"Parity Ethereum Key Management",
+hab,N,"",
+dua-cli,N,"A tool to conveniently learn about the disk usage of directories, fast!",https://github.com/Byron/dua-cli
+librespot-connect,N,"The discovery and Spotify Connect logic for librespot",
+habitat_sup,N,"",
+cached-nix-shell,N,"",
+xprite-editor,N,"",
+vector,Y,"A lightweight and ultra-fast tool for building observability pipelines",
+nym-mixnode,N,"",
+xxv,N,"A hex viewer for the terminal, with a visual text user interface.",https://github.com/chrisvest/xxv
+mux,N,"",
+kubernix,N,"Kubernetes development cluster bootstrapping with Nix packages",https://github.com/saschagrunert/kubernix
+taskwarrior-tui,N,"A Taskwarrior Terminal User Interface",https://github.com/kdheepak/taskwarrior-tui/
+sn0int,N,"Semi-automatic OSINT framework and package manager",https://github.com/kpcyrd/sn0int
+boringtun,N,"an implementation of the WireGuard® protocol designed for portability and speed",https://github.com/cloudflare/boringtun
+tunnelto_server,N,"expose your local web server to the internet with a public url",https://tunnelto.dev
+findomain,N,"The fastest and cross-platform subdomain enumerator, do not waste your time.",https://github.com/edu4rdshl/findomain
+polkadot,N,"Implementation of a https://polkadot.network node in Rust based on the Substrate framework.",
+prs,N,"",
+crosvm,N,"",
+nymsphinx-addressing,N,"",
+codegen,N,"",
+git-packetline,N,"A WIP crate of the gitoxide project implementing the pkt-line serialization format",https://github.com/Byron/gitoxide
+nym,N,"",
+alacritty,N,"A fast, cross-platform, OpenGL terminal emulator",
+alass-cli,N,"Automatic Language-Agnostic Subtitle Synchronization (Command Line Tool)",https://github.com/kaegi/alass
+each,N,"A better way of working with structured data on the command line",https://github.com/arraypad/each
+git-workspace,N,"Manage and update personal and work git repos from multiple providers",https://github.com/orf/git-workspace
+habitat_pkg_export_docker,N,"",
+cargo-about,N,"Cargo plugin for generating a listing of all of the crates and the the terms under which they are licensed",https://github.com/EmbarkStudios/cargo-about
+git-hash,N,"Borrowed and owned git hash digests used to identify git objects",https://github.com/Byron/gitoxide
+libimagentryfilter,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+tunnelto,N,"expose your local web server to the internet with a public url",https://github.com/agrinman/tunnelto
+habitat_pkg_export_tar,N,"",
+imag-timetrack,N,"Part of the imag core distribution: imag-timetrack command",https://github.com/matthiasbeyer/imag
+ripgrep-all,N,"",
+b3sum,N,"a command line implementation of the BLAKE3 hash function",https://github.com/BLAKE3-team/BLAKE3
+vrl-stdlib,Y,"",
+rx,N,"a modern, extensible pixel editor",https://github.com/cloudhead/rx
+cargo-audit,N,"Audit Cargo.lock for crates with security vulnerabilities",https://github.com/rustsec/cargo-audit
+czkawka_core,N,"Core of Czkawka app",https://github.com/qarmin/czkawka
+pueue,N,"A cli tool for managing long running shell commands.",https://github.com/nukesor/pueue
+rustscan,N,"Faster Nmap Scanning with Rust",https://github.com/rustscan/rustscan
+wagyu,N,"A command-line tool to generate cryptocurrency wallets",https://github.com/ArgusHQ/wagyu
+meilisearch,N,"",
+mcfly,N,"McFly replaces your default ctrl-r shell history search with an intelligent search engine that takes into account your working directory and the context of recently executed commands. McFly's suggestions are prioritized in real time with a small neural network.",https://github.com/cantino/mcfly
+dua,N,"",
+fishnet,N,"Distributed Stockfish analysis for lichess.org",https://github.com/niklasf/fishnet
+git-commitgraph,N,"Read-only access to the git commitgraph file format",https://github.com/Byron/gitoxide
+tremor-pipeline,N,"Tremor Pipeline DAG Runtime",
+tab-rs,N,"",
+libimagentrytag,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+git-config,N,"A WIP crate of the gitoxide project dedicated implementing the git config file format",https://github.com/Byron/gitoxide
+voidmap,N,"terminal mind-map + task tracker + tsdb",
+habitat_core,N,"",
+sequoia-store,N,"Public-Key store for Sequoia",https://gitlab.com/sequoia-pgp/sequoia
+rdedup,N,"Data deduplication with compression and public key encryption. - binary",https://github.com/dpc/rdedup
+finalfusion-utils,N,"finalfusion utilities",https://github.com/finalfusion/finalfusion-rust
+habitat-sup-protocol,N,"",
+gping,N,"Ping, but with a graph.",https://github.com/orf/gping
+libimagentryurl,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+nym-client-wasm,N,"A webassembly client which can be used to interact with the the Nym privacy platform. Wasm is used for Sphinx packet generation.",https://github.com/nymtech/nym
+shadowsocks-rust,N,"shadowsocks is a fast tunnel proxy that helps you bypass firewalls.",https://github.com/shadowsocks/shadowsocks-rust
+sniffglue,N,"Secure multithreaded packet sniffer",https://github.com/kpcyrd/sniffglue
+meli,N,"terminal mail client",https://git.meli.delivery/meli/meli.git
+sequoia-openpgp,N,"OpenPGP data types and associated machinery",https://gitlab.com/sequoia-pgp/sequoia
+fst-bin,N,"A command line tool for using finite state transducers to compactly represents
+sets or maps of many strings (> 1 billion is possible). The command line tool
+exposes functionality to search FSTs using regular expressions, Levenshtein
+automata and range queries.
+",https://github.com/BurntSushi/fst
+librustzcash,N,"Rust FFI used by the zcashd binary. Not an official API.",https://github.com/zcash/zcash
+habitat-launcher-protocol,N,"",
+meilisearch-core,Y,"",
+cargo-deb,N,"Make Debian packages (.deb) easily with a Cargo subcommand",https://github.com/mmstick/cargo-deb
+rnix-hashes,N,"Nix hash converter",
+ajour-core,N,"Core library for Ajour",https://github.com/ajour/ajour
+httplz,N,"",
+sd,N,"An intuitive find & replace CLI",https://github.com/chmln/sd.git
+rink-core,N,"Unit conversion library behind rink",https://github.com/tiffany352/rink-rs
+git-transport,N,"A WIP crate of the gitoxide project dedicated to implementing the git transport layer",https://github.com/Byron/gitoxide
+cargo-update,N,"A cargo subcommand for checking and applying updates to installed executables",https://github.com/nabijaczleweli/cargo-update
+mdcat,N,"cat for markdown: Show markdown documents in terminals",https://github.com/lunaryorn/mdcat
+code-minimap,N,"A high performance code minimap generator",https://github.com/wfxr/code-minimap
+library,N,"",
+zcash,N,"",
+git-url,N,"A WIP crate of the gitoxide project implementing parsing and serialization of git-url",https://github.com/Byron/gitoxide
+base64_vuln,N,"",
+git-ref,N,"A crate to handle git references",https://github.com/Byron/gitoxide
+uwc,N,"Counts things in unicode text files",https://gitlab.com/dead10ck/uwc
+grex,N,"grex generates regular expressions from user-provided test cases.
+",https://github.com/pemistahl/grex
+libtiny_client,N,"An IRC client library, mainly to be used in tiny",
+tunnelto_lib,N,"expose your local web server to the internet with a public url",https://github.com/agrinman/tunnelto
+nym-socks5-client,N,"",
+templates,N,"",
+imag-notes,N,"Part of the imag core distribution: imag-notes command",https://github.com/matthiasbeyer/imag
+silicon,N,"Create beautiful image of your code",https://github.com/Aloxaf/silicon
+ripasso,N,"A Spotify daemon",https://github.com/Spotifyd/spotifyd
+rage,N,"[BETA] A simple, secure, and modern encryption tool.",https://github.com/str4d/rage
+imag,N,"Part of the imag core distribution: imag command",https://github.com/matthiasbeyer/imag
+ncgopher,N,"An ncurses gopher and gemini client for the modern internet",https://github.com/jansc/ncgopher
+topology,N,"",
+polkadot-erasure-coding,N,"",
+elan-dist,N,"Installation from a Lean distribution server",
+angle-grinder,N,"",
+emplace,N,"Command-line tool to mirror installed software on multiple machines.",https://github.com/tversteeg/emplace
+dogdns,N,"",
+nymsphinx-acknowledgements,N,"",
+tools,N,"",
+gnvim,N,"A Spotify daemon",https://github.com/Spotifyd/spotifyd
+dns-transport,N,"",
+librespot-protocol,N,"The protobuf logic for communicating with Spotify servers",
+sit-web,N,"Serverless Information Tracker Web Interface",
+intecture,N,"A Spotify daemon",https://github.com/Spotifyd/spotifyd
+fselect,N,"Find files with SQL-like queries",https://github.com/jhspetersson/fselect
+directory-client-models,N,"",
+imag-log,N,"Part of the imag core distribution: imag-log command",https://github.com/matthiasbeyer/imag
+oxipng,N,"A lossless PNG compression optimizer",https://github.com/shssoichiro/oxipng
+sn0int-std,N,"sn0int - stdlib",https://github.com/kpcyrd/sn0int
+openethereum,N,"OpenEthereum",
+blockchains,N,"",
+parity-rpc,N,"Parity Ethereum JSON-RPC Servers (WS, HTTP, IPC)",
+habitat_http_client,N,"",
+sub-batch,N,"Match and rename subtitle files to video files and perfom other batch operations on subtitle files.",https://github.com/kl/sub-batch
+luahelper,N,"",
+cargo-release,N,"Cargo subcommand for you to smooth your release process.",https://github.com/sunng87/cargo-release
+habitat-launcher-client,N,"",
+broot,Y,"A new file manager",https://github.com/Canop/broot
+git-trim,N,"Automatically trims your tracking branches whose upstream branches are merged or stray",https://github.com/foriequal0/git-trim
+librespot,N,"An open source client library for Spotify, with support for Spotify Connect",https://github.com/librespot-org/librespot
+site,N,"",
+xh,N,"Friendly and fast tool for sending HTTP requests",https://github.com/ducaale/xh
+elan,N,"Manage multiple Lean installations with ease",
+coloursum,N,"🎨 Colourise your checksum output",https://github.com/ticky/coloursum
+prometheus-parser,N,"",
+prs-cli,N,"Secure, fast & convenient password manager CLI with GPG & git sync",https://gitlab.com/timvisee/prs
+zola,N,"A fast static site generator with everything built-in",https://github.com/getzola/zola
+wagyu-model,N,"A generic model for cryptocurrency wallets",https://github.com/ArgusHQ/wagyu/tree/v0.6.1/model
+bottom,N,"A cross-platform graphical process/system monitor with a customizable interface and a multitude of features. Supports Linux, macOS, and Windows.",https://github.com/ClementTsang/bottom
+rink,N,"Unit conversion tool, similar to frink",https://github.com/tiffany352/rink-rs
+espanso,N,"Cross-platform Text Expander written in Rust",
+git-object,N,"Borrowed and owned git objects with deserialization and serialization support",https://github.com/Byron/gitoxide
+asuka,N,"",
+void,N,"",
+librespot-core,N,"The core functionality provided by librespot",
+wezterm,N,"",
+sozu,N,"sozu, a fast, reliable, hot reconfigurable HTTP reverse proxy",https://github.com/sozu-proxy/sozu
+ethcore,Y,"OpenEthereum (EthCore) Library",
+age,Y,"[BETA] A simple, secure, and modern encryption library.",https://github.com/str4d/rage
+habitat_butterfly,N,"",
+sequoia-sq,N,"Command-line frontends for Sequoia",https://gitlab.com/sequoia-pgp/sequoia
+libimagentryref,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+xprite,N,"",
+monolith,N,"CLI tool for saving web pages as a single HTML file",https://github.com/Y2Z/monolith
+age-core,N,"[BETA] Common functions used across the age crates",https://github.com/str4d/rage
+czkawka,N,"",
+file-source,N,"",
+todiff,N,"",
+habitat_pkg_export_kubernetes,N,"",
+nym-client,N,"",
+git-protocol,N,"A WIP crate of the gitoxide project for implementing git protocols",https://github.com/Byron/gitoxide
+libimagdiary,N,"Library for the imag core distribution",https://github.com/matthiasbeyer/imag
+websocat,N,"Command-line client for web sockets, like netcat/curl/socat for ws://.",https://github.com/vi/websocat
+shadowsocks,N,"shadowsocks is a fast tunnel proxy that helps you bypass firewalls.",https://github.com/shadowsocks/shadowsocks-rust
+sequoia-autocrypt,N,"Autocrypt support",https://gitlab.com/sequoia-pgp/sequoia
+imageproc,N,"",
+tremor-script,N,"Tremor Script Interpreter",
+git-delta,N,"A syntax-highlighting pager for git",https://github.com/dandavison/delta
+mozwire,N,"MozillaVPN wireguard configuration manager",https://github.com/NilsIrl/MozWire/
+reddsaver,N,"CLI tool to download saved media from Reddit",https://github.com/manojkarthick/reddsaver
+nymsphinx-cover,N,"",
+habitat-launcher,N,"",
+skim,N,"Fuzzy Finder in rust!",https://github.com/lotabout/skim
+rdedup-lib,N,"Data deduplication with compression and public key encryption. - library",https://github.com/dpc/rdedup
+imag-diary,N,"Part of the imag core distribution: imag-diary command",https://github.com/matthiasbeyer/imag
+wg-bond,N,"",
+ethcore-bloom-journal,N,"Journaling bloom filter",
+grep-cli,N,"Utilities for search oriented command line applications.
+",https://github.com/BurntSushi/ripgrep/tree/master/crates/cli
+nymsphinx-params,N,"",
+nymsphinx-anonymous-replies,N,"",
+meilisearch-http,N,"MeiliSearch HTTP server",
+librespot-metadata,N,"The metadata logic for librespot",
+ripgrep,N,"ripgrep is a line-oriented search tool that recursively searches your current
+directory for a regex pattern while respecting your gitignore rules. ripgrep
+has first class support on Windows, macOS and Linux.
+",https://github.com/BurntSushi/ripgrep
+https,N,"Host These Things Please - a basic http server for hosting a folder fast and simply",https://github.com/thecoshman/http
+gifski,N,"pngquant-based GIF maker for nice-looking animGIFs",https://github.com/ImageOptim/gifski
+client-core,N,"",
+tab-daemon,N,"the daemon module for the tab terminal multiplexer",https://github.com/austinjones/tab-rs
+grep-searcher,N,"Fast line oriented regex searching as a library.
+",https://github.com/BurntSushi/ripgrep/tree/master/crates/searcher
+whitebox_tools,N,"A library for analyzing geospatial data.",https://github.com/jblindsay/whitebox-tools/
+rav1e,Y,"The fastest and safest AV1 encoder",https://github.com/xiph/rav1e/
+kak-lsp,N,"",
+wezterm-gui,N,"",
+tremor-rs,N,"",
+delta,N,"",
+globset,N,"Cross platform single glob and glob set matching. Glob set matching is the
+process of matching one or more glob patterns against a single candidate path
+simultaneously, and returning all of the globs that matched.
+",https://github.com/BurntSushi/ripgrep/tree/master/crates/globset
+pipr,N,"A commandline-utility to interactively build complex shell pipelines",https://github.com/Elkowar/pipr
+protobuf,N,"",
+nym-gateway,N,"",
+tox-node,N,"A server application to run tox node",https://github.com/tox-rs/tox-node/
+usvg,N,"An SVG simplification library.",https://github.com/RazrFalcon/resvg
+gitoxide,N,"A command-line application for interacting with git repositories",https://github.com/Byron/gitoxide
+wagyu-zcash,N,"A library for generating Zcash wallets",https://github.com/ArgusHQ/wagyu/tree/v0.6.1/zcash
+crosvm_plugin,N,"",
+fst-bench,Y,"Criterion benchmark suite for fst.",https://github.com/BurntSushi/fst
+sit,N,"Serverless Information Tracker",
