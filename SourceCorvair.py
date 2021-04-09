@@ -78,13 +78,15 @@ def genAllSecondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums):
 
 
 # Get the impact of each bounds check
-def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None):
+def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, test_times=5):
     genAllFirstRoundExp(cargo_root, old_fname, new_fname, all_line_nums)
 
     time_list = []
     for idx, line_num in enumerate(all_line_nums):
-        exp_name = os.path.join(cargo_root, "explore-src-r1", "exp-" + str(idx), "exp.exe")
-        time_exp, _, _ = runExpWithName(exp_name, arg, test_time=5)
+        dir_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx))
+        exp_name = os.path.join(dir_name, "exp.exe")
+        os.chdir(dir_name)
+        time_exp, _, _ = runExpWithName(exp_name, arg, test_time=test_times)
         if time_exp is None:
             exit()
 
@@ -100,7 +102,7 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None):
 
 
 # Get the impact of combined bounds check
-def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None):
+def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None, test_times=5):
     genAllSecondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums)
 
     cur_lines = []
@@ -110,8 +112,10 @@ def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None)
     bottom_error_list = [] # shorter
 
     for idx, line_num in enumerate(sorted_line_nums):
-        exp_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx), "exp.exe")
-        time_exp, shortest_run, longest_run = runExpWithName(exp_name, arg, test_time=5)
+        dir_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx))
+        exp_name = os.path.join(dir_name, "exp.exe")
+        os.chdir(dir_name)
+        time_exp, shortest_run, longest_run = runExpWithName(exp_name, arg, test_time=test_times)
         if time_exp is None:
             exit()
 
@@ -177,7 +181,7 @@ if __name__ == "__main__":
     p.wait()
     exp_name = os.path.join(cargo_root, "baseline", "exp-safe/exp.exe")
     # warm up
-    runExpWithName(exp_name, arg, test_time=10)
+    # runExpWithName(exp_name, arg, test_time=10)
 
     safe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Safe baseline:", safe_time)
@@ -187,14 +191,14 @@ if __name__ == "__main__":
     p.wait()
     exp_name = os.path.join(cargo_root, "baseline", "exp-unsafe/exp.exe")
     # warmup
-    runExpWithName(exp_name, arg, test_time=10)
+    # runExpWithName(exp_name, arg, test_time=10)
     unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Unsafe baseline:", unsafe_time)
 
     # do P1, other wise the impact tuple is loaded from the pickle file
     if p2_src is None:
         # start the experiment
-        impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg)
+        impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
 
         print("Top 10 Impact")
         for idx in range(min(10, len(impact_tuple))):
@@ -208,7 +212,7 @@ if __name__ == "__main__":
             exit()
 
     sorted_line_nums = [x[0] for x in impact_tuple]
-    final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg)
+    final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
     print("Top 10 Combined")
     for idx in range(min(10, len(final_tuple))):

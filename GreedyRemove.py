@@ -51,6 +51,9 @@ def runExpWithName(exp_name, arg=None, test_time=10):
             s = m.group(1)
             result  = float(s.strip())
             time_list.append(result)
+
+            with open("exp.out", "w") as fd:
+                fd.write(out)
             #s = s.replace(',', '')
             #result = int(s)
         except Exception:

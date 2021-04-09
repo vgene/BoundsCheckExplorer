@@ -25,7 +25,8 @@ from collections import defaultdict
 #                   "jpeg-decoder-0.1.20", "outils-0.2.0",  "phf_generator-0.8.0", "itertools-0.9.0"]
 # BENCHMARK_LIST = ["brotli-expand"]
 BENCHMARK_LIST = [ "brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order",
-        "brotli_llvm9_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order"]
+        "brotli_llvm9_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_2",
+        "brotli_llvm11_vec_cargo_fixed_order_valgrind", "brotli_llvm11_vec_cargo"]
         # "brotli_llvm9_no_vec_fixed_order", ]
         #"brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"]
         #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
@@ -354,6 +355,30 @@ def genFigs():
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
     fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     fig.write_image("images/comparison-cargo-vec.pdf")
+
+    print("Generating comparison cargo run 1/2")
+    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_2"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-cargo-run2.pdf")
+
+    print("Generating comparison cargo vs valgrind")
+    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_valgrind"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-cargo-valgrind.pdf")
+
+    print("Generating comparison cargo vs fixed order")
+    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo"], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/comparison-cargo-fixed-order.pdf")
 
     print("Generating comparison All")
     fig = getComparisonFig(BENCHMARK_LIST, True, False)
