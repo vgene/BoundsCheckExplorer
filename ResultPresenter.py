@@ -57,6 +57,9 @@ class ResultProvider:
     def getBarResult(self, benchmark):
         time_safe = self._results[benchmark]['safe_baseline'][0]
         time_unsafe = self._results[benchmark]['unsafe_baseline'][0]
+
+        print(time_unsafe)
+        print(time_safe)
         
         lines = []
         speedups = []
@@ -64,9 +67,10 @@ class ResultProvider:
         for idx, item in enumerate(self._results[benchmark]["impact_tuple"]):
             lines.append(item[0])
             one_uncheck_item = self._results[benchmark]["impact_tuple_one_uncheck"][idx]
-            speedups.append((one_uncheck_item[1] / time_unsafe - 1) *100)
+            speedups.append((time_safe / one_uncheck_item[1] - 1) *100)
 
-            slowdowns.append((time_safe /item[1] - 1) * 100)
+            print(item)
+            slowdowns.append((item[1] / time_unsafe - 1) * 100)
 
         return lines, speedups, slowdowns
 
@@ -502,6 +506,14 @@ def genFigs():
     # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     # fig.write_image("images/comparison-all.pdf")
 
+    print("Generating comparison All")
+    fig = getComparisonFig(['brotli_llvm11_vec_cargo_exp_3'], True, False)
+    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/brotli-expand-final.pdf")
+    
     print("Generate bar")
     fig = getBarFig('brotli_llvm11_vec_cargo_exp')
     fig.write_image("images/bar-cargo-exp.pdf")
