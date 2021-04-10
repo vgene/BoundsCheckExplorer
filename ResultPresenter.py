@@ -56,17 +56,17 @@ class ResultProvider:
 
     def getBarResult(self, benchmark):
         time_safe = self._results[benchmark]['safe_baseline'][0]
-        time_unsafe = self._results[benchmark]['safe_baseline'][0]
+        time_unsafe = self._results[benchmark]['unsafe_baseline'][0]
         
         lines = []
         speedups = []
         slowdowns = []
         for idx, item in enumerate(self._results[benchmark]["impact_tuple"]):
             lines.append(item[0])
-            speedups.append((time_safe / item[1] - 1) *100)
-
             one_uncheck_item = self._results[benchmark]["impact_tuple_one_uncheck"][idx]
-            slowdowns.append((one_uncheck_item[1] / time_unsafe - 1) * 100)
+            speedups.append((one_uncheck_item[1] / time_unsafe - 1) *100)
+
+            slowdowns.append((time_safe /item[1] - 1) * 100)
 
         return lines, speedups, slowdowns
 
