@@ -118,7 +118,7 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, tes
 
     time_list = []
     for idx, line_num in enumerate(all_line_nums):
-        dir_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx))
+        dir_name = os.path.join(cargo_root, "explore-src-r1", "exp-" + str(idx))
         exp_name = os.path.join(dir_name, "exp.exe")
         os.chdir(dir_name)
         time_exp, _, _ = runExpWithName(exp_name, arg, test_time=test_times)
