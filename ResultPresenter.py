@@ -173,7 +173,7 @@ def getPlotBarLayout():
         dcc.Dropdown(
             id='benchmark-dropdown-2',
             options=benchmark_options,
-            value="assume_true",
+            value="brotli_llvm11_vec_cargo_exp",
         ),
         html.Div(id='dd-output-container-2')
     ])
@@ -184,7 +184,7 @@ def getPlotBarLayout():
 @app.callback(
     dash.dependencies.Output('dd-output-container', 'children'),
     [dash.dependencies.Input('benchmark-dropdown', 'value'), ])
-def getOneBenchmarkLayout(benchmark="assume_true"):
+def getOneBenchmarkLayout(benchmark="brotli_llvm11_vec_cargo_exp"):
 
     fig = getOneBenchmarkFig(benchmark)
 
@@ -208,6 +208,13 @@ def getBarLayout(benchmark="brotli_llvm11_vec_cargo_exp"):
 
     if fig:
         layout = [html.Div(children='Plot of ' + benchmark),
+                html.Br(),
+                html.Div(children="""
+                Speedup is making one bounds check unchecked, the others still checked;
+                Slowdown is making one bounds check checked, the others unchecked.
+                The set is only the ones that programmers have made 'get_unchecked'.
+                Both speedups and slowdowns are expected to be a positive number.
+                """),
                   dcc.Graph(
             id='bmark-graph',
             figure=fig)]
