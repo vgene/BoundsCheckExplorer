@@ -51,8 +51,8 @@ class ResultProvider:
         self._results = results
 
     def getBarResult(self, benchmark):
-        time_safe = self._results[benchmark]['safe_baseline']
-        time_unsafe = self._results[benchmark]['safe_baseline']
+        time_safe = self._results[benchmark]['safe_baseline'][0]
+        time_unsafe = self._results[benchmark]['safe_baseline'][0]
         
         lines = []
         speedups = []
@@ -183,7 +183,12 @@ def getOneBenchmarkLayout(benchmark="assume_true"):
 
 def getBarFig(benchmark):
     lines, rel_speedups, rel_slowdowns = app._resultProvider.getBarResult(benchmark)
+    
+    t = list(zip(lines, rel_speedups, rel_slowdowns))
+    t.sort(key=lambda x: x[0])
+    lines, rel_speedups, rel_slowdowns = zip(*t)
 
+    lines = [str(i) for i in lines]
     bar_speedups = {'x': lines, 'y': rel_speedups, 'type': 'bar', 'name': 'speedup over all safe'}
     bar_slowdowns = {'x': lines, 'y': rel_slowdowns, 'type': 'bar', 'name': 'slowdowns over all unsafe'}
 
@@ -364,87 +369,87 @@ def display_page(pathname):
 
 
 def genFigs():
-    for benchmark in BENCHMARK_LIST:
-        fig = getOneBenchmarkFig(benchmark, False, False)
-        if not fig:
-            continue
-        print("Generating: " + benchmark)
-        fig.update_layout(showlegend=False, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-        fig.update_yaxes(title={"standoff": 4})
-        fig.update_traces(marker={"line": {"width":0}}) # Remove border
-        fig.update_layout(showlegend=False, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
+    # for benchmark in BENCHMARK_LIST:
+        # fig = getOneBenchmarkFig(benchmark, False, False)
+        # if not fig:
+            # continue
+        # print("Generating: " + benchmark)
+        # fig.update_layout(showlegend=False, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+        # fig.update_yaxes(title={"standoff": 4})
+        # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+        # fig.update_layout(showlegend=False, width=400, height=250, margin=dict(l=2, r=2, t=2, b=2))
 
-        index = benchmark.rfind('-')
-        if index == -1:
-            filename = benchmark
-        else:
-            filename = benchmark[:benchmark.rindex('-')]
-        filename = filename.replace('_', '-')
-        fig.write_image("images/" + filename  + ".pdf")
+        # index = benchmark.rfind('-')
+        # if index == -1:
+            # filename = benchmark
+        # else:
+            # filename = benchmark[:benchmark.rindex('-')]
+        # filename = filename.replace('_', '-')
+        # fig.write_image("images/" + filename  + ".pdf")
 
-    print("Generating comparison Vec/NoVec")
-    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-vec-11.pdf")
+    # print("Generating comparison Vec/NoVec")
+    # fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-vec-11.pdf")
 
-    print("Generating comparison LLVM9/11")
-    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm9_vec_fixed_order"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-llvm.pdf")
+    # print("Generating comparison LLVM9/11")
+    # fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm9_vec_fixed_order"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-llvm.pdf")
 
-    print("Generating comparison fat/cargo")
-    fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-cargo.pdf")
+    # print("Generating comparison fat/cargo")
+    # fig = getComparisonFig(["brotli_llvm11_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-cargo.pdf")
 
-    print("Generating comparison cargo/vec")
-    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-cargo-vec.pdf")
+    # print("Generating comparison cargo/vec")
+    # fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-cargo-vec.pdf")
 
-    print("Generating comparison cargo run 1/2")
-    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_2"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-cargo-run2.pdf")
+    # print("Generating comparison cargo run 1/2")
+    # fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_2"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-cargo-run2.pdf")
 
-    print("Generating comparison cargo vs valgrind")
-    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_valgrind"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-cargo-valgrind.pdf")
+    # print("Generating comparison cargo vs valgrind")
+    # fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_valgrind"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-cargo-valgrind.pdf")
 
-    print("Generating comparison cargo vs fixed order")
-    fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo"], True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-cargo-fixed-order.pdf")
+    # print("Generating comparison cargo vs fixed order")
+    # fig = getComparisonFig(["brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo"], True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-cargo-fixed-order.pdf")
 
-    print("Generating comparison All")
-    fig = getComparisonFig(BENCHMARK_LIST, True, False)
-    fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/comparison-all.pdf")
+    # print("Generating comparison All")
+    # fig = getComparisonFig(BENCHMARK_LIST, True, False)
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/comparison-all.pdf")
 
     print("Generate bar")
     fig = getBarFig('brotli_llvm11_vec_cargo_exp')
