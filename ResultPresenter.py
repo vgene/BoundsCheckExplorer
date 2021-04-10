@@ -163,12 +163,48 @@ def getPlotMainLayout():
     return layout
 
 
+def getPlotBarLayout():
+    benchmark_options = []
+
+    for benchmark in sorted(BENCHMARK_LIST):
+        benchmark_options.append({'label': benchmark, 'value': benchmark})
+
+    layout = html.Div([
+        dcc.Dropdown(
+            id='benchmark-dropdown-2',
+            options=benchmark_options,
+            value="assume_true",
+        ),
+        html.Div(id='dd-output-container-2')
+    ])
+
+    return layout
+
+
 @app.callback(
     dash.dependencies.Output('dd-output-container', 'children'),
     [dash.dependencies.Input('benchmark-dropdown', 'value'), ])
 def getOneBenchmarkLayout(benchmark="assume_true"):
 
     fig = getOneBenchmarkFig(benchmark)
+
+    if fig:
+        layout = [html.Div(children='Plot of ' + benchmark),
+                  dcc.Graph(
+            id='bmark-graph',
+            figure=fig)]
+    else:
+        layout = None
+
+    return layout
+
+
+@app.callback(
+    dash.dependencies.Output('dd-output-container-2', 'children'),
+    [dash.dependencies.Input('benchmark-dropdown-2', 'value'), ])
+def getBarLayout(benchmark="brotli_llvm11_vec_cargo_exp"):
+
+    fig = getBarFig(benchmark)
 
     if fig:
         layout = [html.Div(children='Plot of ' + benchmark),
@@ -221,7 +257,7 @@ def getBarFig(benchmark):
             'font': {'family': 'Helvetica', 'color': "Black"},
             'plot_bgcolor': 'white',
             'autosize': False,
-            'width': 1200,
+            'width': 3000,
             'height': 400}
         })
 
@@ -359,6 +395,10 @@ def display_page(pathname):
 
     if pathname == '/':
         pathname = '/plots'
+
+    if pathname == '/bar':
+        layout = getPlotBarLayout()
+        return layout
 
     if pathname == '/plots':
         layout = getPlotMainLayout()
