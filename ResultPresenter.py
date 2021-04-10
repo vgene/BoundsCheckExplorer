@@ -58,9 +58,6 @@ class ResultProvider:
         time_safe = self._results[benchmark]['safe_baseline'][0]
         time_unsafe = self._results[benchmark]['unsafe_baseline'][0]
 
-        print(time_unsafe)
-        print(time_safe)
-        
         lines = []
         speedups = []
         slowdowns = []
@@ -69,7 +66,6 @@ class ResultProvider:
             one_uncheck_item = self._results[benchmark]["impact_tuple_one_uncheck"][idx]
             speedups.append((time_safe / one_uncheck_item[1] - 1) *100)
 
-            print(item)
             slowdowns.append((item[1] / time_unsafe - 1) * 100)
 
         return lines, speedups, slowdowns
