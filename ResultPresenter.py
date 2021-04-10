@@ -26,7 +26,7 @@ from collections import defaultdict
 # BENCHMARK_LIST = ["brotli-expand"]
 BENCHMARK_LIST = [ "brotli_llvm11_vec_fixed_order", "brotli_llvm11_no_vec_fixed_order",
         "brotli_llvm9_vec_fixed_order", "brotli_llvm11_vec_cargo_fixed_order", "brotli_llvm11_no_vec_cargo_fixed_order", "brotli_llvm11_vec_cargo_fixed_order_2",
-        "brotli_llvm11_vec_cargo_fixed_order_valgrind", "brotli_llvm11_vec_cargo"]
+        "brotli_llvm11_vec_cargo_fixed_order_valgrind", "brotli_llvm11_vec_cargo", 'brotli_llvm11_vec_cargo_exp']
         # "brotli_llvm9_no_vec_fixed_order", ]
         #"brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"]
         #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
@@ -49,6 +49,22 @@ class ResultProvider:
                 results[benchmark] = d
 
         self._results = results
+
+    def getBarResult(self, benchmark):
+        time_safe = self._results[benchmark]['safe_baseline']
+        time_unsafe = self._results[benchmark]['safe_baseline']
+        
+        lines = []
+        speedups = []
+        slowdowns = []
+        for idx, item in enumerate(self._results[benchmark]["impact_tuple"]):
+            lines.append(item[0])
+            speedups.append((time_safe / item[1] - 1) *100)
+
+            one_uncheck_item = self._results[benchmark]["impact_tuple_one_uncheck"][idx]
+            slowdowns.append((one_uncheck_item[1] / time_unsafe - 1) * 100)
+
+        return lines, speedups, slowdowns
 
     def getSourceCorvairPairs(self, benchmark):
         fns = [0]
@@ -163,6 +179,48 @@ def getOneBenchmarkLayout(benchmark="assume_true"):
         layout = None
 
     return layout
+
+
+def getBarFig(benchmark):
+    lines, rel_speedups, rel_slowdowns = app._resultProvider.getBarResult(benchmark)
+
+    bar_speedups = {'x': lines, 'y': rel_speedups, 'type': 'bar', 'name': 'speedup over all safe'}
+    bar_slowdowns = {'x': lines, 'y': rel_slowdowns, 'type': 'bar', 'name': 'slowdowns over all unsafe'}
+
+    bar_list = [bar_speedups, bar_slowdowns]
+
+    fig = go.Figure({
+        'data': bar_list,
+        'layout': {
+            'legend': {'orientation': 'h', 'x': 0.0, 'y': 1.05}, #1.88
+            'yaxis': {
+                'zeroline': True,
+                'zerolinewidth': 1,
+                'zerolinecolor': 'rgb(200, 200, 200)',
+                'showline': True,
+                'linewidth': 1,
+                'ticks': "inside",
+                'mirror': 'all',
+                'linecolor': 'black',
+                'gridcolor':'rgb(200,200,200)',
+                # 'range': [0, 10],
+                'nticks': 15,
+                'ticksuffix': "%",
+                },
+            'xaxis': {
+                'linecolor': 'black',
+                'showline': True,
+                'linewidth': 1,
+                'mirror': 'all'
+                },
+            'font': {'family': 'Helvetica', 'color': "Black"},
+            'plot_bgcolor': 'white',
+            'autosize': False,
+            'width': 1200,
+            'height': 400}
+        })
+
+    return fig
 
 
 def getComparisonFig(benchmarks, show_legend=False, show_title=False):
@@ -387,6 +445,11 @@ def genFigs():
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
     fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     fig.write_image("images/comparison-all.pdf")
+
+    print("Generate bar")
+    fig = getBarFig('brotli_llvm11_vec_cargo_exp')
+    fig.write_image("images/bar-cargo-exp.pdf")
+
 
 
 if __name__ == '__main__':

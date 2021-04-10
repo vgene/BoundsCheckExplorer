@@ -62,6 +62,19 @@ def genAllFirstRoundExp(cargo_root, old_fname, new_fname, all_line_nums):
         p.wait()
 
 
+# keep everything safe, try one unsafe
+def genAllOneUncheckRoundExp(cargo_root, old_fname, new_fname, all_line_nums):
+    explore_abs = os.path.join(cargo_root, "explore-src-one-uncheck")
+
+    child_processes = []
+    for idx, line_num in enumerate(all_line_nums):
+        test_line_nums = [line_num]
+
+        child_processes.append(genSourceExpNB(cargo_root, explore_abs, old_fname, new_fname, idx, test_line_nums))
+
+    for p in child_processes:
+        p.wait()
+
 # keep everything safe, add unsafe one by one
 def genAllSecondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums):
     explore_abs = os.path.join(cargo_root, "explore-src-r2")
@@ -76,6 +89,28 @@ def genAllSecondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums):
     for p in child_processes:
         p.wait()
 
+# Get the impact of each bounds check, different method
+def oneUnsafeExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, test_times=5):
+    genAllOneUncheckRoundExp(cargo_root, old_fname, new_fname, all_line_nums)
+
+    time_list = []
+    for idx, line_num in enumerate(all_line_nums):
+        dir_name = os.path.join(cargo_root, "explore-src-one-uncheck", "exp-" + str(idx))
+        exp_name = os.path.join(dir_name, "exp.exe")
+        os.chdir(dir_name)
+        time_exp, _, _ = runExpWithName(exp_name, arg, test_time=test_times)
+        if time_exp is None:
+            exit()
+
+        print("Exp", idx, ":", time_exp)
+        time_list.append(time_exp)
+
+    impact_tuple = list(zip(all_line_nums, time_list))
+
+    # ordered it in descending order
+    impact_tuple.sort(key=lambda x: x[1], reverse=True)
+
+    return impact_tuple
 
 # Get the impact of each bounds check
 def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, test_times=5):
@@ -163,6 +198,9 @@ if __name__ == "__main__":
     new_fname = "src/lib.rs"
     cargo_root, arg, pickle_name, clang_arg, p2_src, test_times = argParse()
 
+    if not pickle_name.endswith("pkl"):
+        pickle_name += ".pkl"
+
     if clang_arg is not None:
         CLANG_ARGS = clang_arg
 
@@ -211,6 +249,23 @@ if __name__ == "__main__":
             print(e)
             exit()
 
+    # start the experiment, all but one unsafe
+    impact_tuple_one_uncheck = oneUnsafeExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
+
+    print("Top 10 Impact")
+    for idx in range(min(10, len(impact_tuple_one_uncheck))):
+        print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
+    # end of one uncheck
+
+    # saved 
+    results = {"impact_tuple": impact_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+            "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
+    os.chdir(cargo_root)
+
+    with open("INTER2-" + pickle_name, "wb") as fd:
+        pickle.dump(results, fd)
+    print("Partial result dumped")
+
     sorted_line_nums = [x[0] for x in impact_tuple]
     final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
@@ -219,12 +274,9 @@ if __name__ == "__main__":
         print(idx + 1, ": ", final_tuple[idx][1])
         print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
-    results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple,
+    results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
             "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     os.chdir(cargo_root)
-
-    if not pickle_name.endswith("pkl"):
-        pickle_name += ".pkl"
 
     with open(pickle_name, "wb") as fd:
         pickle.dump(results, fd)
