@@ -102,7 +102,7 @@ def oneUnsafeExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, test
         if time_exp is None:
             exit()
 
-        print("Exp", idx, ":", time_exp)
+        print("Exp", idx, ",line: ", line_num, ":", time_exp)
         time_list.append(time_exp)
 
     impact_tuple = list(zip(all_line_nums, time_list))
@@ -125,7 +125,7 @@ def firstRoundExp(cargo_root, old_fname, new_fname, all_line_nums, arg=None, tes
         if time_exp is None:
             exit()
 
-        print("Exp", idx, ":", time_exp)
+        print("Exp", idx, ",line: ", line_num, ":", time_exp)
         time_list.append(time_exp)
 
     impact_tuple = list(zip(all_line_nums, time_list))
@@ -214,6 +214,9 @@ if __name__ == "__main__":
     line_nums = getUnsafeLines(old_fname)
     print("Running Corvair on ", len(line_nums), " bounds checks")
 
+    import random
+    random.shuffle(line_nums)
+
     # all safe baseline
     p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
     p.wait()
@@ -262,7 +265,7 @@ if __name__ == "__main__":
             "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     os.chdir(cargo_root)
 
-    with open("INTER2-" + pickle_name, "wb") as fd:
+    with open("INTER-" + pickle_name, "wb") as fd:
         pickle.dump(results, fd)
     print("Partial result dumped")
 

@@ -39,14 +39,16 @@ class ResultProvider:
 
     def parsePickle(self, root_path):
         results = {}
-        for benchmark in BENCHMARK_LIST:
-            filename =  root_path + "/" + benchmark+'.pkl'
+        for filename in os.listdir(root_path):
+            if filename.endswith(".pkl"):
+                benchmark = filename[:len(filename) - 4]
+                filename =  root_path + "/" + filename
 
-            if path.isfile(filename):
-                with open(filename, 'rb') as fd:
-                    d = pickle.load(fd)
+                if path.isfile(filename):
+                    with open(filename, 'rb') as fd:
+                        d = pickle.load(fd)
 
-                results[benchmark] = d
+                    results[benchmark] = d
 
         self._results = results
 
