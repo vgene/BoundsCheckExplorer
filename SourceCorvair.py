@@ -214,8 +214,8 @@ if __name__ == "__main__":
     line_nums = getUnsafeLines(old_fname)
     print("Running Corvair on ", len(line_nums), " bounds checks")
 
-    import random
-    random.shuffle(line_nums)
+    # import random
+    # random.shuffle(line_nums)
 
     # all safe baseline
     p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "safe", [])
@@ -236,40 +236,71 @@ if __name__ == "__main__":
     unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Unsafe baseline:", unsafe_time)
 
-    # do P1, other wise the impact tuple is loaded from the pickle file
-    if p2_src is None:
-        # start the experiment
-        impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
+    # remove cold baseline
+    hot_lines = line_nums.copy()
+    from ParseCallgrind import getColdLines
+    callgrind_fname = "/scratch/ziyangx/BoundsCheckExplorer/brotli-expand/explore/call-graph/callgrind.out.401080"
+    cold_lines = getColdLines(hot_lines, callgrind_fname, 50000)
+    for i in cold_lines:
+        hot_lines.remove(i)
+    print("Hot code has", len(hot_lines))
+    p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "hot", hot_lines)
+    p.wait()
+    exp_name = os.path.join(cargo_root, "baseline", "exp-hot/exp.exe")
+    # warmup
+    # runExpWithName(exp_name, arg, test_time=10)
+    unsafe_time = runExpWithName(exp_name, arg, test_time=test_times)
+    print("Hot baseline:", unsafe_time)
 
-        print("Top 10 Impact")
-        for idx in range(min(10, len(impact_tuple))):
-            print("Line ", impact_tuple[idx][0], ": ", impact_tuple[idx][1])
-    else:
-        try:
-            impact_tuple = impact_obj['impact_tuple']
-        except Exception as e:
-            print("Cannot load the impact tuple")
-            print(e)
-            exit()
+    # # do P1, other wise the impact tuple is loaded from the pickle file
+    # if p2_src is None:
+        # # start the experiment
+        # impact_tuple = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
 
-    # start the experiment, all but one unsafe
-    impact_tuple_one_uncheck = oneUnsafeExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
+        # print("Top 10 Impact")
+        # for idx in range(min(10, len(impact_tuple))):
+            # print("Line ", impact_tuple[idx][0], ": ", impact_tuple[idx][1])
+    # else:
+        # try:
+            # impact_tuple = impact_obj['impact_tuple']
+        # except Exception as e:
+            # print("Cannot load the impact tuple")
+            # print(e)
+            # exit()
 
-    print("Top 10 Impact")
-    for idx in range(min(10, len(impact_tuple_one_uncheck))):
-        print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
-    # end of one uncheck
+    # # start the experiment, all but one unsafe
+    # impact_tuple_one_uncheck = oneUnsafeExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
 
-    # saved 
-    results = {"impact_tuple": impact_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
-            "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
-    os.chdir(cargo_root)
+    # print("Top 10 Impact")
+    # for idx in range(min(10, len(impact_tuple_one_uncheck))):
+        # print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
+    # # end of one uncheck
 
-    with open("INTER-" + pickle_name, "wb") as fd:
-        pickle.dump(results, fd)
-    print("Partial result dumped")
+    # # saved 
+    # results = {"impact_tuple": impact_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+            # "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
+    # os.chdir(cargo_root)
 
-    sorted_line_nums = [x[0] for x in impact_tuple]
+    # with open("INTER-" + pickle_name, "wb") as fd:
+        # pickle.dump(results, fd)
+    # print("Partial result dumped")
+
+    # sorted_line_nums = [x[0] for x in impact_tuple]
+
+    ### sorted by from one unchecked
+    ## with open("/scratch/ziyangx/BoundsCheckExplorer/results/brotli_llvm11_vec_cargo_exp_3.pkl", 'rb') as fd:
+    ##     obj = pickle.load(fd)
+
+    ## impact_lines = [i[0] for i in obj['impact_tuple_one_uncheck']]
+    ## impact_lines.reverse()
+    ## sorted_line_nums = impact_lines
+
+    ### sorted by hotness
+    from ParseCallgrind import sortByHot
+    hot_lines = sortByHot(hot_lines, callgrind_fname)
+    hot_lines.extend(cold_lines)
+    sorted_line_nums = hot_lines
+
     final_tuple = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
     print("Top 10 Combined")
@@ -277,7 +308,9 @@ if __name__ == "__main__":
         print(idx + 1, ": ", final_tuple[idx][1])
         print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
-    results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+    # results = {"impact_tuple": impact_tuple, "final_tuple": final_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+            # "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
+    results = {"final_tuple": final_tuple,
             "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     os.chdir(cargo_root)
 

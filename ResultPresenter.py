@@ -502,8 +502,8 @@ def genFigs():
     # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     # fig.write_image("images/comparison-all.pdf")
 
-    print("Generating comparison All")
-    fig = getComparisonFig(['brotli_llvm11_vec_cargo_exp_3'], True, False)
+    print("Generating comparison random vs ordered")
+    fig = getComparisonFig(['brotli_llvm11_vec_cargo_exp_3', 'brotli_llvm11_vec_cargo_one_unchecked', 'brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random', 'brotli_llvm11_vec_cargo_seq'], True, False)
     fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
