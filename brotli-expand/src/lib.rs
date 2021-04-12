@@ -11398,8 +11398,8 @@ mod bit_reader {
     #[inline(always)]
     fn BrotliLoad16LE(input: &[u8], next_in_u32: u32) -> u16 {
         let next_in: usize = next_in_u32 as usize;
-        (unsafe { *input.get_unchecked(next_in) } as u16) |
-            ((unsafe { *input.get_unchecked(next_in + 1) } as u16) << 8)
+        (unsafe { *(&input[next_in]) } as u16) |
+            ((unsafe { *(&input[next_in + 1]) } as u16) << 8)
     }
     #[inline(always)]
     fn BrotliLoad32LE(input: &[u8], next_in_u32: u32) -> u32 {
@@ -11526,7 +11526,7 @@ mod bit_reader {
                      reg_t) << 56;
         } else {
             br.val_ |=
-                (unsafe { *input.get_unchecked(br.next_in as usize) } as
+                (unsafe { *(&input[br.next_in as usize]) } as
                      reg_t) << 24;
         }
         br.bit_pos_ -= 8;
@@ -11651,8 +11651,8 @@ mod bit_reader {
         offset -= bytes_left;
         if offset < br.avail_in {
             return unsafe {
-                       *input.get_unchecked(br.next_in as usize +
-                                                offset as usize)
+                       *(&input[br.next_in as usize +
+                                                offset as usize])
                    } as i32;
         }
         -1
@@ -11661,7 +11661,7 @@ mod bit_reader {
                            mut num: u32, input: &[u8]) {
         let mut offset: u32 = 0;
         while BrotliGetAvailableBits(br) >= 8 && num > 0 {
-            *unsafe { dest.get_unchecked_mut(offset as usize) } =
+            *unsafe { (&mut dest[offset as usize]) } =
                 BrotliGetBitsUnmasked(br) as u8;
             BrotliDropBits(br, 8);
             offset += 1;
@@ -11669,10 +11669,10 @@ mod bit_reader {
         }
         for index in 0..num {
             *unsafe {
-                 dest.get_unchecked_mut(offset as usize + index as usize)
+                 (&mut dest[offset as usize + index as usize])
              } =
                 unsafe {
-                    *input.get_unchecked(br.next_in as usize + index as usize)
+                    *(&input[br.next_in as usize + index as usize])
                 };
         }
         br.avail_in -= num;
@@ -11815,14 +11815,14 @@ mod huffman {
         #[allow(dead_code)]
         pub fn get_tree_mut(&mut self, index: u32) -> &mut [HuffmanCode] {
             let start: usize =
-                unsafe { *self.htrees.slice().get_unchecked(index as usize) }
+                unsafe { *(&self.htrees.slice()[index as usize]) }
                     as usize;
             unsafe { (&mut self.codes.slice_mut()[start..]) }
         }
         #[allow(dead_code)]
         pub fn get_tree(&self, index: u32) -> &[HuffmanCode] {
             let start: usize =
-                unsafe { *self.htrees.slice().get_unchecked(index as usize) }
+                unsafe { *(&self.htrees.slice()[index as usize]) }
                     as usize;
             unsafe { (&self.codes.slice()[start..]) }
         }
@@ -11948,11 +11948,11 @@ mod huffman {
                                                   as usize)
                     };
                 *unsafe {
-                     offset.get_unchecked_mut(
+                     (&mut offset[
                          *code_lengths.get_unchecked(symbol
                                                                               as
                                                                               usize)
-                                                  as usize)
+                                                  as usize])
                  } -= 1;
                 *unsafe { sorted.get_unchecked_mut(index as usize) } = symbol;
             }
@@ -11964,7 +11964,7 @@ mod huffman {
             let code: HuffmanCode =
                 HuffmanCode{bits: 0,
                             value:
-                                unsafe { *sorted.get_unchecked(0) } as u16,};
+                                unsafe { *(&sorted[0]) } as u16,};
             for val in
                 unsafe {
                     (&mut table[0..table_size as usize])
@@ -12090,10 +12090,10 @@ mod huffman {
                     sub_key = BrotliReverseBits(key);
                     key += key_step;
                     (*unsafe {
-                          root_table.get_unchecked_mut(sub_key as usize)
+                          (&mut root_table[sub_key as usize])
                       }).bits = (table_bits + root_bits) as u8;
                     (*unsafe {
-                          root_table.get_unchecked_mut(sub_key as usize)
+                          (&mut root_table[sub_key as usize])
                       }).value =
                         ((table_free_offset as usize) - sub_key as usize) as
                             u16;
@@ -12129,87 +12129,87 @@ mod huffman {
             ::core::panicking::panic("assertion failed: num_symbols <= 4")
         };
         if num_symbols == 0 {
-            (*unsafe { table.get_unchecked_mut(0) }).bits = 0;
-            (*unsafe { table.get_unchecked_mut(0) }).value =
-                unsafe { *val.get_unchecked(0) };
+            (*unsafe { (&mut table[0]) }).bits = 0;
+            (*unsafe { (&mut table[0]) }).value =
+                unsafe { *(&val[0]) };
         } else if num_symbols == 1 {
-            (*unsafe { table.get_unchecked_mut(0) }).bits = 1;
-            (*unsafe { table.get_unchecked_mut(1) }).bits = 1;
-            if unsafe { *val.get_unchecked(1) } >
-                   unsafe { *val.get_unchecked(0) } {
-                (*unsafe { table.get_unchecked_mut(0) }).value =
-                    unsafe { *val.get_unchecked(0) };
-                (*unsafe { table.get_unchecked_mut(1) }).value =
-                    unsafe { *val.get_unchecked(1) };
+            (*unsafe { (&mut table[0]) }).bits = 1;
+            (*unsafe { (&mut table[1]) }).bits = 1;
+            if unsafe { *(&val[1]) } >
+                   unsafe { *(&val[0]) } {
+                (*unsafe { (&mut table[0]) }).value =
+                    unsafe { *(&val[0]) };
+                (*unsafe { (&mut table[1]) }).value =
+                    unsafe { *(&val[1]) };
             } else {
-                (*unsafe { table.get_unchecked_mut(0) }).value =
-                    unsafe { *val.get_unchecked(1) };
-                (*unsafe { table.get_unchecked_mut(1) }).value =
-                    unsafe { *val.get_unchecked(0) };
+                (*unsafe { (&mut table[0]) }).value =
+                    unsafe { *(&val[1]) };
+                (*unsafe { (&mut table[1]) }).value =
+                    unsafe { *(&val[0]) };
             }
             table_size = 2;
         } else if num_symbols == 2 {
-            (*unsafe { table.get_unchecked_mut(0) }).bits = 1;
-            (*unsafe { table.get_unchecked_mut(0) }).value =
-                unsafe { *val.get_unchecked(0) };
-            (*unsafe { table.get_unchecked_mut(2) }).bits = 1;
-            (*unsafe { table.get_unchecked_mut(2) }).value =
-                unsafe { *val.get_unchecked(0) };
-            if unsafe { *val.get_unchecked(2) } >
-                   unsafe { *val.get_unchecked(1) } {
-                (*unsafe { table.get_unchecked_mut(1) }).value =
-                    unsafe { *val.get_unchecked(1) };
-                (*unsafe { table.get_unchecked_mut(3) }).value =
-                    unsafe { *val.get_unchecked(2) };
+            (*unsafe { (&mut table[0]) }).bits = 1;
+            (*unsafe { (&mut table[0]) }).value =
+                unsafe { *(&val[0]) };
+            (*unsafe { (&mut table[2]) }).bits = 1;
+            (*unsafe { (&mut table[2]) }).value =
+                unsafe { *(&val[0]) };
+            if unsafe { *(&val[2]) } >
+                   unsafe { *(&val[1]) } {
+                (*unsafe { (&mut table[1]) }).value =
+                    unsafe { *(&val[1]) };
+                (*unsafe { (&mut table[3]) }).value =
+                    unsafe { *(&val[2]) };
             } else {
-                (*unsafe { table.get_unchecked_mut(1) }).value =
-                    unsafe { *val.get_unchecked(2) };
-                (*unsafe { table.get_unchecked_mut(3) }).value =
-                    unsafe { *val.get_unchecked(1) };
+                (*unsafe { (&mut table[1]) }).value =
+                    unsafe { *(&val[2]) };
+                (*unsafe { (&mut table[3]) }).value =
+                    unsafe { *(&val[1]) };
             }
-            (*unsafe { table.get_unchecked_mut(1) }).bits = 2;
-            (*unsafe { table.get_unchecked_mut(3) }).bits = 2;
+            (*unsafe { (&mut table[1]) }).bits = 2;
+            (*unsafe { (&mut table[3]) }).bits = 2;
             table_size = 4;
         } else if num_symbols == 3 {
             let last: u16 =
                 if val.len() > 3 {
-                    unsafe { *val.get_unchecked(3) }
+                    unsafe { *(&val[3]) }
                 } else { 65535 };
             let mut mval: [u16; 4] =
-                [unsafe { *val.get_unchecked(0) },
-                 unsafe { *val.get_unchecked(1) },
-                 unsafe { *val.get_unchecked(2) }, last];
+                [unsafe { *(&val[0]) },
+                 unsafe { *(&val[1]) },
+                 unsafe { *(&val[2]) }, last];
             for i in 0..3 {
                 for k in i + 1..4 {
                     if mval[k] < mval[i] { mval.swap(k, i); }
                 }
             }
             for i in 0..4 {
-                (*unsafe { table.get_unchecked_mut(i) }).bits = 2;
+                (*unsafe { (&mut table[i]) }).bits = 2;
             }
-            (*unsafe { table.get_unchecked_mut(0) }).value = mval[0];
-            (*unsafe { table.get_unchecked_mut(2) }).value = mval[1];
-            (*unsafe { table.get_unchecked_mut(1) }).value = mval[2];
-            (*unsafe { table.get_unchecked_mut(3) }).value = mval[3];
+            (*unsafe { (&mut table[0]) }).value = mval[0];
+            (*unsafe { (&mut table[2]) }).value = mval[1];
+            (*unsafe { (&mut table[1]) }).value = mval[2];
+            (*unsafe { (&mut table[3]) }).value = mval[3];
             table_size = 4;
         } else if num_symbols == 4 {
             let mut mval: [u16; 4] =
-                [unsafe { *val.get_unchecked(0) },
-                 unsafe { *val.get_unchecked(1) },
-                 unsafe { *val.get_unchecked(2) },
-                 unsafe { *val.get_unchecked(3) }];
+                [unsafe { *(&val[0]) },
+                 unsafe { *(&val[1]) },
+                 unsafe { *(&val[2]) },
+                 unsafe { *(&val[3]) }];
             if mval[3] < mval[2] { mval.swap(3, 2) }
             for i in 0..7 {
-                (*unsafe { table.get_unchecked_mut(i) }).value = mval[0];
-                (*unsafe { table.get_unchecked_mut(i) }).bits =
+                (*unsafe { (&mut table[i]) }).value = mval[0];
+                (*unsafe { (&mut table[i]) }).bits =
                     (1 + (i & 1)) as u8;
             }
-            (*unsafe { table.get_unchecked_mut(1) }).value = mval[1];
-            (*unsafe { table.get_unchecked_mut(3) }).value = mval[2];
-            (*unsafe { table.get_unchecked_mut(5) }).value = mval[1];
-            (*unsafe { table.get_unchecked_mut(7) }).value = mval[3];
-            (*unsafe { table.get_unchecked_mut(3) }).bits = 3;
-            (*unsafe { table.get_unchecked_mut(7) }).bits = 3;
+            (*unsafe { (&mut table[1]) }).value = mval[1];
+            (*unsafe { (&mut table[3]) }).value = mval[2];
+            (*unsafe { (&mut table[5]) }).value = mval[1];
+            (*unsafe { (&mut table[7]) }).value = mval[3];
+            (*unsafe { (&mut table[3]) }).bits = 3;
+            (*unsafe { (&mut table[7]) }).bits = 3;
             table_size = 8;
         } else {
             if !false { ::core::panicking::panic("assertion failed: false") };
@@ -18368,18 +18368,18 @@ pub mod transform {
                    transform: kUppercaseFirst,
                    suffix_id: kPFix_EQSQUOT,}];
     fn ToUpperCase(p: &mut [u8]) -> i32 {
-        if (unsafe { *p.get_unchecked(0) } < 0xc0) {
-            if (unsafe { *p.get_unchecked(0) } >= b'a' &&
-                    unsafe { *p.get_unchecked(0) } <= b'z') {
-                *unsafe { p.get_unchecked_mut(0) } ^= 32;
+        if (unsafe { *(&p[0]) } < 0xc0) {
+            if (unsafe { *(&p[0]) } >= b'a' &&
+                    unsafe { *(&p[0]) } <= b'z') {
+                *unsafe { (&mut p[0]) } ^= 32;
             }
             return 1;
         }
-        if (unsafe { *p.get_unchecked(0) } < 0xe0) {
-            *unsafe { p.get_unchecked_mut(1) } ^= 32;
+        if (unsafe { *(&p[0]) } < 0xe0) {
+            *unsafe { (&mut p[1]) } ^= 32;
             return 2;
         }
-        *unsafe { p.get_unchecked_mut(2) } ^= 5;
+        *unsafe { (&mut p[2]) } ^= 5;
         3
     }
     pub fn TransformDictionaryWord(dst: &mut [u8], mut word: &[u8],
@@ -18388,21 +18388,21 @@ pub mod transform {
         {
             let prefix =
                 &unsafe {
-                     (&kPrefixSuffix[(*kTransforms.get_unchecked(transform
+                     (&kPrefixSuffix[(*(&kTransforms[transform
                                                                                      as
-                                                                                     usize)).prefix_id
+                                                                                     usize])).prefix_id
                                                          as usize..])
                  };
-            while (unsafe { *prefix.get_unchecked(idx as usize) } != 0) {
-                *unsafe { dst.get_unchecked_mut(idx as usize) } =
-                    unsafe { *prefix.get_unchecked(idx as usize) };
+            while (unsafe { *(&prefix[idx as usize]) } != 0) {
+                *unsafe { (&mut dst[idx as usize]) } =
+                    unsafe { *(&prefix[idx as usize]) };
                 idx += 1;
             }
         }
         {
             let t =
                 unsafe {
-                    kTransforms.get_unchecked(transform as usize)
+                    (&kTransforms[transform as usize])
                 }.transform;
             let mut skip: i32 =
                 if t < kOmitFirst1 {
@@ -18414,8 +18414,8 @@ pub mod transform {
             len -= skip;
             if (t <= kOmitLast9) { len -= t as i32; }
             while (i < len) {
-                *unsafe { dst.get_unchecked_mut(idx as usize) } =
-                    unsafe { *word.get_unchecked(i as usize) };
+                *unsafe { (&mut dst[idx as usize]) } =
+                    unsafe { *(&word[i as usize]) };
                 idx += 1;
                 i += 1;
             }
@@ -18440,15 +18440,15 @@ pub mod transform {
         {
             let suffix =
                 &unsafe {
-                     (&kPrefixSuffix[(*kTransforms.get_unchecked(transform
+                     (&kPrefixSuffix[(*(&kTransforms[transform
                                                                                      as
-                                                                                     usize)).suffix_id
+                                                                                     usize])).suffix_id
                                                          as usize..])
                  };
             let mut i: usize = 0;
-            while (unsafe { *suffix.get_unchecked(i as usize) } != 0) {
-                *unsafe { dst.get_unchecked_mut(idx as usize) } =
-                    unsafe { *suffix.get_unchecked(i) };
+            while (unsafe { *(&suffix[i as usize]) } != 0) {
+                *unsafe { (&mut dst[idx as usize]) } =
+                    unsafe { *(&suffix[i]) };
                 idx += 1;
                 i += 1;
             }
@@ -18910,8 +18910,8 @@ mod decode {
                         result: &mut u32) -> bool {
         let mut available_bits = bit_reader::BrotliGetAvailableBits(br);
         if (available_bits == 0) {
-            if (unsafe { *table.get_unchecked(0) }.bits == 0) {
-                *result = unsafe { *table.get_unchecked(0) }.value as u32;
+            if (unsafe { *(&table[0]) }.bits == 0) {
+                *result = unsafe { *(&table[0]) }.value as u32;
                 return true;
             }
             return false;
@@ -18934,9 +18934,9 @@ mod decode {
         available_bits -= HUFFMAN_TABLE_BITS;
         let table_sub_element =
             unsafe {
-                *table.get_unchecked(table_index +
+                *(&table[table_index +
                                          table_element.value as usize +
-                                         val as usize)
+                                         val as usize])
             };
         if (available_bits < table_sub_element.bits as u32) { return false; }
         bit_reader::BrotliDropBits(&mut br,
@@ -19069,9 +19069,9 @@ mod decode {
             *unsafe {
                  symbol_lists.get_unchecked_mut((symbol_list_index_offset as
                                                      i32 +
-                                                     *next_symbol.get_unchecked(code_len
+                                                     *(&next_symbol[code_len
                                                                                     as
-                                                                                    usize))
+                                                                                    usize]))
                                                     as usize)
              } = (*symbol) as u16;
             *unsafe { next_symbol.get_unchecked_mut(code_len as usize) } =
@@ -19130,7 +19130,7 @@ mod decode {
                 if *symbol == last { break ; }
             }
             *unsafe {
-                 next_symbol.get_unchecked_mut(*repeat_code_len as usize)
+                 (&mut next_symbol[*repeat_code_len as usize])
              } = next;
             *space =
                 space.wrapping_sub(repeat_delta << (15 - *repeat_code_len));
@@ -19139,8 +19139,8 @@ mod decode {
                                                          usize)
              } =
                 (unsafe {
-                     *code_length_histo.get_unchecked(*repeat_code_len as
-                                                          usize)
+                     *(&code_length_histo[*repeat_code_len as
+                                                          usize])
                  } as u32 + repeat_delta) as u16;
         } else { *symbol += repeat_delta; }
     }
@@ -19236,7 +19236,7 @@ mod decode {
                 bits &
                     bit_reader::BitMask(huffman::BROTLI_HUFFMAN_MAX_CODE_LENGTH_CODE_LENGTH
                                             as u32);
-            let p = unsafe { *s.table.get_unchecked(p_index as usize) };
+            let p = unsafe { *(&s.table[p_index as usize]) };
             if (p.bits as u32 > available_bits) {
                 if (!bit_reader::BrotliPullByte(&mut s.br, input)) {
                     return BrotliDecoderErrorCode::BROTLI_DECODER_NEEDS_MORE_INPUT;
@@ -19306,7 +19306,7 @@ mod decode {
                         bit_reader::BrotliGetBitsUnmasked(&s.br) as u32 & 0xF;
                 } else { ix = 0; }
                 if (unsafe {
-                        *kCodeLengthPrefixLength.get_unchecked(ix as usize)
+                        *(&kCodeLengthPrefixLength[ix as usize])
                     } as u32 > available_bits) {
                     s.sub_loop_counter = i;
                     s.repeat = num_codes;
@@ -19322,9 +19322,9 @@ mod decode {
                     as u32;
             bit_reader::BrotliDropBits(&mut s.br,
                                        unsafe {
-                                           *kCodeLengthPrefixLength.get_unchecked(ix
+                                           *(&kCodeLengthPrefixLength[ix
                                                                                       as
-                                                                                      usize)
+                                                                                      usize])
                                        } as u32);
             *unsafe {
                  s.code_length_code_lengths.get_unchecked_mut(code_len_idx as
@@ -19537,10 +19537,10 @@ mod decode {
         code = ReadSymbol(table, br, input);
         nbits =
             unsafe {
-                prefix::kBlockLengthPrefixCode.get_unchecked(code as usize)
+                (&prefix::kBlockLengthPrefixCode[code as usize])
             }.nbits as u32;
         unsafe {
-            prefix::kBlockLengthPrefixCode.get_unchecked(code as usize)
+            (&prefix::kBlockLengthPrefixCode[code as usize])
         }.offset as u32 + bit_reader::BrotliReadBits(br, nbits, input)
     }
     fn SafeReadBlockLengthIndex(substate_read_block_length:
@@ -19578,7 +19578,7 @@ mod decode {
         let mut bits: u32 = 0;
         let nbits =
             unsafe {
-                prefix::kBlockLengthPrefixCode.get_unchecked(index as usize)
+                (&prefix::kBlockLengthPrefixCode[index as usize])
             }.nbits;
         if (!bit_reader::BrotliSafeReadBits(br, nbits as u32, &mut bits,
                                             input)) {
@@ -19589,7 +19589,7 @@ mod decode {
         }
         *result =
             unsafe {
-                prefix::kBlockLengthPrefixCode.get_unchecked(index as usize)
+                (&prefix::kBlockLengthPrefixCode[index as usize])
             }.offset as u32 + bits;
         s.substate_read_block_length =
             state::BrotliRunningReadBlockLengthState::BROTLI_STATE_READ_BLOCK_LENGTH_NONE;
@@ -19905,9 +19905,9 @@ mod decode {
                             ;
                             if code == 0 {
                                 *unsafe {
-                                     context_map.get_unchecked_mut(context_index
+                                     (&mut context_map[context_index
                                                                        as
-                                                                       usize)
+                                                                       usize])
                                  } = 0;
                                 ;
                                 context_index += 1;
@@ -19915,9 +19915,9 @@ mod decode {
                             }
                             if code > max_run_length_prefix {
                                 *unsafe {
-                                     context_map.get_unchecked_mut(context_index
+                                     (&mut context_map[context_index
                                                                        as
-                                                                       usize)
+                                                                       usize])
                                  } = (code - max_run_length_prefix) as u8;
                                 ;
                                 context_index += 1;
@@ -19942,9 +19942,9 @@ mod decode {
                             }
                             loop  {
                                 *unsafe {
-                                     context_map.get_unchecked_mut(context_index
+                                     (&mut context_map[context_index
                                                                        as
-                                                                       usize)
+                                                                       usize])
                                  } = 0;
                                 ;
                                 context_index += 1;
@@ -20116,7 +20116,7 @@ mod decode {
                 bit_reader::BrotliBitReaderRestoreState(br, &memento);
                 return false;
             }
-            *unsafe { s.block_length.get_unchecked_mut(tree_type as usize) } =
+            *unsafe { (&mut s.block_length[tree_type as usize]) } =
                 block_length_out;
         }
         let ringbuffer: &mut [u32] =
@@ -20145,7 +20145,7 @@ mod decode {
         let mut i: usize = 0;
         while i <
                   unsafe {
-                      *s.block_type_length_state.num_block_types.get_unchecked(0)
+                      *(&s.block_type_length_state.num_block_types[0])
                   } as usize {
             let offset = (i as usize) << kLiteralContextBits;
             let mut error = 0usize;
@@ -20191,7 +20191,7 @@ mod decode {
         let context_offset: u32;
         let block_type =
             unsafe {
-                *s.block_type_length_state.block_type_rb.get_unchecked(1)
+                *(&s.block_type_length_state.block_type_rb[1])
             } as usize;
         context_offset = (block_type << kLiteralContextBits) as u32;
         s.context_map_slice_index = context_offset as usize;
@@ -20545,12 +20545,12 @@ mod decode {
                                                usize));
             if (s.ringbuffer.slice().len() == 0) { return false; }
             *unsafe {
-                 s.ringbuffer.slice_mut().get_unchecked_mut(s.ringbuffer_size
-                                                                as usize - 1)
+                 (&mut s.ringbuffer.slice_mut()[s.ringbuffer_size
+                                                                as usize - 1])
              } = 0;
             *unsafe {
-                 s.ringbuffer.slice_mut().get_unchecked_mut(s.ringbuffer_size
-                                                                as usize - 2)
+                 (&mut s.ringbuffer.slice_mut()[s.ringbuffer_size
+                                                                as usize - 2])
              } = 0;
             if custom_dict.len() != 0 {
                 let offset =
@@ -20716,7 +20716,7 @@ mod decode {
         s.distance_code =
             s.distance_code - NUM_DISTANCE_SHORT_CODES as i32 + 1;
         *unsafe {
-             s.block_type_length_state.block_length.get_unchecked_mut(2)
+             (&mut s.block_type_length_state.block_length[2])
          } -= 1;
         true
     }
@@ -20788,7 +20788,7 @@ mod decode {
         }
         s.copy_length = copy_length as i32 + v.copy_len_offset as i32;
         *unsafe {
-             s.block_type_length_state.block_length.get_unchecked_mut(1)
+             (&mut s.block_type_length_state.block_length[1])
          } -= 1;
         *insert_length += insert_len_extra as i32;
         true
@@ -21178,7 +21178,7 @@ mod decode {
                                                                                     usize)
                                  } = p1;
                                 *unsafe {
-                                     s.block_type_length_state.block_length.get_unchecked_mut(0)
+                                     (&mut s.block_type_length_state.block_length[0])
                                  } -= 1;
                                 ;
                                 ;
@@ -21262,17 +21262,17 @@ mod decode {
                                {
                                 let mut offset =
                                     unsafe {
-                                        *kBrotliDictionaryOffsetsByLength.get_unchecked(i
+                                        *(&kBrotliDictionaryOffsetsByLength[i
                                                                                             as
-                                                                                            usize)
+                                                                                            usize])
                                     } as i32;
                                 let word_id =
                                     s.distance_code - s.max_distance - 1;
                                 let shift =
                                     unsafe {
-                                        *kBrotliDictionarySizeBitsByLength.get_unchecked(i
+                                        *(&kBrotliDictionarySizeBitsByLength[i
                                                                                              as
-                                                                                             usize)
+                                                                                             usize])
                                     };
                                 let mask =
                                     bit_reader::BitMask(shift as u32) as i32;
@@ -21627,18 +21627,18 @@ mod decode {
                                         BrotliDecoderErrorCode::BROTLI_DECODER_SUCCESS;
                                     let new_byte =
                                         unsafe {
-                                            *xinput.get_unchecked(*input_offset)
+                                            *(&xinput[*input_offset])
                                         };
                                     *unsafe {
-                                         s.buffer.get_unchecked_mut(s.buffer_length
+                                         (&mut s.buffer[s.buffer_length
                                                                         as
-                                                                        usize)
+                                                                        usize])
                                      } = new_byte;
                                     {
                                         match (&unsafe {
-                                                    *saved_buffer.get_unchecked(s.buffer_length
+                                                    *(&saved_buffer[s.buffer_length
                                                                                     as
-                                                                                    usize)
+                                                                                    usize])
                                                 }, &new_byte) {
                                             (left_val, right_val) => {
                                                 if !(*left_val == *right_val)
@@ -21673,12 +21673,12 @@ mod decode {
                                 *available_in = s.br.avail_in as usize;
                                 while *available_in != 0 {
                                     *unsafe {
-                                         s.buffer.get_unchecked_mut(s.buffer_length
+                                         (&mut s.buffer[s.buffer_length
                                                                         as
-                                                                        usize)
+                                                                        usize])
                                      } =
                                         unsafe {
-                                            *xinput.get_unchecked(*input_offset)
+                                            *(&xinput[*input_offset])
                                         };
                                     s.buffer_length += 1;
                                     (*input_offset) += 1;
@@ -21867,7 +21867,7 @@ mod decode {
                                 DecodeVarLenUint8(&mut s.substate_decode_uint8,
                                                   &mut s.br,
                                                   &mut *unsafe {
-                                                            s.block_type_length_state.num_block_types.get_unchecked_mut(index)
+                                                            (&mut s.block_type_length_state.num_block_types[index])
                                                         }, local_input);
                         }
                         match result {
@@ -21877,15 +21877,15 @@ mod decode {
                             _ => break ,
                         }
                         *unsafe {
-                             s.block_type_length_state.num_block_types.get_unchecked_mut(s.loop_counter
+                             (&mut s.block_type_length_state.num_block_types[s.loop_counter
                                                                                              as
-                                                                                             usize)
+                                                                                             usize])
                          } += 1;
                         ;
                         if unsafe {
-                               *s.block_type_length_state.num_block_types.get_unchecked(s.loop_counter
+                               *(&s.block_type_length_state.num_block_types[s.loop_counter
                                                                                             as
-                                                                                            usize)
+                                                                                            usize])
                            } < 2 {
                             s.loop_counter += 1;
                             break ;
@@ -21903,7 +21903,7 @@ mod decode {
                         let loop_counter = s.loop_counter as usize;
                         let alphabet_size =
                             unsafe {
-                                *s.block_type_length_state.num_block_types.get_unchecked(loop_counter)
+                                *(&s.block_type_length_state.num_block_types[loop_counter])
                             } + 2;
                         result =
                             ReadHuffmanCode(alphabet_size, alphabet_size,
@@ -21970,9 +21970,9 @@ mod decode {
                             break ;
                         }
                         *unsafe {
-                             s.block_type_length_state.block_length.get_unchecked_mut(s.loop_counter
+                             (&mut s.block_type_length_state.block_length[s.loop_counter
                                                                                           as
-                                                                                          usize)
+                                                                                          usize])
                          } = block_length_out;
                         ;
                         s.loop_counter += 1;
@@ -22002,7 +22002,7 @@ mod decode {
                                 i32;
                         s.context_modes =
                             s.alloc_u8.alloc_cell(unsafe {
-                                                      *s.block_type_length_state.num_block_types.get_unchecked(0)
+                                                      *(&s.block_type_length_state.num_block_types[0])
                                                   } as usize);
                         if (s.context_modes.slice().len() == 0) {
                             result =
@@ -22027,7 +22027,7 @@ mod decode {
                     BrotliRunningState::BROTLI_STATE_CONTEXT_MAP_1 => {
                         result =
                             DecodeContextMap((unsafe {
-                                                  *s.block_type_length_state.num_block_types.get_unchecked(0)
+                                                  *(&s.block_type_length_state.num_block_types[0])
                                               } as usize) <<
                                                  kLiteralContextBits as usize,
                                              false, &mut s, local_input);
@@ -22060,7 +22060,7 @@ mod decode {
                             } else { num_distance_codes };
                         result =
                             DecodeContextMap((unsafe {
-                                                  *s.block_type_length_state.num_block_types.get_unchecked(2)
+                                                  *(&s.block_type_length_state.num_block_types[2])
                                               } as usize) <<
                                                  kDistanceContextBits as
                                                      usize, true, s,
@@ -22081,7 +22081,7 @@ mod decode {
                                                   kNumInsertAndCopyCodes,
                                                   kNumInsertAndCopyCodes,
                                                   unsafe {
-                                                      *s.block_type_length_state.num_block_types.get_unchecked(1)
+                                                      *(&s.block_type_length_state.num_block_types[1])
                                                   } as u16);
                         s.distance_hgroup.init(&mut s.alloc_u32,
                                                &mut s.alloc_hc,

@@ -193,6 +193,51 @@ def argParse():
     args = parser.parse_args()
     return args.cargo_root, args.arg, args.output, args.clang_arg, args.p2_src, args.test_times
 
+
+def quickTestBrotli(unsafe_lines, arg="/u/ziyangx/bounds-check/BoundsCheckExplorer/brotli-exp/silesia-5.brotli", test_times=5):
+    old_fname = "src/lib-unsafe.rs"
+    new_fname = "src/lib.rs"
+    cargo_root = "/scratch/ziyangx/BoundsCheckExplorer/brotli-expand"
+
+    p = genSourceExpNB(cargo_root, "baseline", old_fname, new_fname, "quick-test", unsafe_lines)
+    p.wait()
+    print("binary generated")
+    exp_name = os.path.join(cargo_root, "baseline", "exp-quick-test/exp.exe")
+
+    quick_result= runExpWithName(exp_name, arg, test_time=test_times)
+    return quick_result
+
+
+# keep everything unsafe, try one safe
+def quickTestBrotliGenAllRoundExp(all_line_nums):
+    old_fname = "src/lib-unsafe.rs"
+    new_fname = "src/lib.rs"
+    cargo_root = "/scratch/ziyangx/BoundsCheckExplorer/brotli-expand"
+    explore_abs = os.path.join(cargo_root, "explore-src-quick-test")
+
+    child_processes = []
+    for idx, line_num in enumerate(all_line_nums):
+        test_line_nums = all_line_nums.copy()
+        test_line_nums.remove(line_num)
+
+        child_processes.append(genSourceExpNB(cargo_root, explore_abs, old_fname, new_fname, idx, test_line_nums))
+
+    for p in child_processes:
+        p.wait()
+
+# Get the impact of combined bounds check
+def quickTestExpWithName(idx, test_times=5, option=0):
+    cargo_root = "/scratch/ziyangx/BoundsCheckExplorer/brotli-expand"
+    arg = "/u/ziyangx/bounds-check/BoundsCheckExplorer/brotli-exp/silesia-5.brotli"
+    dir_name = os.path.join(cargo_root, "explore-src-quick-test", "exp-" + str(idx))
+    exp_name = os.path.join(dir_name, "exp.exe")
+    os.chdir(dir_name)
+    time_exp = runExpWithName(exp_name, arg, test_time=test_times)
+    # time_exp, shortest_run, longest_run = runExpWithName(exp_name, arg, test_time=test_times)
+    # option 0, median, option 1, shortest, option 2 longest
+    return time_exp[option]
+
+
 if __name__ == "__main__":
     old_fname = "src/lib-unsafe.rs"
     new_fname = "src/lib.rs"

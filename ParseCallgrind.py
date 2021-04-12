@@ -56,4 +56,13 @@ if __name__=="__main__":
     lines = getAllUncheckedLines(rs_fname)
     cold_lines = getColdLines(lines, callgrind_fname, 1000)
 
+    for line in cold_lines:
+        lines.remove(line)
+
+    lines = sortByHot(lines, callgrind_fname)
+    line_cnt = parseCallgrind(callgrind_fname)
+
+    for k in lines:
+        print(k, line_cnt[k])
+
     print(len(cold_lines))
