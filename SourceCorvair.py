@@ -4,7 +4,6 @@ import os
 import subprocess
 import pickle
 import time
-import shutil
 import argparse
 from regexify import convertFile
 from GreedyRemove import runExpWithName
@@ -17,7 +16,8 @@ def getUnsafeLines(fname):
         lines = fd.readlines()
 
     for idx, line in enumerate(lines):
-        if "get_unchecked(" in line or "get_unchecked_mut(" in line:
+        # if "get_unchecked(" in line or "get_unchecked_mut(" in line:
+        if "get_unchecked" in line:
             line_nums.append(idx + 1)
 
     return line_nums
@@ -32,12 +32,12 @@ def genSourceExpNB(cargo_root, explore_name, old_fname, new_fname, exp_num, line
         os.makedirs(dir_name)
 
     # convert and save to new file
+    os.makedirs("./src", exist_ok=True)
+    old_fname = os.path.join(cargo_root, old_fname)
+    new_fname = os.path.join(dir_name, new_fname)
     convertFile(old_fname, new_fname, line_nums)
 
     os.chdir(dir_name)
-
-    os.makedirs("./src", exist_ok=True)
-    shutil.copyfile(os.path.join(cargo_root, new_fname), os.path.join(dir_name, "src/lib.rs"))
     # dump the unsafe lines
     with open("unsafe_lines.txt", "w") as fd:
         fd.writelines([str(num) + "\n" for num in line_nums])
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         # print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
     # # end of one uncheck
 
-    # # saved 
+    # # saved
     # results = {"impact_tuple": impact_tuple, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
             # "unsafe_baseline": unsafe_time, "safe_baseline": safe_time}
     # os.chdir(cargo_root)

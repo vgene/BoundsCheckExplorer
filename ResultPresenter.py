@@ -106,6 +106,27 @@ class ResultProvider:
         return fns, times, top_error, bottom_error
 
 
+    def getRelativeTime(self, benchmark):
+        fns = []
+        time_original = self._results[benchmark]['safe_baseline']
+        unsafe_time = self._results[benchmark]['unsafe_baseline']
+        fns.append(0)
+
+        def overhead(time):
+            return (time / unsafe_time[0] - 1) * 100
+
+        times = [overhead(time_original[0])]
+        top_error = [overhead(time_original[2]) - overhead(time_original[0])]
+        bottom_error = [overhead(time_original[0]) - overhead(time_original[1])]
+
+        for idx, item in enumerate(self._results[benchmark]["final_tuple"]):
+            fns.append(idx + 1)
+            times.append(overhead(item[1]))
+            top_error.append((item[2] / unsafe_time[0]) * 100)
+            bottom_error.append((item[3] / unsafe_time[0]) * 100)
+
+        return fns, times, top_error, bottom_error
+
     def getPhase2Pairs(self, benchmark):
         if benchmark.startswith("brotli"):
             return self.getSourceCorvairPairs(benchmark)
@@ -275,10 +296,11 @@ def getBarFig(benchmark):
     return fig
 
 
-def getComparisonFig(benchmarks, show_legend=False, show_title=False):
+def getComparisonFig(benchmarks, show_legend=False, show_title=False, names=None):
     scatter_list = []
-    for benchmark in benchmarks:
-        xs, ys, top_error, bottom_error = app._resultProvider.getAbsoluteTime(benchmark)
+    for idx, benchmark in enumerate(benchmarks):
+        xs, ys, top_error, bottom_error = app._resultProvider.getRelativeTime(benchmark)
+        ys.reverse()
 
         # color = '#0429A1'
         shape = 0
@@ -286,6 +308,9 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
         if xs is None or ys is None:
             return None
     
+        if names is not None:
+            benchmark = names[idx]
+
         scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
             error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
                                        marker={"symbol": shape,
@@ -310,8 +335,8 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
                         'linecolor': 'black',
                         'gridcolor': 'rgb(200, 200, 200)',
                         # 'nticks': 15,
-                        'title': {'text': "Time",'font': {'size': 18} },
-                        'ticksuffix': "s",
+                        'title': {'text': "Overhead",'font': {'size': 18} },
+                        'ticksuffix': "%",
                     },
                     'xaxis': {
                         'range': [0, xs[-1]],
@@ -321,7 +346,7 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False):
                         'gridcolor': 'rgb(200, 200, 200)',
                         'linecolor': 'black',
                         'showline': True,
-                        'title': {'text': "#Bounds Check Removed", 'font': {'size': 18}},
+                        'title': {'text': "#Bounds Check Reintroduced", 'font': {'size': 18}},
                         'linewidth': 2,
                         'mirror': 'all',
                     },
@@ -503,7 +528,7 @@ def genFigs():
     # fig.write_image("images/comparison-all.pdf")
 
     print("Generating comparison random vs ordered")
-    fig = getComparisonFig(['brotli_llvm11_vec_cargo_one_checked', 'brotli_llvm11_vec_cargo_one_unchecked', 'brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random'], True, False)
+    fig = getComparisonFig(['brotli_llvm11_vec_cargo_one_checked', 'brotli_llvm11_vec_cargo_one_unchecked', 'brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
     # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
