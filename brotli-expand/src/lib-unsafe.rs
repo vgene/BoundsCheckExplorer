@@ -11406,7 +11406,7 @@ mod bit_reader {
         let next_in: usize = next_in_u32 as usize;
         let mut four_byte: [u8; 4] = [0; 4];
         four_byte.clone_from_slice(unsafe {
-                                       input.get_unchecked_raw(next_in..next_in
+                                       input.get_unchecked(next_in..next_in
                                                                             +
                                                                             4)
                                    });
@@ -11418,7 +11418,7 @@ mod bit_reader {
         let next_in: usize = next_in_u32 as usize;
         let mut eight_byte: [u8; 8] = [0; 8];
         eight_byte.clone_from_slice(unsafe {
-                                        input.get_unchecked_raw(next_in..next_in
+                                        input.get_unchecked(next_in..next_in
                                                                              +
                                                                              8)
                                     });
@@ -11817,14 +11817,14 @@ mod huffman {
             let start: usize =
                 unsafe { *self.htrees.slice().get_unchecked(index as usize) }
                     as usize;
-            unsafe { self.codes.slice_mut().get_unchecked_raw_mut(start..) }
+            unsafe { self.codes.slice_mut().get_unchecked_mut(start..) }
         }
         #[allow(dead_code)]
         pub fn get_tree(&self, index: u32) -> &[HuffmanCode] {
             let start: usize =
                 unsafe { *self.htrees.slice().get_unchecked(index as usize) }
                     as usize;
-            unsafe { self.codes.slice().get_unchecked_raw(start..) }
+            unsafe { self.codes.slice().get_unchecked(start..) }
         }
         pub fn reset(self: &mut Self, alloc_u32: &mut AllocU32,
                      alloc_hc: &mut AllocHC) {
@@ -11839,7 +11839,7 @@ mod huffman {
             for htree in self.htrees.slice() {
                 ret[index] =
                     unsafe {
-                        (&self.codes).slice().get_unchecked_raw(*htree as
+                        (&self.codes).slice().get_unchecked(*htree as
                                                                     usize..)
                     };
                 index += 1;
@@ -11967,7 +11967,7 @@ mod huffman {
                                 unsafe { *sorted.get_unchecked(0) } as u16,};
             for val in
                 unsafe {
-                    table.get_unchecked_raw_mut(0..table_size as usize)
+                    table.get_unchecked_mut(0..table_size as usize)
                 }.iter_mut() {
                 *val = code;
             }
@@ -18388,7 +18388,7 @@ pub mod transform {
         {
             let prefix =
                 &unsafe {
-                     kPrefixSuffix.get_unchecked_raw((*kTransforms.get_unchecked(transform
+                     kPrefixSuffix.get_unchecked((*kTransforms.get_unchecked(transform
                                                                                      as
                                                                                      usize)).prefix_id
                                                          as usize..)
@@ -18410,7 +18410,7 @@ pub mod transform {
                 } else { t as i32 - (kOmitFirst1 - 1) as i32 };
             let mut i: i32 = 0;
             if (skip > len) { skip = len; }
-            word = unsafe { word.get_unchecked_raw(skip as usize..) };
+            word = unsafe { word.get_unchecked(skip as usize..) };
             len -= skip;
             if (t <= kOmitLast9) { len -= t as i32; }
             while (i < len) {
@@ -18421,7 +18421,7 @@ pub mod transform {
             }
             let uppercase =
                 &mut unsafe {
-                         dst.get_unchecked_raw_mut((idx - len) as usize..)
+                         dst.get_unchecked_mut((idx - len) as usize..)
                      };
             if (t == kUppercaseFirst) {
                 ToUpperCase(uppercase);
@@ -18430,7 +18430,7 @@ pub mod transform {
                 while (len > 0) {
                     let step =
                         ToUpperCase(&mut unsafe {
-                                             uppercase.get_unchecked_raw_mut(uppercase_offset..)
+                                             uppercase.get_unchecked_mut(uppercase_offset..)
                                          });
                     uppercase_offset += step as usize;
                     len -= step;
@@ -18440,7 +18440,7 @@ pub mod transform {
         {
             let suffix =
                 &unsafe {
-                     kPrefixSuffix.get_unchecked_raw((*kTransforms.get_unchecked(transform
+                     kPrefixSuffix.get_unchecked((*kTransforms.get_unchecked(transform
                                                                                      as
                                                                                      usize)).suffix_id
                                                          as usize..)
@@ -19011,7 +19011,7 @@ mod decode {
         let num_symbols = s.symbol;
         for symbols_lists_item in
             unsafe {
-                s.symbols_lists_array.get_unchecked_raw_mut(s.sub_loop_counter
+                s.symbols_lists_array.get_unchecked_mut(s.sub_loop_counter
                                                                 as
                                                                 usize..num_symbols
                                                                            as
@@ -19038,12 +19038,12 @@ mod decode {
         i = 0;
         for symbols_list_item in
             unsafe {
-                s.symbols_lists_array.get_unchecked_raw(0..num_symbols as
+                s.symbols_lists_array.get_unchecked(0..num_symbols as
                                                                usize)
             }.iter() {
             for other_item in
                 unsafe {
-                    s.symbols_lists_array.get_unchecked_raw(i as usize +
+                    s.symbols_lists_array.get_unchecked(i as usize +
                                                                 1..num_symbols
                                                                        as
                                                                        usize +
@@ -19292,7 +19292,7 @@ mod decode {
         let mut i = s.sub_loop_counter;
         for code_length_code_order in
             unsafe {
-                kCodeLengthCodeOrder.get_unchecked_raw(s.sub_loop_counter as
+                kCodeLengthCodeOrder.get_unchecked(s.sub_loop_counter as
                                                            usize..CODE_LENGTH_CODES)
             }.iter() {
             let code_len_idx = *code_length_code_order;
@@ -19380,7 +19380,7 @@ mod decode {
                                 as usize + 1;
                         for code_length_histo in
                             unsafe {
-                                s.code_length_histo.get_unchecked_raw_mut(0..max_code_len_len)
+                                s.code_length_histo.get_unchecked_mut(0..max_code_len_len)
                             }.iter_mut() {
                             *code_length_histo = 0;
                         }
@@ -19465,7 +19465,7 @@ mod decode {
                         huffman::BROTLI_HUFFMAN_MAX_CODE_LENGTH as usize + 1;
                     for (i, next_symbol_mut) in
                         unsafe {
-                            s.next_symbol.get_unchecked_raw_mut(0..max_code_length)
+                            s.next_symbol.get_unchecked_mut(0..max_code_length)
                         }.iter_mut().enumerate() {
                         *next_symbol_mut =
                             i as i32 - (max_code_length as i32);
@@ -19512,7 +19512,7 @@ mod decode {
                     }
                     table_size =
                         huffman::BrotliBuildHuffmanTable(unsafe {
-                                                             table.get_unchecked_raw_mut(offset..)
+                                                             table.get_unchecked_mut(offset..)
                                                          },
                                                          HUFFMAN_TABLE_BITS as
                                                              i32,
@@ -19625,14 +19625,14 @@ mod decode {
         let mut upper_bound: u32 = *mtf_upper_bound;
         for (i, item) in
             unsafe {
-                mtf.get_unchecked_raw_mut(0..(upper_bound as usize + 1usize))
+                mtf.get_unchecked_mut(0..(upper_bound as usize + 1usize))
             }.iter_mut().enumerate() {
             *item = i as u8;
         }
         upper_bound = 0;
         for v_i in
             unsafe {
-                v.get_unchecked_raw_mut(0usize..(v_len as usize))
+                v.get_unchecked_mut(0usize..(v_len as usize))
             }.iter_mut() {
             let mut index = (*v_i) as i32;
             let value = unsafe { *mtf.get_unchecked(index as usize) };
@@ -19725,7 +19725,7 @@ mod decode {
         let mut result = BrotliDecoderErrorCode::BROTLI_DECODER_SUCCESS;
         for htree_iter in
             unsafe {
-                htrees.slice_mut().get_unchecked_raw_mut(s.htree_index as
+                htrees.slice_mut().get_unchecked_mut(s.htree_index as
                                                              usize..(group_num_htrees
                                                                          as
                                                                          usize))
@@ -20089,16 +20089,16 @@ mod decode {
         if (!safe) {
             block_type =
                 ReadSymbol(unsafe {
-                               s.block_type_trees.slice().get_unchecked_raw(tree_offset..)
+                               s.block_type_trees.slice().get_unchecked(tree_offset..)
                            }, br, input);
             *unsafe { s.block_length.get_unchecked_mut(tree_type as usize) } =
                 ReadBlockLength(unsafe {
-                                    s.block_len_trees.slice().get_unchecked_raw(tree_offset..)
+                                    s.block_len_trees.slice().get_unchecked(tree_offset..)
                                 }, br, input);
         } else {
             let memento = bit_reader::BrotliBitReaderSaveState(br);
             if (!SafeReadSymbol(unsafe {
-                                    s.block_type_trees.slice().get_unchecked_raw(tree_offset..)
+                                    s.block_type_trees.slice().get_unchecked(tree_offset..)
                                 }, br, &mut block_type, input)) {
                 return false;
             }
@@ -20107,7 +20107,7 @@ mod decode {
                 SafeReadBlockLengthIndex(&s.substate_read_block_length,
                                          s.block_length_index,
                                          unsafe {
-                                             s.block_len_trees.slice().get_unchecked_raw(tree_offset..)
+                                             s.block_len_trees.slice().get_unchecked(tree_offset..)
                                          }, br, input);
             if !SafeReadBlockLengthFromIndex(s, br, &mut block_length_out,
                                              index_ret, input) {
@@ -20121,7 +20121,7 @@ mod decode {
         }
         let ringbuffer: &mut [u32] =
             &mut unsafe {
-                     s.block_type_rb.get_unchecked_raw_mut(tree_type as usize
+                     s.block_type_rb.get_unchecked_mut(tree_type as usize
                                                                * 2..)
                  };
         if (block_type == 1) {
@@ -20366,7 +20366,7 @@ mod decode {
             (s.partial_pos_out & s.ringbuffer_mask as usize) as usize;
         let start =
             unsafe {
-                s.ringbuffer.slice().get_unchecked_raw(start_index..start_index
+                s.ringbuffer.slice().get_unchecked(start_index..start_index
                                                                         +
                                                                         num_written
                                                                             as
@@ -20374,7 +20374,7 @@ mod decode {
             };
         if let Some(output) = opt_output {
             unsafe {
-                output.get_unchecked_raw_mut(*output_offset..*output_offset +
+                output.get_unchecked_mut(*output_offset..*output_offset +
                                                                  num_written
                                                                      as usize)
             }.clone_from_slice(start);
@@ -20447,7 +20447,7 @@ mod decode {
                         nbytes = s.ringbuffer_size - s.pos;
                     }
                     bit_reader::BrotliCopyBytes(unsafe {
-                                                    s.ringbuffer.slice_mut().get_unchecked_raw_mut(s.pos
+                                                    s.ringbuffer.slice_mut().get_unchecked_mut(s.pos
                                                                                                        as
                                                                                                        usize..)
                                                 }, &mut s.br, nbytes as u32,
@@ -20509,7 +20509,7 @@ mod decode {
                 if s.custom_dict_size as usize > max_dict_size {
                     let cd =
                         unsafe {
-                            s.custom_dict.slice().get_unchecked_raw((s.custom_dict_size
+                            s.custom_dict.slice().get_unchecked((s.custom_dict_size
                                                                          as
                                                                          usize
                                                                          -
@@ -20521,7 +20521,7 @@ mod decode {
                     cd
                 } else {
                     unsafe {
-                        s.custom_dict.slice().get_unchecked_raw(0..s.custom_dict_size
+                        s.custom_dict.slice().get_unchecked(0..s.custom_dict_size
                                                                        as
                                                                        usize)
                     }
@@ -20556,7 +20556,7 @@ mod decode {
                 let offset =
                     ((-s.custom_dict_size) & s.ringbuffer_mask) as usize;
                 unsafe {
-                    s.ringbuffer.slice_mut().get_unchecked_raw_mut(offset..offset
+                    s.ringbuffer.slice_mut().get_unchecked_mut(offset..offset
                                                                                +
                                                                                s.custom_dict_size
                                                                                    as
@@ -20582,7 +20582,7 @@ mod decode {
         let mut i: i32 = s.loop_counter;
         for context_mode_iter in
             unsafe {
-                s.context_modes.slice_mut().get_unchecked_raw_mut(i as
+                s.context_modes.slice_mut().get_unchecked_mut(i as
                                                                       usize..(s.block_type_length_state.num_block_types[0]
                                                                                   as
                                                                                   usize))
@@ -20807,7 +20807,7 @@ mod decode {
         let off_src = u32off_src as usize;
         let mut local_array: [u8; 16] = [0; 16];
         local_array.clone_from_slice(unsafe {
-                                         data.get_unchecked_raw(off_src as
+                                         data.get_unchecked(off_src as
                                                                     usize..off_src
                                                                                as
                                                                                usize
@@ -20815,7 +20815,7 @@ mod decode {
                                                                                16)
                                      });
         unsafe {
-            data.get_unchecked_raw_mut(off_dst as
+            data.get_unchecked_mut(off_dst as
                                            usize..off_dst as usize + 16)
         }.clone_from_slice(&local_array);
     }
@@ -20824,15 +20824,15 @@ mod decode {
         if off_dst > off_src {
             let (src, dst) = data.split_at_mut(off_dst);
             let src_slice =
-                unsafe { src.get_unchecked_raw(off_src..off_src + size) };
+                unsafe { src.get_unchecked(off_src..off_src + size) };
             unsafe {
-                dst.get_unchecked_raw_mut(0..size)
+                dst.get_unchecked_mut(0..size)
             }.clone_from_slice(src_slice);
         } else {
             let (dst, src) = data.split_at_mut(off_src);
-            let src_slice = unsafe { src.get_unchecked_raw(0..size) };
+            let src_slice = unsafe { src.get_unchecked(0..size) };
             unsafe {
-                dst.get_unchecked_raw_mut(off_dst..off_dst + size)
+                dst.get_unchecked_mut(off_dst..off_dst + size)
             }.clone_from_slice(src_slice);
         }
     }
@@ -21284,7 +21284,7 @@ mod decode {
                                     let mut len = i;
                                     let word =
                                         unsafe {
-                                            kBrotliDictionary.get_unchecked_raw(offset
+                                            kBrotliDictionary.get_unchecked(offset
                                                                                     as
                                                                                     usize..(offset
                                                                                                 +
@@ -21294,7 +21294,7 @@ mod decode {
                                         };
                                     if (transform_idx == 0) {
                                         unsafe {
-                                            s.ringbuffer.slice_mut().get_unchecked_raw_mut(pos
+                                            s.ringbuffer.slice_mut().get_unchecked_mut(pos
                                                                                                as
                                                                                                usize..((pos
                                                                                                             +
@@ -21305,7 +21305,7 @@ mod decode {
                                     } else {
                                         len =
                                             TransformDictionaryWord(unsafe {
-                                                                        s.ringbuffer.slice_mut().get_unchecked_raw_mut(pos
+                                                                        s.ringbuffer.slice_mut().get_unchecked_mut(pos
                                                                                                                            as
                                                                                                                            usize..)
                                                                     }, word,
@@ -21570,23 +21570,23 @@ mod decode {
                                *available_in);
             if copy_len > 0 {
                 unsafe {
-                    saved_buffer.get_unchecked_raw_mut(s.buffer_length as
+                    saved_buffer.get_unchecked_mut(s.buffer_length as
                                                            usize..(s.buffer_length
                                                                        as
                                                                        usize +
                                                                        copy_len))
                 }.clone_from_slice(unsafe {
-                                       xinput.get_unchecked_raw(*input_offset..copy_len
+                                       xinput.get_unchecked(*input_offset..copy_len
                                                                                    +
                                                                                    *input_offset)
                                    });
                 unsafe {
-                    s.buffer.get_unchecked_raw_mut(s.buffer_length as
+                    s.buffer.get_unchecked_mut(s.buffer_length as
                                                        usize..(s.buffer_length
                                                                    as usize +
                                                                    copy_len))
                 }.clone_from_slice(unsafe {
-                                       xinput.get_unchecked_raw(*input_offset..copy_len
+                                       xinput.get_unchecked(*input_offset..copy_len
                                                                                    +
                                                                                    *input_offset)
                                    });
@@ -21955,7 +21955,7 @@ mod decode {
                             SafeReadBlockLengthIndex(&s.block_type_length_state.substate_read_block_length,
                                                      s.block_type_length_state.block_length_index,
                                                      unsafe {
-                                                         s.block_type_length_state.block_len_trees.slice().get_unchecked_raw(tree_offset
+                                                         s.block_type_length_state.block_len_trees.slice().get_unchecked(tree_offset
                                                                                                                                  as
                                                                                                                                  usize..)
                                                      }, &mut s.br,
