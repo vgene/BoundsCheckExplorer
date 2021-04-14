@@ -61,16 +61,25 @@ def findTargetFiles(single_file):
 # new_fname is the file after conversion 
 # selective unsafe contains the lines that we want to keep the unsafe
 def convertFile(old_fname, new_fname, selective_unsafe=[]):
-    mutregex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
-    mutregex_out = r'(&mut \1[' #\2])'
-    regex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
-    regex_out = r'(&\1[' #\2])'
+    # mutregex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    # mutregex_out = r'(&mut \1[' #\2])'
+    # regex_in = r'([($a-zA-Z_][a-zA-Z0-9:_\.\(\)\*]*)\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    # regex_out = r'(&\1[' #\2])'
+
+    # # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
+    # raw_mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    # raw_mutregex_out = r'(&mut \1[' #\2])'
+    # raw_regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    # raw_regex_out = r'(&\1[' #\2])'
+    mutregex_in = r'\.get_unchecked_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    mutregex_out = r'.get_mut(' #\2])'
+    regex_in = r'\.get_unchecked\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    regex_out = r'.get(' #\2])'
+    raw_mutregex_in = r'\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_mutregex_out = r'.get_mut(' #\2])'
+    raw_regex_in = r'\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
+    raw_regex_out = r'.get(' #\2])'
     
-    # handle raw parts, emitted by the macro as get_unchecked_raw(_mut)
-    raw_mutregex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw_mut\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
-    raw_mutregex_out = r'(&mut \1[' #\2])'
-    raw_regex_in = r'([$a-zA-Z_][a-zA-Z0-9:_\.\(\)]*)\.get_unchecked_raw\(' #]([0-9a-zA-Z_][a-zA-Z0-9_\.\>\*\+ ]*)[)]'
-    raw_regex_out = r'(&\1[' #\2])'
 
     with open(old_fname, 'r') as fd:
         old_block = fd.read()
@@ -194,7 +203,8 @@ def convertBlock(block, regex_in, regex_out, cur_line=1, selective_unsafe=[]):
             bcs.extend(addition_bcs)
 
         # update new block
-        new_block += pre_block + cur_block + new_middle_block + "])"  # use the right parenthesis
+        # new_block += pre_block + cur_block + new_middle_block + "])"  # use the right parenthesis
+        new_block += pre_block + cur_block + new_middle_block + ").unwrap()"  # use the right parenthesis
 
         # update block
         block = post_block[pos + 1:]
