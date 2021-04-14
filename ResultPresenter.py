@@ -317,7 +317,18 @@ def getComparisonFig(benchmarks, show_legend=False, show_title=False, names=None
                                                "size": 6, 'opacity': 1},
                                        mode='lines+markers',
                                        name=benchmark, showlegend=show_legend))
-        # Set tick suffix
+
+    xs = [216, 215, 209, 194, 126]
+    xs.reverse()
+    ys = [6.4, 2.9, 0.98, 0.49, 0]
+    ys.reverse()
+
+    scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
+        marker={"symbol": shape,
+            "size": 6, 'opacity': 1},
+        mode='lines+markers',
+        name="Nader", showlegend=show_legend))
+
     height = 350
 
     fig = go.Figure({
@@ -527,17 +538,25 @@ def genFigs():
     # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     # fig.write_image("images/comparison-all.pdf")
 
+    # print("Generating comparison random vs ordered")
+    # fig = getComparisonFig(['brotli_llvm11_vec_cargo_one_checked', 'brotli_llvm11_vec_cargo_one_unchecked', 'brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
+    # # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/brotli-expand-final.pdf")
+    
     print("Generating comparison random vs ordered")
-    fig = getComparisonFig(['brotli_llvm11_vec_cargo_one_checked', 'brotli_llvm11_vec_cargo_one_unchecked', 'brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
+    fig = getComparisonFig(['brotli_llvm11_vec_cargo_hot', 'brotli_llvm11_vec_cargo_random'], True, False, ["Hotness", "Random"])
     # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
     fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/brotli-expand-final.pdf")
-    
-    print("Generate bar")
-    fig = getBarFig('brotli_llvm11_vec_cargo_exp')
-    fig.write_image("images/bar-cargo-exp.pdf")
+    fig.write_image("images/brotli-eva-explore.pdf")
+
+    # print("Generate bar")
+    # fig = getBarFig('brotli_llvm11_vec_cargo_exp')
+    # fig.write_image("images/bar-cargo-exp.pdf")
 
 
 
