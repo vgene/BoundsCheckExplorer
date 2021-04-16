@@ -53,6 +53,20 @@ def findTargetFiles(single_file):
     rs_files = subprocess.run(["find", target, "-name", "*.rs", "-type", "f"], 
             capture_output=True, text=True)
     filelist = rs_files.stdout.split()
+    if os.path.exists("ignore.txt"):
+        with open("ignore.txt", 'r') as fd:
+            lines = fd.readlines()
+            ignore_list = [i.strip() for i in lines]
+
+        final_list = filelist.copy()
+        for f in filelist:
+            for ignore in ignore_list:
+                if ignore in f:
+                    if f in final_list:
+                        final_list.remove(f)
+
+        print("Removed", len(filelist) - len (final_list), "files")
+        filelist = final_list
     return filelist
 
 

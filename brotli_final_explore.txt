@@ -1,0 +1,458 @@
+Running Corvair on  261  bounds checks
+Safe baseline: (2.137699125, 2.126792171, 2.159514525)
+Unsafe baseline: (1.975096616, 1.97236417, 1.985571296)
+Hot code has 229
+Hot baseline: (1.97391795, 1.971046307, 2.006526205)
+binary generated
+Initial baseline: 1.971912553
+Generating 41 exps
+Testing with 40 get_unchecked, with 11347 removed
+2.000599569
+Testing with 40 get_unchecked, with 18964 removed
+1.996320092
+Testing with 40 get_unchecked, with 20746 removed
+1.986884969
+Testing with 40 get_unchecked, with 18884 removed
+2.009069054
+Testing with 40 get_unchecked, with 20658 removed
+1.973580478
+Testing with 40 get_unchecked, with 20810 removed
+1.967696668
+Testing with 40 get_unchecked, with 20818 removed
+2.022715554
+Testing with 40 get_unchecked, with 21336 removed
+1.968494813
+Testing with 40 get_unchecked, with 21039 removed
+1.988295578
+Testing with 40 get_unchecked, with 20764 removed
+1.968637147
+Testing with 40 get_unchecked, with 21009 removed
+1.968205319
+Testing with 40 get_unchecked, with 21066 removed
+1.968559268
+Testing with 40 get_unchecked, with 11421 removed
+2.04341846
+Testing with 40 get_unchecked, with 20759 removed
+1.979268696
+Testing with 40 get_unchecked, with 20957 removed
+1.970399413
+Testing with 40 get_unchecked, with 21223 removed
+1.972981516
+Testing with 40 get_unchecked, with 21146 removed
+1.973808881
+Testing with 40 get_unchecked, with 20791 removed
+1.972796312
+Testing with 40 get_unchecked, with 20719 removed
+1.968964238
+Testing with 40 get_unchecked, with 20993 removed
+1.970491952
+Testing with 40 get_unchecked, with 21397 removed
+1.986975274
+Testing with 40 get_unchecked, with 21181 removed
+1.969328094
+Testing with 40 get_unchecked, with 21154 removed
+1.966897688
+Testing with 40 get_unchecked, with 21176 removed
+1.986140521
+Testing with 40 get_unchecked, with 21087 removed
+1.986569898
+Testing with 40 get_unchecked, with 21097 removed
+1.9815774
+Testing with 40 get_unchecked, with 18984 removed
+2.001514385
+Testing with 40 get_unchecked, with 21117 removed
+1.971804642
+Testing with 40 get_unchecked, with 11903 removed
+1.969982926
+Testing with 40 get_unchecked, with 21392 removed
+1.98978535
+Testing with 40 get_unchecked, with 18891 removed
+2.008805058
+Testing with 40 get_unchecked, with 21218 removed
+1.971497897
+Testing with 40 get_unchecked, with 11409 removed
+1.977667791
+Testing with 40 get_unchecked, with 20827 removed
+1.983876496
+Testing with 40 get_unchecked, with 19646 removed
+1.974206134
+Testing with 40 get_unchecked, with 11896 removed
+1.978588765
+Testing with 40 get_unchecked, with 20624 removed
+1.969158949
+Testing with 40 get_unchecked, with 19081 removed
+1.969182947
+Testing with 40 get_unchecked, with 20829 removed
+1.971136092
+Testing with 40 get_unchecked, with 19125 removed
+1.973027246
+Testing with 40 get_unchecked, with 19184 removed
+1.968161101
+binary generated
+### Round 1 :  41 runs, 19 get_unchecked left
+### New baseline: 1.972878515
+Generating 19 exps
+Testing with 18 get_unchecked, with 11347 removed
+1.989275019
+Testing with 18 get_unchecked, with 18964 removed
+1.987541003
+Testing with 18 get_unchecked, with 20746 removed
+1.99568309
+Testing with 18 get_unchecked, with 18884 removed
+1.992646227
+Testing with 18 get_unchecked, with 20818 removed
+2.018473959
+Testing with 18 get_unchecked, with 21039 removed
+1.980163174
+Testing with 18 get_unchecked, with 11421 removed
+2.048016147
+Testing with 18 get_unchecked, with 20759 removed
+1.983502656
+Testing with 18 get_unchecked, with 21397 removed
+1.982689319
+Testing with 18 get_unchecked, with 21176 removed
+1.984271669
+Testing with 18 get_unchecked, with 21087 removed
+1.977532022
+Testing with 18 get_unchecked, with 21097 removed
+1.976134716
+Testing with 18 get_unchecked, with 18984 removed
+1.980091395
+Testing with 18 get_unchecked, with 21392 removed
+1.978772331
+Testing with 18 get_unchecked, with 18891 removed
+2.018859489
+Testing with 18 get_unchecked, with 11409 removed
+2.001393618
+Testing with 18 get_unchecked, with 20827 removed
+1.983065987
+Testing with 18 get_unchecked, with 19646 removed
+1.98105727
+Testing with 18 get_unchecked, with 11896 removed
+1.988472739
+Force remove one in a round
+binary generated
+### Round 2 :  19 runs, 18 get_unchecked left
+### New baseline: 1.976258901
+Generating 18 exps
+Testing with 17 get_unchecked, with 11347 removed
+1.999475376
+Testing with 17 get_unchecked, with 18964 removed
+1.987140244
+Testing with 17 get_unchecked, with 20746 removed
+2.000572429
+Testing with 17 get_unchecked, with 18884 removed
+2.005647633
+Testing with 17 get_unchecked, with 20818 removed
+2.020499214
+Testing with 17 get_unchecked, with 21039 removed
+1.984657416
+Testing with 17 get_unchecked, with 11421 removed
+2.048137714
+Testing with 17 get_unchecked, with 20759 removed
+1.983526909
+Testing with 17 get_unchecked, with 21397 removed
+1.981356953
+Testing with 17 get_unchecked, with 21176 removed
+1.985707138
+Testing with 17 get_unchecked, with 21087 removed
+1.976392025
+Testing with 17 get_unchecked, with 18984 removed
+1.989647532
+Testing with 17 get_unchecked, with 21392 removed
+1.982196649
+Testing with 17 get_unchecked, with 18891 removed
+2.014743274
+Testing with 17 get_unchecked, with 11409 removed
+1.998791261
+Testing with 17 get_unchecked, with 20827 removed
+1.98577301
+Testing with 17 get_unchecked, with 19646 removed
+1.977324881
+Testing with 17 get_unchecked, with 11896 removed
+1.987090547
+binary generated
+### Round 3 :  18 runs, 16 get_unchecked left
+### New baseline: 1.98064007
+Generating 16 exps
+Testing with 15 get_unchecked, with 11347 removed
+1.999941502
+Testing with 15 get_unchecked, with 18964 removed
+2.007728233
+Testing with 15 get_unchecked, with 20746 removed
+1.975816117
+Testing with 15 get_unchecked, with 18884 removed
+1.998703797
+Testing with 15 get_unchecked, with 20818 removed
+2.004406283
+Testing with 15 get_unchecked, with 21039 removed
+1.98721355
+Testing with 15 get_unchecked, with 11421 removed
+2.029384782
+Testing with 15 get_unchecked, with 20759 removed
+1.98573035
+Testing with 15 get_unchecked, with 21397 removed
+1.984305154
+Testing with 15 get_unchecked, with 21176 removed
+1.973775587
+Testing with 15 get_unchecked, with 18984 removed
+2.000641635
+Testing with 15 get_unchecked, with 21392 removed
+1.982387387
+Testing with 15 get_unchecked, with 18891 removed
+2.025156032
+Testing with 15 get_unchecked, with 11409 removed
+1.981393089
+Testing with 15 get_unchecked, with 20827 removed
+1.986969814
+Testing with 15 get_unchecked, with 11896 removed
+1.971127197
+binary generated
+### Round 4 :  16 runs, 11 get_unchecked left
+### New baseline: 1.990535174
+0.5% [11347, 18964, 18884, 20818, 21039, 11421, 20759, 21397, 18984, 18891, 20827] 1.990535174
+binary generated
+Initial baseline: 1.990070035
+Generating 11 exps
+Testing with 10 get_unchecked, with 11347 removed
+2.013964731
+Testing with 10 get_unchecked, with 18964 removed
+2.075735215
+Testing with 10 get_unchecked, with 18884 removed
+2.014339674
+Testing with 10 get_unchecked, with 20818 removed
+2.030705698
+Testing with 10 get_unchecked, with 21039 removed
+2.008158941
+Testing with 10 get_unchecked, with 11421 removed
+2.056520237
+Testing with 10 get_unchecked, with 20759 removed
+1.987960734
+Testing with 10 get_unchecked, with 21397 removed
+1.988156466
+Testing with 10 get_unchecked, with 18984 removed
+2.0733374
+Testing with 10 get_unchecked, with 18891 removed
+2.010267536
+Testing with 10 get_unchecked, with 20827 removed
+2.035079647
+binary generated
+### Round 1 :  11 runs, 9 get_unchecked left
+### New baseline: 1.994891663
+1% [11347, 18964, 18884, 20818, 21039, 11421, 18984, 18891, 20827] 1.994891663
+binary generated
+Initial baseline: 1.993140977
+Generating 9 exps
+Testing with 8 get_unchecked, with 11347 removed
+2.0141573
+Testing with 8 get_unchecked, with 18964 removed
+2.075675998
+Testing with 8 get_unchecked, with 18884 removed
+2.016041241
+Testing with 8 get_unchecked, with 20818 removed
+2.020726194
+Testing with 8 get_unchecked, with 21039 removed
+2.009434308
+Testing with 8 get_unchecked, with 11421 removed
+2.047484285
+Testing with 8 get_unchecked, with 18984 removed
+2.064189593
+Testing with 8 get_unchecked, with 18891 removed
+1.998372388
+Testing with 8 get_unchecked, with 20827 removed
+1.997630926
+Force remove one in a round
+binary generated
+### Round 1 :  9 runs, 8 get_unchecked left
+### New baseline: 1.99111674
+Generating 8 exps
+Testing with 7 get_unchecked, with 11347 removed
+2.012515824
+Testing with 7 get_unchecked, with 18964 removed
+2.025742101
+Testing with 7 get_unchecked, with 18884 removed
+2.00794613
+Testing with 7 get_unchecked, with 20818 removed
+2.023671206
+Testing with 7 get_unchecked, with 21039 removed
+2.051634733
+Testing with 7 get_unchecked, with 11421 removed
+2.058577747
+Testing with 7 get_unchecked, with 18984 removed
+2.06595251
+Testing with 7 get_unchecked, with 18891 removed
+1.994069606
+Force remove one in a round
+binary generated
+### Round 2 :  8 runs, 7 get_unchecked left
+### New baseline: 2.002224286
+Generating 7 exps
+Testing with 6 get_unchecked, with 11347 removed
+2.038866502
+Testing with 6 get_unchecked, with 18964 removed
+2.049550112
+Testing with 6 get_unchecked, with 18884 removed
+2.006000521
+Testing with 6 get_unchecked, with 20818 removed
+2.037417841
+Testing with 6 get_unchecked, with 21039 removed
+2.021483256
+Testing with 6 get_unchecked, with 11421 removed
+2.063341668
+Testing with 6 get_unchecked, with 18984 removed
+2.069310034
+Force remove one in a round
+binary generated
+### Round 3 :  7 runs, 6 get_unchecked left
+### New baseline: 2.00986933
+Generating 6 exps
+Testing with 5 get_unchecked, with 11347 removed
+2.019130209
+Testing with 5 get_unchecked, with 18964 removed
+2.041685385
+Testing with 5 get_unchecked, with 20818 removed
+2.051761542
+Testing with 5 get_unchecked, with 21039 removed
+2.022579879
+Testing with 5 get_unchecked, with 11421 removed
+2.076676182
+Testing with 5 get_unchecked, with 18984 removed
+2.082457252
+End of exploration
+binary generated
+### Round 4 :  6 runs, 6 get_unchecked left
+### New baseline: 2.010630119
+2% [11347, 18964, 20818, 21039, 11421, 18984] 2.010630119
+binary generated
+Initial baseline: 2.012961082
+Generating 6 exps
+Testing with 5 get_unchecked, with 11347 removed
+2.015393601
+Testing with 5 get_unchecked, with 18964 removed
+2.041646598
+Testing with 5 get_unchecked, with 20818 removed
+2.050931674
+Testing with 5 get_unchecked, with 21039 removed
+2.025019397
+Testing with 5 get_unchecked, with 11421 removed
+2.081005572
+Testing with 5 get_unchecked, with 18984 removed
+2.082834268
+Force remove one in a round
+binary generated
+### Round 1 :  6 runs, 5 get_unchecked left
+### New baseline: 2.016886215
+Generating 5 exps
+Testing with 4 get_unchecked, with 18964 removed
+2.067429101
+Testing with 4 get_unchecked, with 20818 removed
+2.060466756
+Testing with 4 get_unchecked, with 21039 removed
+2.048099892
+Testing with 4 get_unchecked, with 11421 removed
+2.064656122
+Testing with 4 get_unchecked, with 18984 removed
+2.067662456
+End of exploration
+binary generated
+### Round 2 :  5 runs, 5 get_unchecked left
+### New baseline: 2.029502554
+3% [18964, 20818, 21039, 11421, 18984] 2.029502554
+binary generated
+Initial baseline: 2.01541408
+Generating 5 exps
+Testing with 4 get_unchecked, with 18964 removed
+2.0650889
+Testing with 4 get_unchecked, with 20818 removed
+2.056872247
+Testing with 4 get_unchecked, with 21039 removed
+2.045596808
+Testing with 4 get_unchecked, with 11421 removed
+2.061459177
+Testing with 4 get_unchecked, with 18984 removed
+2.070173573
+Force remove one in a round
+binary generated
+### Round 1 :  5 runs, 4 get_unchecked left
+### New baseline: 2.04576493
+Generating 4 exps
+Testing with 3 get_unchecked, with 18964 removed
+2.035157414
+Testing with 3 get_unchecked, with 20818 removed
+2.085480143
+Testing with 3 get_unchecked, with 11421 removed
+2.072753061
+Testing with 3 get_unchecked, with 18984 removed
+2.071169241
+binary generated
+### Round 2 :  4 runs, 3 get_unchecked left
+### New baseline: 2.036419018
+Generating 3 exps
+Testing with 2 get_unchecked, with 20818 removed
+2.062235291
+Testing with 2 get_unchecked, with 11421 removed
+2.094913801
+Testing with 2 get_unchecked, with 18984 removed
+2.034889347
+binary generated
+### Round 3 :  3 runs, 2 get_unchecked left
+### New baseline: 2.03661167
+Generating 2 exps
+Testing with 1 get_unchecked, with 20818 removed
+2.063341059
+Testing with 1 get_unchecked, with 11421 removed
+2.095821343
+End of exploration
+binary generated
+### Round 4 :  2 runs, 2 get_unchecked left
+### New baseline: 2.035539323
+4% [20818, 11421] 2.035539323
+binary generated
+Initial baseline: 2.037383294
+Generating 2 exps
+Testing with 1 get_unchecked, with 20818 removed
+2.064316797
+Testing with 1 get_unchecked, with 11421 removed
+2.094457221
+Force remove one in a round
+binary generated
+### Round 1 :  2 runs, 1 get_unchecked left
+### New baseline: 2.064351125
+Generating 1 exps
+Testing with 0 get_unchecked, with 11421 removed
+2.128158837
+End of exploration
+binary generated
+### Round 2 :  1 runs, 1 get_unchecked left
+### New baseline: 2.063093612
+5% [11421] 2.063093612
+binary generated
+Initial baseline: 2.063997903
+Generating 1 exps
+Testing with 0 get_unchecked, with 11421 removed
+2.129239954
+End of exploration
+binary generated
+### Round 1 :  1 runs, 1 get_unchecked left
+### New baseline: 2.063567993
+6% [11421] 2.063567993
+binary generated
+Initial baseline: 2.063602853
+Generating 1 exps
+Testing with 0 get_unchecked, with 11421 removed
+2.128733456
+End of exploration
+binary generated
+### Round 1 :  1 runs, 1 get_unchecked left
+### New baseline: 2.063761807
+7% [11421] 2.063761807
+binary generated
+Initial baseline: 2.067416121
+Generating 1 exps
+Testing with 0 get_unchecked, with 11421 removed
+2.132739003
+Force remove one in a round
+binary generated
+### Round 1 :  1 runs, 0 get_unchecked left
+### New baseline: 2.125168263
+8% [] 2.125168263
