@@ -360,15 +360,15 @@ def getComparisonFig(onebenchmark, show_legend=False, show_title=False, names=No
             color = "#d7191c"
             shape = "square"
         # color = '#0429A1'
-        shape = 0
+        # shape = 0
 
         if xs is None or ys is None:
             return None
     
-        scatter_list.append(go.Scatter(x=xs, y=ys,  line={'color': color, 'width':2.5},
+        scatter_list.append(go.Scatter(x=xs, y=ys,  line={'color': color, 'width':2},
             # error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
                                        marker={"symbol": shape,
-                                               "size": 10, 'opacity': 1},
+                                               "size": 8, 'opacity': 1},
                                        mode='lines+markers',
                                        name=name, showlegend=show_legend))
 
