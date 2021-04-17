@@ -331,28 +331,46 @@ def getBarFig(benchmark):
 
 
 #def getComparisonFig(benchmarks, show_legend=False, show_title=False, names=None):
-# def getComparisonFig(onebenchmark, show_legend=False, show_title=False, names=None):
-def getComparisonFig(show_legend=False, show_title=False, names=None):
+def getComparisonFig(onebenchmark, show_legend=False, show_title=False, names=None):
+# def getComparisonFig(show_legend=False, show_title=False, names=None):
+    color_list =['#a6cee3', '#ffff99', '#1f78b4', '#6a3d9a','#fb9a99',
+            '#fdbf6f','#cab2d6', '#ff7f00', '#b2df8a', '#e31a1c',
+            '#33a02c','#b15928']
+    shape_list = ["star", "star-square", "cross", "circle",
+            "square", "square-open", "circle-open", "x",
+            "triangle-up", "triangle-up-open", "diamond", "diamond-open"]
+
     scatter_list = []
-    shape = 0
-    # benchmark = onebenchmark[0]
-    # for idx, name in enumerate(names):
-        # xs, ys, top_error, bottom_error = app._resultProvider.getRelativeTimeWithName(benchmark, name)
-        # ys.reverse()
-        # ys = [-item for item in ys]
+    benchmark = onebenchmark[0]
+    for idx, name in enumerate(names):
+        xs, ys, top_error, bottom_error = app._resultProvider.getRelativeTimeWithName(benchmark, name)
+        ys.reverse()
+        ys = [-item for item in ys]
 
-        # # color = '#0429A1'
-        # shape = 0
+        if name == "Hotness":
+            color = "#fdae61"
+            shape = "circle"
+        elif name == "One-Checked":
+            color = "#abd9e9"
+            shape = "diamond"
+        elif name == "One-Unchecked":
+            color = "#fee090"
+            shape = "x"
+        elif name == "Random":
+            color = "#d7191c"
+            shape = "square"
+        # color = '#0429A1'
+        shape = 0
 
-        # if xs is None or ys is None:
-            # return None
+        if xs is None or ys is None:
+            return None
     
-        # scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
+        scatter_list.append(go.Scatter(x=xs, y=ys,  line={'color': color, 'width':2.5},
             # error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
-                                       # marker={"symbol": shape,
-                                               # "size": 6, 'opacity': 1},
-                                       # mode='lines+markers',
-                                       # name=name, showlegend=show_legend))
+                                       marker={"symbol": shape,
+                                               "size": 10, 'opacity': 1},
+                                       mode='lines+markers',
+                                       name=name, showlegend=show_legend))
 
     # # manual add brotli results
     # xs = [263, 262, 261, 257, 254, 247, 222]
@@ -360,40 +378,42 @@ def getComparisonFig(show_legend=False, show_title=False, names=None):
     # ys = [-7.7, -4.4, -3.0, -1.8, -0.9, -0.3, 0]
     # ys.reverse()
 
-    # scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
-        # marker={"symbol": shape,
-            # "size": 6, 'opacity': 1},
+    # # scatter_list.append(go.Scatter(x=xs, y=ys, line={'color': '#fdae61', 'width': 4},
+
+    # scatter_list.append(go.Scatter(x=xs, y=ys, line={'color': '#2c7bb6', 'width': 2.5},
+        # marker={"symbol": "star",
+            # "size": 10, 'opacity': 1},
         # mode='lines+markers',
-        # name="Nader", showlegend=show_legend))
+        # name="NADER", showlegend=show_legend))
 
-    xs = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-    xs.reverse()
-    ys = [-0.0, -0.1, -0.0, -0.0, 0.1, -0.0, -0.2, 0.0, -7.3, -11.8]
-    # ys.reverse()
-
-    scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
-            # error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
-        marker={"symbol": shape,
-            "size": 6, 'opacity': 1},
-        mode='lines+markers',
-        name="Hotness", showlegend=show_legend))
-
-    xs = [7, 8, 9]
+    # xs = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
     # xs.reverse()
-    ys = [0.0, -3.9, -11.8]
-    # ys.reverse()
+    # ys = [-0.0, -0.1, -0.0, -0.0, 0.1, -0.0, -0.2, 0.0, -7.3, -11.8]
+    # # ys.reverse()
 
-    scatter_list.append(go.Scatter(x=xs, y=ys, # line={'color': color},
-        marker={"symbol": shape,
-            "size": 6, 'opacity': 1},
-        mode='lines+markers',
-        name="Nader", showlegend=show_legend))
+    # scatter_list.append(go.Scatter(x=xs, y=ys, line={'color': '#fdae61', 'width': 2.5},
+            # # error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
+            # marker={"symbol": "circle",
+            # "size": 10, 'opacity': 1},
+        # mode='lines+markers',
+        # name="Hotness", showlegend=show_legend))
+
+    # xs = [7, 8, 9]
+    # # xs.reverse()
+    # ys = [0.0, -3.9, -11.8]
+    # # ys.reverse()
+
+    # scatter_list.append(go.Scatter(x=xs, y=ys, line={'color': '#2c7bb6', 'width': 2.5},
+        # marker={"symbol": "star",
+            # "size": 10, 'opacity': 1},
+        # mode='lines+markers',
+        # name="NADER", showlegend=show_legend))
     height = 350
 
     fig = go.Figure({
         'data': scatter_list,
         'layout': {
-                    'legend': {'orientation': 'h', 'x': 0.25, 'y': 1.1},
+                    'legend': {'orientation': 'h', 'x': 0.05, 'y': 1.1},
                     'yaxis': {
                         'zeroline': True,
                         'zerolinewidth': 1,
@@ -427,8 +447,9 @@ def getComparisonFig(show_legend=False, show_title=False, names=None):
                     'height': height}
     })
 
-    fig.update_xaxes(title_standoff = 1) # title_font = {"size": 28},)
-    fig.update_yaxes(title_standoff = 1)
+    fig.update_xaxes(title_standoff = 1, tickfont=dict(size=16)) # title_font = {"size": 28},)
+    fig.update_yaxes(title_standoff = 1,  tickfont=dict(size=16))
+    fig.update_layout(legend = dict(font=dict(size = 20)))
 
     return fig
 
@@ -597,13 +618,13 @@ def genFigs():
     # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     # fig.write_image("images/comparison-all.pdf")
 
-    # print("Generating comparison random vs ordered")
-    # fig = getComparisonFig(['brotli_llvm11_final'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
-    # # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    # fig.update_yaxes(title={"standoff": 4})
-    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    # fig.write_image("images/brotli-expand-final.pdf")
+    print("Generating comparison random vs ordered")
+    fig = getComparisonFig(['brotli_llvm11_final'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
+    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    fig.update_yaxes(title={"standoff": 4})
+    fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    fig.write_image("images/brotli-expand-final.pdf")
     
     # print("Generating comparison paper")
     # fig = getComparisonFig(['brotli_llvm11_final'], True, False, ["Hotness", "Random"])
@@ -613,13 +634,13 @@ def genFigs():
     # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
     # fig.write_image("images/brotli-eva-explore.pdf")
     
-    print("Generating comparison paper")
-    fig = getComparisonFig( True, False, ["Hotness", "Random"])
-    # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
-    fig.update_yaxes(title={"standoff": 4})
-    fig.update_traces(marker={"line": {"width":0}}) # Remove border
-    fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
-    fig.write_image("images/cost-eva-explore.pdf")
+    # print("Generating comparison paper")
+    # fig = getComparisonFig( True, False, ["Hotness", "Random"])
+    # # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
+    # fig.update_yaxes(title={"standoff": 4})
+    # fig.update_traces(marker={"line": {"width":0}}) # Remove border
+    # fig.update_layout(showlegend=True, width=800, height=500, margin=dict(l=2, r=2, t=2, b=2))
+    # fig.write_image("images/cost-eva-explore.pdf")
 
     # print("Generate bar")
     # fig = getBarFig('brotli_llvm11_vec_cargo_exp')
