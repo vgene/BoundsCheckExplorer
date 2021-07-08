@@ -147,12 +147,13 @@ def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None,
     time_list = []
     top_error_list = [] # longer
     bottom_error_list = [] # shorter
+    time_list_list = []
 
     for idx, line_num in enumerate(sorted_line_nums):
         dir_name = os.path.join(cargo_root, "explore-src-r2", "exp-" + str(idx))
         exp_name = os.path.join(dir_name, "exp.exe")
         os.chdir(dir_name)
-        time_exp, shortest_run, longest_run = runExpWithName(exp_name, arg, test_time=test_times)
+        time_exp, shortest_run, longest_run, all_time_list = runExpWithName(exp_name, arg, test_time=test_times, getAllList=True)
         if time_exp is None:
             exit()
 
@@ -162,8 +163,9 @@ def secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg=None,
         top_error_list.append(longest_run - time_exp)
         bottom_error_list.append(time_exp - shortest_run)
         lines_list.append(cur_lines.copy())
+        time_list_list.append(all_time_list)
 
-    final_tuple = list(zip(lines_list, time_list, top_error_list, bottom_error_list))
+    final_tuple = list(zip(lines_list, time_list, top_error_list, bottom_error_list, time_list_list))
 
     return final_tuple
 
@@ -351,98 +353,98 @@ if __name__ == "__main__":
     hot_time = runExpWithName(exp_name, arg, test_time=test_times)
     print("Hot baseline:", hot_time)
 
-    # # do P1, other wise the impact tuple is loaded from the pickle file
-    # if p2_src is None:
-    #     # start the experiment
-    #     impact_tuple_one_check = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
+    # do P1, other wise the impact tuple is loaded from the pickle file
+    if p2_src is None:
+        # start the experiment
+        impact_tuple_one_check = firstRoundExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
 
-    #     print("Top 10 Impact (one checked)")
-    #     for idx in range(min(10, len(impact_tuple_one_check))):
-    #         print("Line ", impact_tuple_one_check[idx][0], ": ", impact_tuple_one_check[idx][1])
-    # else:
-    #     try:
-    #         impact_tuple_one_check = impact_obj['impact_tuple']
-    #     except Exception as e:
-    #         print("Cannot load the impact tuple")
-    #         print(e)
-    #         exit()
+        print("Top 10 Impact (one checked)")
+        for idx in range(min(10, len(impact_tuple_one_check))):
+            print("Line ", impact_tuple_one_check[idx][0], ": ", impact_tuple_one_check[idx][1])
+    else:
+        try:
+            impact_tuple_one_check = impact_obj['impact_tuple']
+        except Exception as e:
+            print("Cannot load the impact tuple")
+            print(e)
+            exit()
 
-    # # start the experiment, all but one unsafe
-    # impact_tuple_one_uncheck = oneUnsafeExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
+    # start the experiment, all but one unsafe
+    impact_tuple_one_uncheck = oneUnsafeExp(cargo_root, old_fname, new_fname, line_nums, arg, test_times)
 
-    # print("Top 10 Impact (one unchecked)")
-    # for idx in range(min(10, len(impact_tuple_one_uncheck))):
-    #     print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
-    # # end of one uncheck
+    print("Top 10 Impact (one unchecked)")
+    for idx in range(min(10, len(impact_tuple_one_uncheck))):
+        print("Line ", impact_tuple_one_uncheck[idx][0], ": ", impact_tuple_one_uncheck[idx][1])
+    # end of one uncheck
 
-    # # saved
-    # results = {"impact_tuple": impact_tuple_one_check, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
-    #         "unsafe_baseline": unsafe_time, "safe_baseline": safe_time, "hot_baseline": hot_time}
-    # os.chdir(cargo_root)
+    # saved
+    results = {"impact_tuple": impact_tuple_one_check, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+            "unsafe_baseline": unsafe_time, "safe_baseline": safe_time, "hot_baseline": hot_time}
+    os.chdir(cargo_root)
 
-    # with open("INTER-" + pickle_name, "wb") as fd:
-    #     pickle.dump(results, fd)
-    # print("Partial result dumped")
+    with open("INTER-" + pickle_name, "wb") as fd:
+        pickle.dump(results, fd)
+    print("Partial result dumped")
 
-    # #sorted by from sequential
-    # sorted_line_nums = line_nums.copy() 
-    # final_tuple_by_sequential = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
+    #sorted by from sequential
+    sorted_line_nums = line_nums.copy() 
+    final_tuple_by_sequential = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
-    # final_tuple = final_tuple_by_sequential
-    # print("Top 10 Combined (Sequential)")
-    # for idx in range(min(10, len(final_tuple))):
-    #     print(idx + 1, ": ", final_tuple[idx][1])
-    #     print(", ".join([str(e) for e in final_tuple[idx][0]]))
+    final_tuple = final_tuple_by_sequential
+    print("Top 10 Combined (Sequential)")
+    for idx in range(min(10, len(final_tuple))):
+        print(idx + 1, ": ", final_tuple[idx][1])
+        print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
-    # #sorted by from random
-    # sorted_line_nums = line_nums.copy() 
-    # random.shuffle(sorted_line_nums)
-    # final_tuple_by_random = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
+    #sorted by from random
+    sorted_line_nums = line_nums.copy() 
+    random.shuffle(sorted_line_nums)
+    final_tuple_by_random = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
-    # final_tuple = final_tuple_by_random
-    # print("Top 10 Combined (Random)")
-    # for idx in range(min(10, len(final_tuple))):
-    #     print(idx + 1, ": ", final_tuple[idx][1])
-    #     print(", ".join([str(e) for e in final_tuple[idx][0]]))
+    final_tuple = final_tuple_by_random
+    print("Top 10 Combined (Random)")
+    for idx in range(min(10, len(final_tuple))):
+        print(idx + 1, ": ", final_tuple[idx][1])
+        print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
-    # #sorted by from one checked
-    # sorted_line_nums = [x[0] for x in impact_tuple_one_check]
+    #sorted by from one checked
+    sorted_line_nums = [x[0] for x in impact_tuple_one_check]
 
-    # final_tuple_by_one_checked = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
+    final_tuple_by_one_checked = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
-    # final_tuple = final_tuple_by_one_checked
-    # print("Top 10 Combined (one-checked)")
-    # for idx in range(min(10, len(final_tuple))):
-    #     print(idx + 1, ": ", final_tuple[idx][1])
-    #     print(", ".join([str(e) for e in final_tuple[idx][0]]))
+    final_tuple = final_tuple_by_one_checked
+    print("Top 10 Combined (one-checked)")
+    for idx in range(min(10, len(final_tuple))):
+        print(idx + 1, ": ", final_tuple[idx][1])
+        print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
 
-    # #sorted by from one unchecked
-    # impact_lines = [i[0] for i in impact_tuple_one_uncheck]
-    # impact_lines.reverse()
-    # sorted_line_nums = impact_lines
+    #sorted by from one unchecked
+    impact_lines = [i[0] for i in impact_tuple_one_uncheck]
+    impact_lines.reverse()
+    sorted_line_nums = impact_lines
 
-    # final_tuple_by_one_unchecked = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
+    final_tuple_by_one_unchecked = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
-    # final_tuple = final_tuple_by_one_unchecked
-    # print("Top 10 Combined (one-unchecked)")
-    # for idx in range(min(10, len(final_tuple))):
-    #     print(idx + 1, ": ", final_tuple[idx][1])
-    #     print(", ".join([str(e) for e in final_tuple[idx][0]]))
+    final_tuple = final_tuple_by_one_unchecked
+    print("Top 10 Combined (one-unchecked)")
+    for idx in range(min(10, len(final_tuple))):
+        print(idx + 1, ": ", final_tuple[idx][1])
+        print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
     # sorted by hotness
     from ParseCallgrind import sortByHot
     hot_lines = sortByHot(hot_lines, calout_fname, single_file=rs_fname)
     hot_lines.extend(cold_lines)
-    # sorted_line_nums = hot_lines
+    sorted_line_nums = hot_lines
 
-    # final_tuple_by_hotness = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
+    final_tuple_by_hotness = secondRoundExp(cargo_root, old_fname, new_fname, sorted_line_nums, arg, test_times)
 
-    # final_tuple = final_tuple_by_hotness
-    # print("Top 10 Combined (hotness)")
-    # for idx in range(min(10, len(final_tuple))):
-    #     print(idx + 1, ": ", final_tuple[idx][1])
-    #     print(", ".join([str(e) for e in final_tuple[idx][0]]))
+    final_tuple = final_tuple_by_hotness
+    print("Top 10 Combined (hotness)")
+    for idx in range(min(10, len(final_tuple))):
+        print(idx + 1, ": ", final_tuple[idx][1])
+        print(", ".join([str(e) for e in final_tuple[idx][0]]))
 
     # explorer
     threshold = unsafe_time[0] * 1.005
@@ -481,13 +483,13 @@ if __name__ == "__main__":
     final_unsafe, final_baseline = iterativeExplore(threshold, final_unsafe)
     print("8%", final_unsafe, final_baseline)
     
-    # results = {"impact_tuple": impact_tuple_one_check, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
-    #         "final_tuple": final_tuple_by_one_checked, "final_tuple_one_unchecked": final_tuple_by_one_unchecked,
-    #         "final_tuple_hotness": final_tuple_by_hotness, "final_tuple_sequential": final_tuple_by_sequential,
-    #         "final_tuple_random": final_tuple_by_random,
-    #         "unsafe_baseline": unsafe_time, "safe_baseline": safe_time, "hot_baseline": hot_time}
-    # os.chdir(cargo_root)
+    results = {"impact_tuple": impact_tuple_one_check, "impact_tuple_one_uncheck": impact_tuple_one_uncheck,
+            "final_tuple": final_tuple_by_one_checked, "final_tuple_one_unchecked": final_tuple_by_one_unchecked,
+            "final_tuple_hotness": final_tuple_by_hotness, "final_tuple_sequential": final_tuple_by_sequential,
+            "final_tuple_random": final_tuple_by_random,
+            "unsafe_baseline": unsafe_time, "safe_baseline": safe_time, "hot_baseline": hot_time}
+    os.chdir(cargo_root)
 
-    # with open(pickle_name, "wb") as fd:
-    #     pickle.dump(results, fd)
+    with open(pickle_name, "wb") as fd:
+        pickle.dump(results, fd)
 

@@ -9,12 +9,14 @@
 import argparse
 import os
 import json
+from dash.dependencies import ALL
 import numpy as np
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 import pickle 
+import scipy.stats as st
 
 from os import path
 
@@ -31,6 +33,10 @@ BENCHMARK_LIST = []
         # # "brotli_llvm9_no_vec_fixed_order", ]
         # #"brotli_llvm11_no_vec", "brotli_llvm11_vec", "brotli_llvm9_no_vec", "brotli_llvm9_vec"]
         # #["brotli_no_vec", "brotli_normal", "brotli_llvm11"]
+
+MAX_B_VARIANCE=0
+MAX_T_VARIANCE=0
+ALL_VARIANCE=[]
 
 class ResultProvider:
 
@@ -128,15 +134,36 @@ class ResultProvider:
         def overhead(time):
             return (time / unsafe_time[0] - 1) * 100
 
+        def calcCI(time_list, time):
+            time_list = time_list[:9]
+            print(time_list)
+            CI = st.t.interval(alpha=0.95, df=len(time_list)-1, loc=np.mean(time_list), scale=st.sem(time_list)) 
+            top = CI[1] - time
+            bottom = time - CI[0]
+            print(CI[0], CI[1], time, top, bottom)
+            return top, bottom
+
         times = [overhead(time_original[0])]
         top_error = [overhead(time_original[2]) - overhead(time_original[0])]
         bottom_error = [overhead(time_original[0]) - overhead(time_original[1])]
 
+
         for idx, item in enumerate(self._results[benchmark][mykey]):
             fns.append(idx + 1)
             times.append(overhead(item[1]))
-            top_error.append((item[2] / unsafe_time[0]) * 100)
-            bottom_error.append((item[3] / unsafe_time[0]) * 100)
+            top, bottom = calcCI(item[4], item[1])
+            global MAX_T_VARIANCE
+            global MAX_B_VARIANCE
+            global ALL_VARIANCE
+            if top > MAX_T_VARIANCE:
+                MAX_T_VARIANCE = top
+            if bottom > MAX_B_VARIANCE:
+                MAX_B_VARIANCE = bottom
+            ALL_VARIANCE.append((top, bottom))
+            top_error.append((top / unsafe_time[0]) * 100)
+            bottom_error.append((bottom / unsafe_time[0]) * 100)
+            # top_error.append((item[2] / unsafe_time[0]) * 100)
+            # bottom_error.append((item[3] / unsafe_time[0]) * 100)
 
         return fns, times, top_error, bottom_error
 
@@ -366,7 +393,7 @@ def getComparisonFig(onebenchmark, show_legend=False, show_title=False, names=No
             return None
     
         scatter_list.append(go.Scatter(x=xs, y=ys,  line={'color': color, 'width':2},
-            # error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
+            error_y=dict(type='data', symmetric=False, array=top_error, color='rgba(5,5,5, 0.3)', arrayminus=bottom_error),
                                        marker={"symbol": shape,
                                                "size": 8, 'opacity': 1},
                                        mode='lines+markers',
@@ -619,7 +646,8 @@ def genFigs():
     # fig.write_image("images/comparison-all.pdf")
 
     print("Generating comparison random vs ordered")
-    fig = getComparisonFig(['brotli_llvm11_final'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
+    fig = getComparisonFig(['brotli_llvm11_explore_raw'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
+    # fig = getComparisonFig(['brotli_llvm11_final'], True, False, ["One-Checked", "One-Unchecked", "Hotness", "Random"])
     # fig.update_layout(showlegend=True, height=300, yaxis={"nticks": 6}, xaxis={'nticks': 8})
     fig.update_yaxes(title={"standoff": 4})
     fig.update_traces(marker={"line": {"width":0}}) # Remove border
@@ -663,3 +691,6 @@ if __name__ == '__main__':
         ])
 
         app.run_server(debug=False, host='0.0.0.0', port=8090)
+
+    print(MAX_B_VARIANCE, MAX_T_VARIANCE)
+    print(ALL_VARIANCE)

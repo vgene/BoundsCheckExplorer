@@ -19,6 +19,7 @@ RUSTFLAGS="-Awarnings $2 -C codegen-units=1" cargo build --jobs 1 --release --bi
 #RUSTFLAGS="-C opt-level=3 -Cdebuginfo=2 -Cembed-bitcode=yes -Awarnings" cargo rustc --release --bin $1 -- --emit=llvm-bc -Clto=fat
 
 #cp target/release/deps/*.bc original.bc
+#pwd
 cp target/release/$1 exp.exe
 rm -rf target
 # opt -load ${root_path}/avoid-bench-inline/build/install/lib/CAT.so -avoid-bench-inline --inline-threshold=0 --inlinehint-threshold=50 -always-inline -simplifycfg original.bc -o original.bc >> log 2>&1
